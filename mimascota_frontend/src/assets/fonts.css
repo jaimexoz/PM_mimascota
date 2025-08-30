@@ -1,0 +1,56 @@
+/* Configuración global de fuentes para MiMascota */
+
+/* Importar fuente Inter desde Google Fonts (ya importada en index.html) */
+
+/* Aplicar Inter solo a elementos de texto, no a todos los elementos */
+body,
+html,
+#app {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Aplicar fuente a elementos de texto específicos */
+button,
+input,
+textarea,
+select,
+label,
+span,
+p,
+h1, h2, h3, h4, h5, h6,
+a,
+li,
+td,
+th,
+div {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Configuraciones específicas para diferentes pesos de fuente */
+.font-light {
+  font-weight: 300;
+}
+
+.font-normal {
+  font-weight: 400;
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.font-extrabold {
+  font-weight: 800;
+}
+
+.font-black {
+  font-weight: 900;
+} 

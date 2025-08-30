@@ -1,0 +1,68 @@
+# ===========================
+# GLOBAL PARA TODO EL PROYECTO
+# ===========================
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Configuración de IDEs
+.vscode/
+.cursor/
+.idea/
+
+# Archivos de entorno
+.env
+*.local
+
+
+# Coverage reports
+coverage/
+
+# ===========================
+# FRONTEND
+# ===========================
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/cypress/videos/
+frontend/cypress/screenshots/
+frontend/*.tsbuildinfo
+
+# ===========================
+# BACKEND
+# ===========================
+backend/node_modules/
+backend/dist/
+backend/*.tsbuildinfo
+
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+.DS_Store
+dist
+dist-ssr
+coverage
+*.local
+
+/cypress/videos/
+/cypress/screenshots/
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+*.tsbuildinfo
