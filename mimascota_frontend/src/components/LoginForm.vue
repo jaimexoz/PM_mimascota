@@ -85,7 +85,6 @@ const handleLogin = async () => {
   justify-content: center;
   align-items: center;
   padding: 40px;
-  background-color: white;
   color: black;
   width: 100%;
   box-sizing: border-box;

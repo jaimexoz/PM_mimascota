@@ -97,7 +97,6 @@ const register = async () => {
   justify-content: center;
   align-items: center;
   padding: 40px;
-  background-color: white;
   font-family: 'Inter', sans-serif;
   color: black;
   width: 100%;

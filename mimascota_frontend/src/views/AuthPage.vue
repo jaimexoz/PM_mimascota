@@ -13,9 +13,11 @@
                 />
             </transition>
         </div>
-        <div class="image-section">
-            <img src="../assets/mascota_login.jpg" alt="Perro y Gato" class="mascot-image" />
+         <div class="image-section">
+            <!-- <img src="../assets/dogcat.jpg" alt="Perro y Gato" class="mascot-image" />-->
+          
         </div>
+        
     </div>
 </template>
 
@@ -53,41 +55,40 @@ const handleRegistrationSuccess = (message) => {
 <style scoped>
 .auth-container {
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: #fff;
-    padding: 2rem;
-    gap: 2rem;
     font-family: 'Inter', sans-serif;
+    overflow: hidden;
+
+    /* ¡CAMBIOS CLAVE AQUÍ! */
+    /* La imagen de fondo ahora va aquí */
+    background-image: url('../assets/cat.jpeg');
+    background-position: 40px;
+    background-size: cover; /* Cubre todo el contenedor */
+    background-repeat: no-repeat; /* No repite la imagen */
+    
 }
 
 .form-section {
-    padding: 0;
-    background: none;
-    border-radius: 0;
-    box-shadow: none;
-    width: 100%;
-    max-width: 450px;
+    flex: 1; /* Esta propiedad hace que ocupe 1/2 del espacio horizontal disponible */
+    background-color: #ffffff; /* Fondo blanco para el formulario */
     display: flex;
     flex-direction: column;
-    align-items: center;
+    justify-content: center; /* Centra el contenido verticalmente */
+    align-items: center; /* Centra el contenido horizontalmente */
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
 }
-
+/** */
 .image-section {
-    background: none;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    max-width: 550px;
-    padding: 2rem;
+    flex: 1;
 }
 
 .mascot-image {
-    max-width: 100%;
+    width: 120%; /* La imagen ocupará el 100% del ancho del div padre */
     height: auto;
+    object-fit: cover; /* Recorta la imagen para que cubra todo el espacio sin deformarse */
     display: block;
 }
 
@@ -126,20 +127,28 @@ const handleRegistrationSuccess = (message) => {
 /* Media queries para pantallas grandes */
 @media (min-width: 900px) {
     .auth-container {
-        flex-direction: row;
-        gap: 4rem;
-        background: #fff;
+        flex-direction: row; /* Coloca los elementos uno al lado del otro */
+        gap: 0; /* Elimina el espacio entre las secciones */
+        width: 100%; /* Tamaño fijo para el contenedor, opcional */
+        height: 500px; /* Tamaño fijo para la altura, opcional */
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        
+        overflow: hidden; /* Importante para que los bordes redondeados funcionen */
     }
     .form-section {
         flex: 1;
         align-items: center;
-        background: none;
-        box-shadow: none;
-        border-radius: 0;
+        background-color: #ffffff;
+        height: 100%;
+        border-bottom-right-radius: 50px;
+        border-top-right-radius: 50px;
+        
+        box-shadow: 1px 10px 10px 10px rgba(32,32,32,0.3);
     }
+/*
     .image-section {
-        flex: 1;
+        flex: 2;
         background: none;
-    }
+    }*/
 }
 </style>
