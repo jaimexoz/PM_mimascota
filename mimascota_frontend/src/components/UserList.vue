@@ -50,7 +50,7 @@
               <td>{{ usuario.celular }}</td>
               <td>
                 <span :class="rolClass(usuario.rol)">
-                  {{ usuario.rol === 2 ? 'Usuario normal' : 'Admin' }}
+                  {{ getRoleName(usuario.rol) }}
                 </span>
               </td>
                              <td class="acciones">
@@ -66,7 +66,10 @@
                        <span class="role-badge admin">Admin</span>
                      </div>
                      <div class="role-option" @click="changeUserRole(usuario.id, 2)" :class="{ 'active': usuario.rol === 2 }">
-                       <span class="role-badge user">Usuario Normal</span>
+                       <span class="role-badge user">Usuario</span>
+                     </div>
+                     <div class="role-option" @click="changeUserRole(usuario.id, 3)" :class="{ 'active': usuario.rol === 3 }">
+                       <span class="role-badge employee">Empleado</span>
                      </div>
                    </div>
                  </div>
@@ -146,7 +149,17 @@ const filteredUsuarios = computed(() => {
 });
 
 const rolClass = (rol) => {
-  return rol === 2 ? 'rol-normal' : 'rol-admin';
+  if (rol === 1) return 'rol-admin';
+  if (rol === 2) return 'rol-user';
+  if (rol === 3) return 'rol-employee';
+  return 'rol-admin';
+};
+
+const getRoleName = (rol) => {
+  if (rol === 1) return 'Admin';
+  if (rol === 2) return 'Usuario';
+  if (rol === 3) return 'Empleado';
+  return 'Admin';
 };
 
 const goBack = () => {
@@ -186,7 +199,8 @@ const changeUserRole = async (userId, newRole) => {
     });
 
     if (!response.ok) {
-      throw new Error('Error al cambiar el rol del usuario');
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Error al cambiar el rol del usuario');
     }
 
     // Actualizar la lista de usuarios
@@ -302,7 +316,7 @@ h2 {
   font-weight: 600;
 }
 
-.rol-normal {
+.rol-user {
   background: #eafaf1;
   color: #27ae60;
   padding: 4px 12px;
@@ -318,14 +332,21 @@ h2 {
   font-size: 0.95em;
 }
 
+.rol-employee {
+  background: #fff3cd;
+  color: #856404;
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-size: 0.95em;
+}
+
 .acciones {
-  display: flex;
+  
   gap: 10px;
 }
 
 .icon {
   cursor: pointer;
-  display: flex;
   align-items: center;
   transition: transform 0.1s;
 }
@@ -345,6 +366,7 @@ h2 {
 .role-edit-container {
   position: relative;
   display: inline-block;
+  margin: 7px;
 }
 
 .role-dropdown {
@@ -394,6 +416,11 @@ h2 {
 .role-badge.user {
   background-color: #eafaf1;
   color: #27ae60;
+}
+
+.role-badge.employee {
+  background-color: #fff3cd;
+  color: #856404;
 }
 
 @media (max-width: 768px) {

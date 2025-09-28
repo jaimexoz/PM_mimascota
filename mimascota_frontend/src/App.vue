@@ -13,7 +13,7 @@ html, body {
   width: 100%;
   min-height: 100vh; /* Asegura que la raíz del documento ocupe toda la altura visible */
   /* El siguiente es CLAVE para la barra horizontal. Si no la quieres, ocultala aquí: */
-  overflow-x: hidden; /* Evita que el scroll horizontal aparezca a menos que sea forzado */
+  /* Evita que el scroll horizontal aparezca a menos que sea forzado */
 }
 
 *, *::before, *::after {

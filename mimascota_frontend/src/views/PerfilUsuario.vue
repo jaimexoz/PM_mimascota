@@ -1,8 +1,7 @@
 <template>
   <div class="perfil-page">
     <Navbar />
-    <div class="perfil-fondo">
-      <!-- Espacio reservado para imagen de fondo -->
+    <div class="perfil-fondo"> 
     </div>
     <div class="perfil-contenido">
       <div class="perfil-card">
@@ -25,30 +24,58 @@
             <h2>Información</h2>
             <div class="info-item"><span>Nombre</span><input type="text" :value="userName" readonly /></div>
             <div class="info-item"><span>Correo electrónico</span><input type="text" :value="userEmail" readonly /></div>
-            <div class="info-item"><span>Teléfono</span><input type="text" :value="userPhone" readonly /></div>
-            <div class="info-item"><span>Edad</span><input type="text" :value="userAge" readonly /></div>
+
+           
+              <div class="info-item-2"><span>Teléfono</span><input type="text" :value="userPhone" readonly /></div>
+              <div class="info-item-21"><span>Edad</span><input type="text" :value="userAge" readonly /></div>
+            
+            
             <div class="info-buttons">
-              <button class="info-btn">Editar Perfil</button>
+              <button class="info-btn">Guardar</button>
               <button class="info-btn" @click="showChangePasswordModal = true">Cambiar contraseña</button>
-            </div>
-          </div>
-          <div class="perfil-col funcionalidades">
-            <h2>Funcionalidades</h2>
-            <div class="func-grid">
-              <div class="func-column">
-                <button class="func-btn">Agregar Mascota</button>
-                <button class="func-btn">Eliminar Mascota</button>
-                <button class="func-btn">Editar Mascota</button>
-              </div>
-              <div class="func-column">
-                <button class="func-btn">Mis publicaciones</button>
-                <button class="func-btn">Solicitudes enviadas</button>
-                <button class="func-btn">Solicitudes recibidas</button>
-              </div>
             </div>
           </div>
         </div>
       </div>
+      
+
+
+      <div class="perfil-card-fun">
+        <div class="perfil-col funcionalidades">
+            <div class="fun-top">
+                <h2>Funcionalidades</h2>
+            </div>
+            <div class="func-grid">
+              <div class="func-column">
+                <router-link to="/agregarmascota" class="func-btn">
+                        Agregar Mascotas
+                </router-link>
+
+                <button class="func-btn">Editar Mascotas</button>
+                <button class="func-btn">Eliminar Mascotas</button>
+                <button class="func-btn">Mis Publicaciones</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="perfil-col solicitud">
+          <div class="fun-top">
+            <h2>Funcionalidades</h2>
+          </div>
+          
+            <div class="func-grid">
+              
+              <div class="func-column">
+                  <button class="func-btn">Solicitudes enviadas</button>
+                  <button class="func-btn">Solicitudes recibidas</button>
+                  <button class="func-btn">Adopciones Realizadas</button>
+              </div>
+            </div>
+        </div>
+
+      </div>
+      
+      
     </div>
     
     <!-- Modal para cambiar contraseña -->
@@ -309,42 +336,65 @@ const changePassword = async () => {
 </script>
 
 <style scoped>
+
+
+
+
 .perfil-page {
   min-height: 100vh;
-  background: #f8f9fa;
+  width: 100%;
+  background: #ffffff;
   display: flex;
   flex-direction: column;
   font-family: 'Inter', sans-serif;
+  background-image: url('../assets/huellas.jpg');
+  background-size: contain;
+  
 }
+
+
 
 .perfil-fondo {
   width: 100%;
-  height: 220px;
-  background: #e9ecef;
+  height: 100;
+  background: #ffffff;
   position: relative;
-  z-index: 1;
 }
 
 .perfil-contenido {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  margin-top: -120px;
+  margin-top: 100px;
   z-index: 2;
 }
 
 .perfil-card {
-  background: rgba(255,255,255,0.85);
+  background: #fffbf8;
   box-shadow: 0 8px 32px rgba(0,0,0,0.12);
   border-radius: 24px;
+  padding: 1rem;
+  margin: 20px;
+  align-items: center;
+  min-width: 400px;
+  max-width: 500px;
+  width: 100%;
+  backdrop-filter: blur(8px);
+}
+
+.perfil-card-fun {
+  
+  border-radius: 24px;
   padding: 2.5rem 2rem 2rem 2rem;
+  margin: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 950px;
-  max-width: 1100px;
+  min-width: 500px;
+  max-width: 600px;
   width: 100%;
-  backdrop-filter: blur(8px);
+  gap: 20px; /* Espacio entre el Recuadro 2 y el Recuadro 3 */
+  flex-grow: 1;
 }
 
 .perfil-foto-section {
@@ -373,12 +423,13 @@ const changePassword = async () => {
 
 .subir-foto-btn {
   background: #fff;
-  border: 2px solid #e0e0e0;
+  border: white;
+  box-shadow: 0px 6px 10px -1px #d0cfcf;
   border-radius: 24px;
   padding: 0.7rem 2.2rem;
   font-weight: 600;
   font-size: 1.1rem;
-  color: #333;
+  color: #000000;
   cursor: pointer;
   transition: all 0.2s;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
@@ -422,14 +473,15 @@ const changePassword = async () => {
   flex: 1;
   min-width: 280px;
   max-width: 400px;
-  padding: 1rem 0;
+  padding-bottom: 20px;
 }
 
 .perfil-col h2 {
-  font-size: 1.3rem;
+  font-size: 1.6rem;
   font-weight: 700;
+  margin-top: 1rem;
   margin-bottom: 1.5rem;
-  color: #222;
+  color: #000000;
 }
 
 .info-item {
@@ -440,19 +492,75 @@ const changePassword = async () => {
 }
 .info-item span {
   min-width: 110px;
-  font-weight: 500;
-  color: #444;
+  width: 10%;
+  font-weight: 700;
+  font-size: 18px;
+  color: #000000;
 }
 .info-item input {
   flex: 1;
   padding: 0.5rem 0.8rem;
-  border: 1px solid #e0e0e0;
+  border: white;
+  box-shadow: 0px 6px 10px -1px #d0cfcf;
   border-radius: 8px;
-  background: #f7f7f7;
   font-size: 1rem;
   color: #333;
   outline: none;
 }
+
+
+
+.info-item-2, .info-item-21{
+  display: inline-block;
+  align-items: center;
+  margin-bottom: 1.1rem;
+  gap: 1rem;
+  width: 50%;
+}
+
+.info-item-2 span {
+  min-width: 110px;
+  width: 10%;
+  font-weight: 700;
+  font-size: 18px;
+  color: #000000;
+}
+
+.info-item-21 span {
+  min-width: 110px;
+  width: 10%;
+  font-weight: 700;
+  font-size: 18px;
+  color: #000000;
+}
+
+
+.info-item-2 input {
+  flex: 1;
+  width: 90%;
+  padding: 0.5rem 0.8rem;
+  border: white;
+  box-shadow: 0px 6px 10px -1px #d0cfcf;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #333;
+  outline: none;
+}
+
+.info-item-21 input {
+  flex: 1;
+  width: 100%;
+  padding: 0.5rem 0.8rem;
+  border: white;
+  box-shadow: 0px 6px 10px -1px #d0cfcf;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #333;
+  outline: none;
+}
+
+
+
 .info-buttons {
   display: flex;
   gap: 1rem;
@@ -461,39 +569,65 @@ const changePassword = async () => {
 .info-btn {
   flex: 1;
   padding: 0.7rem 1.2rem;
-  background: #fff;
-  border: 2px solid #e0e0e0;
-  border-radius: 12px;
+  background: #ff9100;
+  border: none;
+  border-radius: 25px;
   font-weight: 600;
-  color: #333;
+  font-size: 15px;
+  color: #ffffff;
   cursor: pointer;
   transition: all 0.2s;
 }
 .info-btn:hover {
-  background: #f8f8f8;
-  border-color: #333;
+  background: #ff7700;
+  border-color: #ffffff;
 }
 
 .funcionalidades {
-  display: flex;
-  flex-direction: column;
+  background: #fffbf8;
+  margin-top: -40px;
+  margin-bottom: 1px;
   align-items: flex-start;
+  box-shadow: 0 8px 32px rgba(77, 68, 68, 0.12);
+  border-radius: 24px;
+  min-width: 500px;
+  max-width: 600px;
+  width: 100%;
+  backdrop-filter: blur(8px);
+}
+
+.fun-top{
+  width: auto;
+  justify-items: center;
+  height: 40px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #ebebeb; 
+  box-shadow: 0 2px 0px rgba(77, 68, 68, 0.12);
+
+}
+
+.solicitud{
+  align-items: flex-start;
+  background: #fffbf8;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  border-radius: 24px;
+  margin-top: 1px;
+  min-width: 500px;
+  max-width: 600px;
+  width: 100%;
+  backdrop-filter: blur(8px);
+
 }
 .func-grid {
   display: flex;
   gap: 1.5rem;
   width: 100%;
+  padding: 0.5rem 2rem 1rem 2rem;
 }
 
 .func-column {
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  flex: 1;
-  min-width: 0; /* Permite que las columnas se ajusten */
-}
-.func-column {
-  display: flex;
+  align-items: center;
   flex-direction: column;
   gap: 1rem;
   flex: 1;
@@ -501,14 +635,16 @@ const changePassword = async () => {
 .func-btn {
   padding: 0.7rem 1.2rem;
   background: #fff;
-  border: 2px solid #e0e0e0;
+  border: white;
+  box-shadow: 0px 6px 10px -1px #d0cfcf;
   border-radius: 12px;
   font-weight: 600;
-  color: #333;
+  color: #000000;
+  font-size: 18px;
   cursor: pointer;
   transition: all 0.2s;
-  width: 100%;
-  text-align: left;
+  width: 70%;
+  text-align: center;
 }
 .func-btn:hover {
   background: #f8f8f8;
@@ -525,6 +661,7 @@ const changePassword = async () => {
   padding: 1.2rem 0 1rem 0;
   margin-top: 3rem;
   letter-spacing: 2px;
+  z-index: 2;
 }
 
 /* Estilos para el modal de cambio de contraseña */
@@ -561,6 +698,7 @@ const changePassword = async () => {
   margin: 0;
   color: #333;
   font-size: 1.3rem;
+  font-weight:600;
 }
 
 .close-btn {
@@ -618,7 +756,8 @@ const changePassword = async () => {
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  margin-bottom: -15px;
+  gap: 0.2rem;
 }
 
 .form-group label {
@@ -628,11 +767,22 @@ const changePassword = async () => {
 }
 
 .form-group input {
-  padding: 0.8rem;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  padding: 0.6rem;
+  border: none;
+  background: #eff1f2;
+  color: white;
+  border-radius: 25px;
   font-size: 1rem;
   transition: border-color 0.2s;
+}
+
+.form-group input::placeholder {
+    color: #939393;    
+    font-weight: 500;
+}
+
+.form-group input[type="password"] {
+    color: #939393;
 }
 
 .form-group input:focus {
@@ -652,7 +802,7 @@ const changePassword = async () => {
   border: 1px solid #ddd;
   background: white;
   color: #666;
-  border-radius: 8px;
+  border-radius: 25px;
   cursor: pointer;
   font-weight: 600;
   transition: all 0.2s;
@@ -667,16 +817,17 @@ const changePassword = async () => {
   flex: 1;
   padding: 0.8rem;
   border: none;
-  background: #007bff;
+  background: #ff9100;
   color: white;
-  border-radius: 8px;
+  border-radius: 25px;
   cursor: pointer;
   font-weight: 600;
+  font-size: 13px;
   transition: background-color 0.2s;
 }
 
 .submit-btn:hover:not(:disabled) {
-  background: #0056b3;
+  background: #ff7700;
 }
 
 .submit-btn:disabled {

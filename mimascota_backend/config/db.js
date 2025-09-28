@@ -2,7 +2,6 @@
 const { Pool } = require('pg');
 require('dotenv').config(); // Carga las variables de entorno desde .env
 
-console.log('Valor de la contraseña:', process.env.DB_PASSWORD); 
 // Configuración de la Pool de conexiones a PostgreSQL
 const pool = new Pool({
     user: process.env.DB_USER,

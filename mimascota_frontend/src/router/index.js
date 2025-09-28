@@ -9,6 +9,8 @@ import RegisterForm from '../components/RegisterForm.vue';
 import AuthPage from '../views/AuthPage.vue';
 import ResetPassword from '../views/ResetPassword.vue';
 import VerifyEmail from '../views/VerifyEmail.vue';
+import PerfilUsuario from '../views/PerfilUsuario.vue';
+import AddMascot from '@/views/AddMascot.vue';
 
 import { isAuthenticated } from '../utils/auth'; // Importa la función de autenticación
 
@@ -69,6 +71,14 @@ const router = createRouter({
             component: () => import('../views/PerfilUsuario.vue'),
             meta: { requiresAuth: true }
         },
+
+        {
+            // ⭐️ Esta es la ruta que necesitas
+            path: '/agregarmascota', 
+            name: 'AgregarMascota',
+            component: AddMascot,
+            meta: { requiresAuth: true }
+         },
         // Ruta comodín para manejar rutas no encontradas
         {
             path: '/:pathMatch(.*)*',

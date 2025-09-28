@@ -245,6 +245,7 @@ onUnmounted(() => {
   right: 0;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
+  box-shadow: 0px 0px 5px 5px rgba(0,0,0,0.5);
   border-bottom: 1px solid #e0e0e0;
   z-index: 1000;
   transition: all 0.3s ease;
@@ -254,7 +255,7 @@ onUnmounted(() => {
 
 .navbar-scrolled {
   background: rgba(255, 255, 255, 0.98);
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 0px 5px 5px rgba(0,0,0,0.5);
   padding: 0.5rem 0;
 }
 
