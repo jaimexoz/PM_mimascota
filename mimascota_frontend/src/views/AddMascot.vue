@@ -183,6 +183,16 @@ const mascota = reactive({
 const archivosSubidos = reactive([]); // Array reactivo para almacenar {id, file, url}
 const dragActivo = ref(false); // Bandera reactiva para el estilo visual del drag
 
+// ⭐️ ESTADO PARA EL MODAL DE MENSAJES ⭐️
+const modal = reactive({
+    visible: false,
+    mensaje: '',
+    tipo: 'success' // 'success' o 'error'
+});
+
+// Inicializamos el router para redirecciones
+const router = useRouter();
+
 // Opciones predefinidas
 const opcionesSexo = ['Macho', 'Hembra'];
 const opcionesPersonalidad = [
@@ -209,6 +219,33 @@ function togglePersonalidad(rasgo) {
         mascota.personalidad.push(rasgo);
     }
 }
+
+// -----------------------------------------------------------------
+// LÓGICA DEL MODAL
+// -----------------------------------------------------------------
+
+/**
+ * Muestra el modal con un mensaje y tipo específico.
+ * @param {string} msg - Mensaje a mostrar.
+ * @param {string} type - 'success' o 'error'.
+ */
+function mostrarModal(msg, type) {
+    modal.mensaje = msg;
+    modal.tipo = type;
+    modal.visible = true;
+}
+
+/**
+ * Cierra el modal y redirige o resetea el formulario.
+ */
+function cerrarModal() {
+    modal.visible = false;
+    if (modal.tipo === 'success') {
+        // Redirigir al perfil o a la lista de mascotas después del éxito
+        router.push('/perfil');
+    }
+}
+
 
 // -----------------------------------------------------------------
 // LÓGICA DE DRAG AND DROP Y SUBIDA DE ARCHIVOS
@@ -291,22 +328,37 @@ function eliminarArchivo(id) {
     }
 }
 
+
+
 /**
  * Envía los datos del formulario, incluyendo los múltiples archivos, al servidor.
  */
-async function publicarMascota() {
+ async function publicarMascota() {
     const formData = new FormData();
+    
+    // ⭐️ 1. Obtener el token de autenticación
+    // CORRECCIÓN CLAVE: Usamos 'authToken' ya que así se guarda en localStorage.
+    const token = localStorage.getItem('authToken'); 
 
-    // 1. Añadir los MÚLTIPLES archivos de imagen
+    if (!token) {
+        alert('Debes iniciar sesión para publicar una mascota.');
+        // ⭐️ Importante: Redirigir al login si no hay token (asumiendo que tienes una ruta '/login')
+        useRouter().push('/login'); 
+        return;
+    }
+
+    // 2. Añadir los MÚLTIPLES archivos de imagen
     archivosSubidos.forEach((item, index) => {
-        // Usamos un nombre de campo 'fotos' con índice para que el backend lo maneje como un array
-        formData.append(`fotos[${index}]`, item.file); 
+        // ⭐️ CORRECCIÓN CRÍTICA: Multer espera el campo 'fotos' (sin el índice en la clave)
+        // La clave debe ser 'fotos' para cada archivo.
+        formData.append(`fotos`, item.file); 
     });
 
-    // 2. Añadir todos los campos de texto como un string JSON
+    // 3. Añadir todos los campos de texto como un string JSON
     formData.append('datos', JSON.stringify({
         nombre: mascota.nombre,
-        especie: mascota.especie,
+        // 🚨 CORRECCIÓN ANTERIOR MANTENIDA: 'mascota.especi' a 'mascota.especie'
+        especie: mascota.especie, 
         sexo: mascota.sexo,
         edad: mascota.edad,
         raza: mascota.raza,
@@ -319,22 +371,36 @@ async function publicarMascota() {
     try {
         const response = await fetch('http://localhost:3000/api/mascotas', {
             method: 'POST',
+            // ⭐️ 4. AÑADIR LA CABECERA DE AUTORIZACIÓN
+            headers: {
+                // Usamos el token correcto en el header
+                'Authorization': `Bearer ${token}`, 
+            },
             body: formData,
         });
 
         if (response.ok) {
-            alert('¡Mascota publicada con éxito! 🎉');
-            // Aquí puedes redirigir o resetear el formulario
+            mostrarModal('¡Mascota publicada con éxito! 🎉', 'success');
         } else {
-            const error = await response.json();
-            alert('Error al publicar: ' + (error.mensaje || 'Error desconocido.'));
+            const errorText = await response.text(); // Leer como texto si no es JSON
+            let mensajeError = 'Error desconocido.';
+            
+            try {
+                // Intentar parsear como JSON si el error no fue de red
+                const errorJson = JSON.parse(errorText);
+                mensajeError = errorJson.message || errorJson.mensaje || 'Error desconocido del servidor.';
+            } catch (e) {
+                // Si no es JSON, mostrar el código de estado
+                mensajeError = `Error ${response.status}: ${response.statusText}.`;
+            }
+            
+            alert('Error al publicar: ' + mensajeError);
         }
     } catch (error) {
         console.error('Error de red al enviar el formulario:', error);
         alert('No se pudo conectar al servidor. Asegúrate de que Express esté corriendo.');
     }
 }
-
 function irAtras() {
     window.history.back();
 }

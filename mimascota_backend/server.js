@@ -7,8 +7,9 @@ require('dotenv').config(); // Cargar variables de entorno
 
 // Importar rutas
 const authRoutes = require('./routes/authRoutes');
-const uploadRoutes = require('./routes/uploadRoutes'); // ¡Importante! Asegúrate de que esta línea esté
-// const otherRoutes = require('./routes/otherRoutes'); // Si tienes más rutas en el futuro
+const uploadRoutes = require('./routes/uploadRoutes');
+// ⭐️ ¡NUEVO! Importar las rutas de mascota
+const mascotaRoutes = require('./routes/mascotaRoutes'); 
 
 const app = express();
 
@@ -27,7 +28,10 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Prefijo '/api/auth' para todas las rutas definidas en authRoutes
 app.use('/api/auth', authRoutes);
 // Prefijo '/api/upload' para todas las rutas definidas en uploadRoutes
-app.use('/api/upload', uploadRoutes); // ¡Importante! Asegúrate de que esta línea esté presente
+app.use('/api/upload', uploadRoutes);
+
+// ⭐️ ¡NUEVO! Configurar las rutas de mascota con el prefijo '/api/mascotas'
+app.use('/api/mascotas', mascotaRoutes); 
 
 // Ruta de prueba simple (opcional)
 app.get('/', (req, res) => {
