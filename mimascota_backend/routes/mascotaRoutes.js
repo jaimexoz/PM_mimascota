@@ -1,36 +1,67 @@
-// mi_mascota_backend/routes/mascotaRoutes.js
-
 const express = require('express');
 const router = express.Router();
 const pool = require('../config/db'); 
 const fs = require('fs');
 const path = require('path');
+// Importación de Cloudinary. Asumo la ruta correcta.
+const cloudinary = require('../config/cloudinaryConfig'); 
 
-// ⭐️ Importamos las funciones de autenticación (solo necesitamos 'protect' aquí)
-
+// ⭐️ Importamos las funciones de autenticación
 const { protect } = require('../middleware/authMiddleware');
 
 // Importamos el middleware específico para subir múltiples archivos
 const { uploadArrayMascota } = require('../config/multerConfig'); 
 
-// Función de utilidad para eliminar archivos subidos si la BD falla
+// =================================================================
+// FUNCIONES DE UTILIDAD PARA ARCHIVOS Y CLOUDINARY
+// =================================================================
+
+/**
+ * Función auxiliar para subir un archivo local a Cloudinary.
+ * @param {string} filePath - Ruta local del archivo temporal (dada por Multer).
+ * @param {string} folderName - Carpeta en Cloudinary.
+ * @returns {Promise<string|null>} URL segura de Cloudinary o null si falla.
+ */
+async function uploadToCloudinary(filePath, folderName) {
+    if (!filePath) return null;
+    try {
+        const result = await cloudinary.uploader.upload(filePath, {
+            folder: folderName, // Carpeta en Cloudinary
+            transformation: [
+                { width: 800, height: 800, crop: "limit" } // Optimización de imagen
+            ]
+        });
+        return result.secure_url; // URL pública del archivo
+    } catch (error) {
+        console.error('Error al subir a Cloudinary:', error);
+        return null;
+    }
+}
+
+/**
+ * Función de utilidad para eliminar archivos subidos temporalmente.
+ * Usa fs.unlink para la eliminación asíncrona (más seguro).
+ * @param {string[]} filePaths - Array de rutas de archivos locales.
+ */
 const cleanupUploadedFiles = (filePaths) => {
     filePaths.forEach(filePath => {
         // Obtenemos el path absoluto para asegurar la eliminación
         const absolutePath = path.resolve(filePath); 
         fs.unlink(absolutePath, (err) => {
-            if (err) console.error(`Error al borrar el archivo en cleanup: ${absolutePath}`, err);
+            if (err) console.error(`Error al borrar el archivo local: ${absolutePath}`, err);
         });
     });
 };
 
-// --- NUEVA RUTA: GET PARA LISTAR TODAS LAS MASCOTAS ---
-// Esta ruta es pública, por lo que NO usamos el middleware 'protect'.
+// =================================================================
+// RUTAS
+// =================================================================
+
+// --- RUTA GET PARA LISTAR TODAS LAS MASCOTAS ---
 router.get('/', async (req, res) => {
     try {
-        // Seleccionamos todos los campos necesarios de las mascotas que NO estén eliminadas
-        // Es buena práctica usar un JOIN con la tabla de usuarios (u) para obtener el nombre 
-        // del publicador/dueño de la mascota.
+         // Seleccionamos todos los campos necesarios de las mascotas que NO estén eliminadas
+         // Incluyendo el nombre del dueño.
         const query = `
             SELECT 
                 m.idxxxx_mascot, m.nombre_mascot, m.especi_mascot, m.sexoxx_mascot, 
@@ -39,50 +70,42 @@ router.get('/', async (req, res) => {
                 m.fecha_creacion, m.forane_usuari_id, 
                 u.nombre_usuari AS nombre_dueño, 
                 u.emailx_usuari AS email_dueño
-            FROM 
+                FROM 
                 mascotas m
-            JOIN 
+                JOIN 
                 usuarios u ON m.forane_usuari_id = u.idxxxx_usuari
-            WHERE 
+                WHERE 
                 m.eliminado_logico = FALSE
-            ORDER BY 
+                ORDER BY 
                 m.fecha_creacion DESC;
-        `;
-        
+            `;
+
         const result = await pool.query(query);
 
         // Envía el array de mascotas al cliente
         res.status(200).json(result.rows);
 
-    } catch (dbError) {
+        } catch (dbError) {
         console.error('Error al obtener la lista de mascotas:', dbError);
         res.status(500).json({ mensaje: 'Error interno del servidor al obtener mascotas.', error: dbError.message });
     }
 });
 
-// --- RUTA POST PARA PUBLICAR MASCOTA ---
-// ⭐️ 1. Aplicamos 'protect' primero para asegurarnos de que el usuario esté logueado
-// ⭐️ 2. Luego aplicamos 'uploadArrayMascota' para manejar la subida
+
+// --- RUTA POST PARA PUBLICAR MASCOTA (CON SUBIDA A CLOUDINARY) ---
 router.post('/', protect, uploadArrayMascota, async (req, res) => {
-    
-    // Si Multer detectó un error (ej. límite de archivos/tamaño), se manejaría aquí.
-    if (req.multerError) {
-        // Multer debería haber manejado este error antes de llegar al controlador,
-        // pero se mantiene la lógica de seguridad.
-    }
+    // 1. AUTENTICACIÓN Y EXTRACCIÓN DE DATOS
+    const forane_usuari_id = req.user.id; 
 
-    // El ID del usuario ha sido adjuntado a req.user por el middleware 'protect'
-    // Asumimos que el ID está en req.user.id (por tu lógica de token)
-    const forane_usuari_id = req.user.id; // ⭐️ ¡Aquí está el ID real del usuario autenticado!
-
-    // 1. Parsear los datos de texto (enviados como req.body.datos desde Vue)
+    // Rutas locales temporales que Multer acaba de crear
+    const localImagePaths = req.files ? req.files.map(file => file.path) : [];
     let datosMascota;
+
     try {
         datosMascota = JSON.parse(req.body.datos);
     } catch (e) {
-        // Borrar imágenes subidas si el JSON es inválido
-        const imagePaths = req.files ? req.files.map(file => file.path) : [];
-        cleanupUploadedFiles(imagePaths);
+    // Borrar imágenes subidas si el JSON es inválido y retornar error
+    cleanupUploadedFiles(localImagePaths);
         return res.status(400).json({ mensaje: 'Formato de datos de la mascota inválido (JSON no válido).' });
     }
 
@@ -91,21 +114,51 @@ router.post('/', protect, uploadArrayMascota, async (req, res) => {
         personalidad, informacionAdicional
     } = datosMascota;
 
-    // 2. Mapear las rutas de las imágenes subidas
-    const imagePaths = req.files ? req.files.map(file => file.path) : [];
+    let cloudinaryImageUrls = [];
     
-    // Nota: Multer almacena la ruta completa en el sistema de archivos (ej: 'uploads/foto-123.jpg')
-    const image1_mascot = imagePaths[0] || null;
-    const image2_mascot = imagePaths[1] || null;
-    const image3_mascot = imagePaths[2] || null;
+    // ==========================================================
+    // 2. SUBIR IMÁGENES A CLOUDINARY Y LIMPIAR ARCHIVOS LOCALES
+    // ==========================================================
+    try {
+        // Subir todas las imágenes en paralelo 
+        const uploadPromises = localImagePaths.map(path => 
+            uploadToCloudinary(path, 'mascotas_para_adopcion') // Carpeta destino en Cloudinary
+        );
+        
+        cloudinaryImageUrls = await Promise.all(uploadPromises);
+        
+        // Verificar si alguna subida falló
+        if (cloudinaryImageUrls.includes(null)) {
+            throw new Error("Una o más imágenes fallaron al subir a Cloudinary.");
+        }
+
+    } catch (uploadError) {
+        console.error('Fallo grave durante la subida de imágenes a Cloudinary:', uploadError);
+        return res.status(500).json({ 
+            mensaje: 'Error al subir una o más imágenes a Cloudinary.',
+            error: uploadError.message
+        });
+    } finally {
+        // ¡IMPORTANTE! Borrar los archivos locales sin importar si la subida a Cloudinary fue exitosa o falló
+        cleanupUploadedFiles(localImagePaths);
+    }
     
-    // 3. Preparar los datos para la BD
-    const personalidadString = Array.isArray(personalidad) ? personalidad.join(', ') : ''; 
-    const infoad_mascot = `Personalidad: ${personalidadString}. Info Adicional: ${informacionAdicional || 'N/A'}`;
+    // 3. PREPARAR DATOS PARA LA BD (USANDO LAS URLs DE CLOUDINARY)
+    const image1_mascot = cloudinaryImageUrls[0] || null;
+    const image2_mascot = cloudinaryImageUrls[1] || null;
+    const image3_mascot = cloudinaryImageUrls[2] || null;
+    
+    const infoad_mascot = informacionAdicional || 'N/A'; 
     
     const client = await pool.connect(); 
+    
     try {
-        const query = `
+        await client.query('BEGIN'); // INICIAR TRANSACCIÓN
+
+        // ==========================================================
+        // PASO A: INSERTAR MASCOTA Y OBTENER ID (idxxxx_mascot)
+        // ==========================================================
+        const insertQuery = `
             INSERT INTO mascotas (
                 nombre_mascot, especi_mascot, sexoxx_mascot, edadme_mascot, 
                 razaxx_mascot, pesokg_mascot, tamano_mascot, infoad_mascot, 
@@ -115,28 +168,61 @@ router.post('/', protect, uploadArrayMascota, async (req, res) => {
             RETURNING idxxxx_mascot;
         `;
 
-        const values = [
+        const insertValues = [
             nombre, especie, sexo, edad, 
             raza, peso, tamano, infoad_mascot, 
-            image1_mascot, image2_mascot, image3_mascot, false, 
-            forane_usuari_id // ⭐️ ¡El ID real del usuario!
+            image1_mascot, image2_mascot, image3_mascot, false, // <-- URLs de Cloudinary
+            forane_usuari_id
         ];
 
-        await client.query(query, values);
+        const result = await client.query(insertQuery, insertValues);
+        const mascotaId = result.rows[0].idxxxx_mascot; 
+
+        // ==========================================================
+        // PASO B y C: Obtener IDs y hacer INSERT en mascota_caracteristicas
+        // ==========================================================
+        if (personalidad && personalidad.length > 0) {
+            const placeholderList = personalidad.map((_, i) => `$${i + 1}`).join(',');
+
+            // Nota: Aquí se usa 'idxxxx_caract' y 'nombre_caract' según tu código anterior.
+            const selectQuery = `
+                SELECT idxxxx_caract 
+                FROM caracteristicas 
+                WHERE nombre_caract IN (${placeholderList});
+            `;
+            
+            const caracteristicasResult = await client.query(selectQuery, personalidad);
+            const caracteristicaIds = caracteristicasResult.rows.map(row => row.idxxxx_caract);
+
+            if (caracteristicaIds.length > 0) {
+                const relacionValues = caracteristicaIds.map(charId => `(${mascotaId}, ${charId})`).join(',');
+                
+                // Nota: Aquí se usa 'forane_caract_id' según tu código anterior.
+                const relacionQuery = `
+                    INSERT INTO mascota_caracteristicas (forane_mascot_id, forane_caract_id) 
+                    VALUES ${relacionValues};
+                `;
+                await client.query(relacionQuery);
+            }
+        }
+        
+        await client.query('COMMIT'); // CONFIRMAR TRANSACCIÓN
 
         res.status(201).json({ 
-            mensaje: 'Mascota publicada con éxito y guardada en BD.',
-            archivos_guardados: imagePaths.length,
-            usuario_id: forane_usuari_id
+            mensaje: 'Mascota y características publicadas con éxito.',
+            mascota_id: mascotaId
         });
 
     } catch (dbError) {
-        console.error('Error al insertar en la BD:', dbError);
+        await client.query('ROLLBACK'); // REVERTIR TRANSACCIÓN
+        console.error('Error de base de datos en la transacción:', dbError);
         
-        // Borrar los archivos subidos si la inserción en la BD falla
-        cleanupUploadedFiles(imagePaths);
+        // Las imágenes locales ya fueron limpiadas. Solo devolvemos el error de BD.
 
-        res.status(500).json({ mensaje: 'Error interno del servidor al guardar la mascota.', error: dbError.message });
+        res.status(500).json({ 
+            mensaje: 'Error interno del servidor al guardar la mascota y sus relaciones.', 
+            error: dbError.message 
+        });
     } finally {
         client.release();
     }

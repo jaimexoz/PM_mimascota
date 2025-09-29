@@ -149,6 +149,32 @@
         </div>
 
     </div>
+
+    <div v-if="modal.visible" class="modal-overlay">
+    <div class="modal-content" :class="modal.tipo">
+        <div class="modal-x">
+            <button @click="cerrarModal" class="btn-x">
+                X
+            </button>
+        </div>
+        <div class="modal-header">
+                <template v-if="modal.tipo === 'success'">
+                    <h2>Su mascota ha sido añadida correctamente</h2>
+                </template>
+                <template v-if="modal.tipo === 'error'">
+                    <h2>El archivo excede el tamaño (5MB)</h2>
+                </template>
+            
+            
+        </div>
+        
+        <div class="modal-actions">
+            <button @click="cerrarModal" class="btn-primary">
+                Aceptar
+            </button>
+        </div>
+    </div>
+</div>
     
     
 </div>
@@ -243,6 +269,8 @@ function cerrarModal() {
     if (modal.tipo === 'success') {
         // Redirigir al perfil o a la lista de mascotas después del éxito
         router.push('/perfil');
+    }else{
+        window.location.reload();
     }
 }
 
@@ -380,7 +408,7 @@ function eliminarArchivo(id) {
         });
 
         if (response.ok) {
-            mostrarModal('¡Mascota publicada con éxito! 🎉', 'success');
+            mostrarModal('Su mascota ha sido añadida correctamente', 'success');
         } else {
             const errorText = await response.text(); // Leer como texto si no es JSON
             let mensajeError = 'Error desconocido.';
@@ -394,7 +422,8 @@ function eliminarArchivo(id) {
                 mensajeError = `Error ${response.status}: ${response.statusText}.`;
             }
             
-            alert('Error al publicar: ' + mensajeError);
+            /*alert('Error al publicar: El archivo excede el tamaño (5MB) ');*/
+            mostrarModal('El archivo excede el tamaño (5MB)', 'error');
         }
     } catch (error) {
         console.error('Error de red al enviar el formulario:', error);
@@ -588,12 +617,19 @@ function irAtras() {
     width: 250px;
     margin: 30px auto 0;
     padding: 15px;
-    background-color: #ff9900;
+    background-color: #ffad31;
     color: white;
     border: none;
     border-radius: 25px;
     font-size: 1.2em;
     cursor: pointer;
+    transition: all 0.3s 
+}
+
+.btn-publicar:hover{
+    background-color: #ff9900;
+    box-shadow: 0px 6px 10px -1px #757373;
+    animation: pulse 1.5s infinite;
 }
 .pet-image-placeholder{
     width: 100%;
@@ -640,13 +676,26 @@ textarea {
 
 .upload-button {
     appearance: none; 
-    background-color: #ff9900;
+    background-color: #ffad31;
     color: white;
     padding: 10px 20px;
     border-radius: 25px;
     cursor: pointer;
     display: inline-block;
     margin-top: 10px;
+    transition: transform 1s ease;
+}
+
+.upload-button:hover {
+    background-color: #ff9900;
+     box-shadow: 0px 6px 10px -1px #757373; 
+   
+}
+
+.upload-button:active {
+    background-color: #ff9900;
+     box-shadow: 0px 6px 10px -1px #757373; 
+    transform: scale(0.1);
 }
 
 /* Contenedor principal que maneja el borde y el centrado de todo el contenido */
@@ -711,4 +760,126 @@ textarea {
     height: 100%;
     object-fit: cover; /* Asegura que la imagen se vea bien */
 }
+
+
+/* Modal */
+
+/* ESTILOS CSS PARA EL MODAL (Añadir en el bloque <style> o archivo CSS) */
+
+.modal-overlay {
+    /* Fondo que cubre toda la pantalla */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Oscurece el fondo */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Asegura que esté por encima de todo */
+}
+
+.modal-content {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    animation: fadeIn 0.3s ease-out;
+    justify-items: center;
+}
+
+.modal-header {
+  margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.modal-header h2 {
+    font-size: 1.4rem;
+    color: #333;
+    margin: 10px;
+    font-weight: 700;
+}
+
+.modal-icon {
+    font-size: 3rem;
+    display: inline-block;
+    width: 60px;
+    height: 60px;
+    line-height: 60px;
+    border-radius: 50%;
+    color: white;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.modal-content.success .modal-header{
+    font-size: 1.5rem;
+    color: #333;
+    margin: 10px;
+    font-weight: 400;
+}
+
+.modal-content.error .modal-header{
+    font-size: 1.4rem;
+    color: #333;
+    margin: 10px;
+    font-weight: 700;
+
+}
+
+.modal-content.error .modal-icon {
+    background-color: #f44336; /* Rojo para error */
+}
+
+.modal-actions {
+    width: 40%;
+}
+
+.btn-primary {
+    margin-top: 20px;
+    background: #ffb84d;
+    border-radius: 25px;
+    margin-bottom: 10px;
+    padding: 10px 25px;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.btn-primary:hover{
+    background: #ff9900;
+}
+
+.modal-x{
+  display: flex;
+  width: 100%;
+  justify-content: right;
+  border-bottom: 1px solid #dbdbdb; 
+  
+}
+
+
+.btn-x{
+  color: #adadad;
+  background: none;
+  font-weight: 700;
+  font-size: 1.5rem;
+  border: none;
+  margin-top: 5px;
+  margin-right: 10px;
+}
+
+
+.btn-x:hover {
+    color: #4f4f4f;
+   
+}
+
+
 </style>
+
