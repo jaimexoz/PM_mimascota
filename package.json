@@ -2,7 +2,9 @@
   "dependencies": {
     "cloudinary": "^2.7.0",
     "express": "^5.1.0",
+    "lucide-vue-next": "^0.544.0",
     "multer": "^2.0.2",
-    "pg": "^8.16.3"
+    "pg": "^8.16.3",
+    "pinia": "^3.0.3"
   }
 }

@@ -56,6 +56,72 @@ const cleanupUploadedFiles = (filePaths) => {
 // =================================================================
 // RUTAS
 // =================================================================
+// --- RUTA GET PARA LISTAR MASCOTAS PARA EL FEED PRINCIPAL (Optimizado) ---
+router.get('/feed', async (req, res) => {
+    try {
+        // Seleccionamos SOLO los campos esenciales para mostrar en el feed de tarjetas.
+        const query = `
+            SELECT 
+                m.idxxxx_mascot, 
+                m.nombre_mascot, 
+                m.especi_mascot, 
+                m.sexoxx_mascot, 
+                m.edadme_mascot, 
+                m.razaxx_mascot, 
+                m.tamano_mascot, 
+                m.image1_mascot
+            FROM 
+                mascotas m
+            WHERE 
+                m.eliminado_logico = FALSE
+            ORDER BY 
+                m.idxxxx_mascot DESC;
+            `;
+
+        const result = await pool.query(query);
+
+        // Envía el array de mascotas al cliente
+        res.status(200).json(result.rows);
+
+    } catch (dbError) {
+        console.error('Error al obtener la lista de mascotas para el feed:', dbError);
+        res.status(500).json({ mensaje: 'Error interno del servidor al obtener mascotas para el feed.', error: dbError.message });
+    }
+});
+//-----GET PARA MOSTRAR LAS 4 MAS RECIENTES
+
+router.get('/home2nd', async (req, res) => {
+    try {
+        // Seleccionamos SOLO los campos esenciales para mostrar en el feed de tarjetas.
+        const query = `
+            SELECT 
+                m.idxxxx_mascot, 
+                m.nombre_mascot, 
+                m.especi_mascot, 
+                m.sexoxx_mascot, 
+                m.edadme_mascot, 
+                m.razaxx_mascot, 
+                m.tamano_mascot, 
+                m.image1_mascot
+            FROM 
+                mascotas m
+            WHERE 
+                m.eliminado_logico = FALSE
+            ORDER BY 
+                m.idxxxx_mascot DESC
+            LIMIT 4;
+            `;
+
+        const result = await pool.query(query);
+
+        // Envía el array de mascotas al cliente
+        res.status(200).json(result.rows);
+
+    } catch (dbError) {
+        console.error('Error al obtener la lista de mascotas para el feed:', dbError);
+        res.status(500).json({ mensaje: 'Error interno del servidor al obtener mascotas para el feed.', error: dbError.message });
+    }
+});
 
 // --- RUTA GET PARA LISTAR TODAS LAS MASCOTAS ---
 router.get('/', async (req, res) => {
@@ -67,7 +133,7 @@ router.get('/', async (req, res) => {
                 m.idxxxx_mascot, m.nombre_mascot, m.especi_mascot, m.sexoxx_mascot, 
                 m.edadme_mascot, m.razaxx_mascot, m.pesokg_mascot, m.tamano_mascot, 
                 m.infoad_mascot, m.image1_mascot, m.image2_mascot, m.image3_mascot, 
-                m.fecha_creacion, m.forane_usuari_id, 
+                m.forane_usuari_id, 
                 u.nombre_usuari AS nombre_dueño, 
                 u.emailx_usuari AS email_dueño
                 FROM 
@@ -77,7 +143,7 @@ router.get('/', async (req, res) => {
                 WHERE 
                 m.eliminado_logico = FALSE
                 ORDER BY 
-                m.fecha_creacion DESC;
+                m.idxxxx_mascot DESC;
             `;
 
         const result = await pool.query(query);
