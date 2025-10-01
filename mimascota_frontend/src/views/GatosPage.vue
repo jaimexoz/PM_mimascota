@@ -1,86 +1,85 @@
 <template>
-  <div class="adoption-feed-container">
+    <div class="adoption-feed-container">
 
-      <Navbar /> 
-      
-      <!-- 1. ENCABEZADO Y FILTROS -->
-      <div class="content-wrapper">
-          <h1 class="main-title">
-              <PawPrint class="paw-icon-main" />
-              ¡Adopta con Amor!
-              <PawPrint class="paw-icon-main" />
-          </h1>
-          <p class="subtitle">Encuentra a tu nuevo mejor amigo entre miles de mascotas.</p>
+    <Navbar /> 
+    
+    <!-- 1. ENCABEZADO Y FILTROS -->
+    <div class="content-wrapper">
+        <h1 class="main-title">
+            <PawPrint class="paw-icon-main" />
+            ¡Adopta con Amor!
+            <PawPrint class="paw-icon-main" />
+        </h1>
+        <p class="subtitle">Encuentra a tu nuevo mejor amigo entre miles de mascotas.</p>
 
-          <!-- BARRA DE FILTROS -->
-          <div class="filter-bar">
-              
-              <span class="filter-label">Filtrar por:</span>
+        <!-- BARRA DE FILTROS -->
+        <div class="filter-bar"> 
+            <span class="filter-label">Filtrar por:</span>
 
-              <!-- Filtros Select -->
-              <select v-model="filters.edad" class="filter-select">
-                  <option value="">Edad</option>
-                  <option v-for="option in filterOptions.edad" :key="option" :value="option">{{ option }}</option>
-              </select>
+            <!-- Filtros Select -->
+            <select v-model="filters.edad" class="filter-select">
+                <option value="">Edad</option>
+                <option v-for="option in filterOptions.edad" :key="option" :value="option">{{ option }}</option>
+            </select>
 
-              <select v-model="filters.sexo" class="filter-select">
-                  <option value="">Sexo</option>
-                  <option v-for="option in filterOptions.sexo" :key="option" :value="option">{{ option }}</option>
-              </select>
+            <select v-model="filters.sexo" class="filter-select">
+                <option value="">Sexo</option>
+                <option v-for="option in filterOptions.sexo" :key="option" :value="option">{{ option }}</option>
+            </select>
 
-              <select v-model="filters.tamano" class="filter-select">
-                  <option value="">Tamaño</option>
-                  <option v-for="option in filterOptions.tamano" :key="option" :value="option">{{ option }}</option>
-              </select>
-              
-              <select v-model="filters.orden" class="filter-select">
-                  <option v-for="option in filterOptions.orden" :key="option.value" :value="option.value">{{ option.label }}</option>
-              </select>
+            <select v-model="filters.tamano" class="filter-select">
+                <option value="">Tamaño</option>
+                <option v-for="option in filterOptions.tamano" :key="option" :value="option">{{ option }}</option>
+            </select>
+            
+            <select v-model="filters.orden" class="filter-select">
+                <option v-for="option in filterOptions.orden" :key="option.value" :value="option.value">{{ option.label }}</option>
+            </select>
 
 
-              <!-- Barra de Búsqueda -->
-              <div class="search-input-container">
-                  <input type="text" v-model="filters.busqueda"
-                      placeholder="Buscar por nombre o raza..."
-                      class="search-input">
-                  <Search class="search-icon" />
-              </div>
-              
-              <!-- Botón Limpiar Filtros -->
-              <button @click="clearFilters" class="clear-filters-button">
-                  Limpiar
-              </button>
-          </div>
-          <!-- FIN BARRA DE FILTROS -->
-      </div>
+            <!-- Barra de Búsqueda -->
+            <div class="search-input-container">
+                <input type="text" v-model="filters.busqueda"
+                    placeholder="Buscar por nombre..."
+                    class="search-input">
+                <Search class="search-icon" />
+            </div>
+            
+            <!-- Botón Limpiar Filtros -->
+            <button @click="clearFilters" class="clear-filters-button">
+                Limpiar
+            </button>
+        </div>
+        <!-- FIN BARRA DE FILTROS -->
+    </div>
 
-      <!-- 2. CONTENIDO PRINCIPAL (FEED DE MASCOTAS) -->
-      <div class="content-wrapper feed-content">
-          
-          <!-- Estado de Carga -->
-          <div v-if="isLoading" class="loading-state">
-              <Loader class="loading-icon animate-spin" />
-              <p class="loading-text">Cargando mascotas...</p>
-          </div>
+    <!-- 2. CONTENIDO PRINCIPAL (FEED DE MASCOTAS) -->
+    <div class="content-wrapper feed-content">
+    
+        <!-- Estado de Carga -->
+        <div v-if="isLoading" class="loading-state">
+            <Loader class="loading-icon animate-spin" />
+            <p class="loading-text">Cargando mascotas...</p>
+        </div>
 
-          <!-- Resultados del Filtro -->
-          <div v-else-if="applyFilters.length > 0" class="pet-card-grid">
-              
-              <!-- Componente dinámico de tarjeta de mascota -->
-              <PetCard v-for="mascota in applyFilters" :key="mascota.id" :mascota="mascota" />
-          </div>
+        <!-- Resultados del Filtro -->
+        <div v-else-if="applyFilters.length > 0" class="pet-card-grid">
+            
+            <!-- Componente dinámico de tarjeta de mascota -->
+            <PetCard v-for="mascota in applyFilters" :key="mascota.id" :mascota="mascota" />
+        </div>
 
-          <!-- Sin Resultados -->
-          <div v-else class="no-results-state">
-              <h2 class="no-results-title">¡Vaya! No encontramos mascotas con esos filtros.</h2>
-              <p class="no-results-text">Intenta ajustar tus criterios de búsqueda o limpiar los filtros.</p>
-              <button @click="clearFilters" class="show-all-button">
-                  Mostrar todas las mascotas
-              </button>
-          </div>
-      </div>
+        <!-- Sin Resultados -->
+        <div v-else class="no-results-state">
+            <h2 class="no-results-title">¡Vaya! No encontramos mascotas con esos filtros.</h2>
+            <p class="no-results-text">Intenta ajustar tus criterios de búsqueda o limpiar los filtros.</p>
+            <button @click="clearFilters" class="show-all-button">
+                Mostrar todas las mascotas
+            </button>
+        </div>
+    </div>
 
-  </div>
+</div>
 </template>
 
 <script setup>
@@ -96,23 +95,23 @@ const isLoading = ref(true);
 
 // Estado de los filtros y búsqueda
 const filters = reactive({
-  edad: '',
-  sexo: '',
-  tamano: '',
-  orden: 'mas_recientes', 
-  busqueda: ''
+    edad: '',
+    sexo: '',
+    tamano: '',
+    orden: 'mas_recientes', 
+    busqueda: ''
 });
 
 // Opciones de filtro
 const filterOptions = {
-  edad: ['Cachorro (0-12m)', 'Joven (1-3a)', 'Adulto (+3a)'],
-  sexo: ['Macho', 'Hembra'],
-  tamano: ['Pequeño', 'Mediano', 'Grande'],
-  orden: [
-      { value: 'mas_recientes', label: 'Más recientes' },
-      { value: 'mas_antiguos', label: 'Más antiguos' },
-      { value: 'alfabetico', label: 'A-Z' }
-  ]
+    edad: ['Cachorro (0-12m)', 'Joven (1-3a)', 'Adulto (+3a)'],
+    sexo: ['Macho', 'Hembra'],
+    tamano: ['Pequeño', 'Mediano', 'Grande'],
+    orden: [
+        { value: 'mas_recientes', label: 'Más recientes' },
+        { value: 'mas_antiguos', label: 'Más antiguos' },
+        { value: 'alfabetico', label: 'A-Z' }
+    ]
 };
 
 // ==============================================
@@ -123,35 +122,35 @@ const filterOptions = {
 * Función para obtener TODAS las mascotas de la base de datos.
 */
 async function getMascotas() {
-  isLoading.value = true;
-  try {
-      // NOTA: Asegúrate de que tu backend tenga un endpoint que devuelva todas las mascotas
-      const response = await fetch('http://localhost:3000/api/mascotas/feed', { 
-          method: 'GET',
-          headers: {
-              'Authorization': `Bearer ${authStore.token}` 
-          },
-      });
+    isLoading.value = true;
+    try {
+        // NOTA: Asegúrate de que tu backend tenga un endpoint que devuelva todas las mascotas
+        const response = await fetch('http://localhost:3000/api/mascotas/feed', { 
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${authStore.token}` 
+            },
+        });
 
-      if (!response.ok) {
-          throw new Error('Error al cargar las mascotas: ' + response.statusText);
-      }
+        if (!response.ok) {
+            throw new Error('Error al cargar las mascotas: ' + response.statusText);
+        }
 
-      const data = await response.json();
-      
-      if (data.length === 0) {
-          mascotas.value = createMockMascotas(8); // Usar mocks si no hay datos
-      } else {
-          mascotas.value = data;
-      }
-      
-  } catch (error) {
-      console.error("Error al obtener las mascotas:", error);
-      // Fallback a datos simulados
-      mascotas.value = createMockMascotas(8); 
-  } finally {
-      isLoading.value = false;
-  }
+        const data = await response.json();
+        
+        if (data.length === 0) {
+            mascotas.value = createMockMascotas(8); // Usar mocks si no hay datos
+        } else {
+            mascotas.value = data;
+        }
+        
+    } catch (error) {
+        console.error("Error al obtener las mascotas:", error);
+        // Fallback a datos simulados
+        mascotas.value = createMockMascotas(8); 
+    } finally {
+        isLoading.value = false;
+    }
 }
 
 /**
@@ -159,76 +158,81 @@ async function getMascotas() {
 * Se ejecuta automáticamente cuando cambian los filtros.
 */
 const applyFilters = computed(() => {
-  let results = [...mascotas.value];
+    let results = [...mascotas.value];
 
-  // 1. FILTRADO POR BÚSQUEDA (Nombre o Raza)
-  if (filters.busqueda) {
-      const busquedaLower = filters.busqueda.toLowerCase();
-      results = results.filter(m => 
-          (m.nombre_mascot && m.nombre_mascot.toLowerCase().includes(busquedaLower)) ||
-          (m.raza_mascot && m.raza_mascot.toLowerCase().includes(busquedaLower))
-      );
-  }
-  
-  // 2. FILTRADO POR SEXO
-  if (filters.sexo) {
-      results = results.filter(m => m.sexoxx_mascot === filters.sexo);
-  }
+    // 1. FILTRADO POR BÚSQUEDA (Nombre o Raza)
+    if (filters.busqueda) {
+        const busquedaLower = filters.busqueda.toLowerCase();
+        results = results.filter(m => 
+            (m.nombre_mascot && m.nombre_mascot.toLowerCase().includes(busquedaLower)) ||
+            (m.raza_mascot && m.raza_mascot.toLowerCase().includes(busquedaLower))
+        );
+    }
+    
+    // 2. FILTRADO POR SEXO
+    if (filters.sexo) {
+        results = results.filter(m => m.sexoxx_mascot === filters.sexo);
+    }
 
-  // 3. FILTRADO POR TAMAÑO
-  if (filters.tamano) {
-      results = results.filter(m => m.tamano_mascot === filters.tamano);
-  }
+    // 3. FILTRADO POR TAMAÑO
+    if (filters.tamano) {
+        results = results.filter(m => m.tamano_mascot === filters.tamano);
+    }
 
-  // 4. FILTRADO POR EDAD (Asume 'edadme_mascot' está en meses)
-  if (filters.edad) {
-      results = results.filter(m => {
-          const edadMeses = m.edadme_mascot; 
-          switch (filters.edad) {
-              case 'Cachorro (0-12m)': return edadMeses >= 0 && edadMeses <= 12;
-              case 'Joven (1-3a)': return edadMeses > 12 && edadMeses <= 36;
-              case 'Adulto (+3a)': return edadMeses > 36;
-              default: return true;
-          }
-      });
-  }
+    // 4. FILTRADO POR EDAD (Asume 'edadme_mascot' está en meses)
+    if (filters.edad) {
+        results = results.filter(m => {
+            const edadMeses = m.edadme_mascot; 
+            switch (filters.edad) {
+                case 'Cachorro (0-12m)': return edadMeses >= 0 && edadMeses <= 12;
+                case 'Joven (1-3a)': return edadMeses > 12 && edadMeses <= 36;
+                case 'Adulto (+3a)': return edadMeses > 36;
+                default: return true;
+            }
+        });
+    }
 
-  // 5. ORDENAMIENTO
-  switch (filters.orden) {
-      case 'alfabetico':
-          results.sort((a, b) => (a.nombre_mascot || '').localeCompare(b.nombre_mascot || ''));
-          break;
-      case 'mas_antiguos':
-          results.sort((a, b) => (a.id || 0) - (b.id || 0)); 
-          break;
-      case 'mas_recientes':
-      default:
-          results.sort((a, b) => (b.id || 0) - (a.id || 0)); 
-          break;
-  }
+    
 
-  return results;
-});
+    switch (filters.orden) {
+        case 'alfabetico':
+            results.sort((a, b) => (a.nombre_mascot || '').localeCompare(b.nombre_mascot || ''));
+            break;
+            
+        case 'mas_antiguos':
+            // Orden Ascendente (ID más bajo = más antiguo)
+            results.sort((a, b) => (a.idxxxx_mascot || 0) - (b.idxxxx_mascot || 0)); 
+            break;
+            
+        case 'mas_recientes':
+        default:
+            // Orden Descendente (ID más alto = más reciente) - El valor por defecto
+            results.sort((a, b) => (b.idxxxx_mascot|| 0) - (a.idxxxx_mascot || 0)); 
+            break;
+    }
+
+    return results;
+    });
 
 /**
 * Función para limpiar todos los filtros
 */
 function clearFilters() {
-  Object.assign(filters, {
-      edad: '',
-      sexo: '',
-      tamano: '',
-      orden: 'mas_recientes',
-      busqueda: ''
-  });
+    Object.assign(filters, {
+        edad: '',
+        sexo: '',
+        tamano: '',
+        orden: 'mas_recientes',
+        busqueda: ''
+    });
 }
 
 // Llama a la función al cargar el componente
 onMounted(() => {
-  if (!authStore.token) {
-      authStore.loadTokenFromLocalStorage();
-  }
-  getMascotas();
+    if (!authStore.token) {
+        authStore.loadTokenFromLocalStorage();
+    }
+    getMascotas();
 });
 
 
@@ -240,44 +244,44 @@ onMounted(() => {
 * Función para simular datos de mascotas si la base de datos no funciona.
 */
 function createMockMascotas(count) {
-  const mockData = [];
-  const names = ["Max", "Luna", "Rocky", "Bella", "Coco", "Kira", "Toby", "Nala"];
-  const breeds = ["Labrador", "Border Collie", "Mestizo", "Poodle", "Pastor Alemán"];
-  const sizes = ["Pequeño", "Mediano", "Grande"];
-  const imageBaseUrl = 'https://placehold.co/400x400/FF9933/FFFFFF/png?text=';
+    const mockData = [];
+    const names = ["Max", "Luna", "Rocky", "Bella", "Coco", "Kira", "Toby", "Nala"];
+    const breeds = ["Labrador", "Border Collie", "Mestizo", "Poodle", "Pastor Alemán"];
+    const sizes = ["Pequeño", "Mediano", "Grande"];
+    const imageBaseUrl = 'https://placehold.co/400x400/FF9933/FFFFFF/png?text=';
 
-  for (let i = 0; i < count; i++) {
-      const name = names[i % names.length];
-      const ageYears = Math.floor(Math.random() * 5) + 1;
-      const ageMonths = ageYears * 12 + Math.floor(Math.random() * 12);
-      
-      mockData.push({
-          id: i + 1,
-          nombre_mascot: name,
-          especie_mascot: i % 2 === 0 ? 'Perro' : 'Gato',
-          sexoxx_mascot: i % 4 < 2 ? 'Macho' : 'Hembra',
-          edadme_mascot: ageMonths, // Edad en meses
-          raza_mascot: breeds[i % breeds.length],
-          tamano_mascot: sizes[i % sizes.length],
-          image1_mascot: `${imageBaseUrl}${name.replace(' ', '+')}`,
-      });
-  }
-  return mockData;
+    for (let i = 0; i < count; i++) {
+        const name = names[i % names.length];
+        const ageYears = Math.floor(Math.random() * 5) + 1;
+        const ageMonths = ageYears * 12 + Math.floor(Math.random() * 12);
+        
+        mockData.push({
+            id: i + 1,
+            nombre_mascot: name,
+            especie_mascot: i % 2 === 0 ? 'Perro' : 'Gato',
+            sexoxx_mascot: i % 4 < 2 ? 'Macho' : 'Hembra',
+            edadme_mascot: ageMonths, // Edad en meses
+            raza_mascot: breeds[i % breeds.length],
+            tamano_mascot: sizes[i % sizes.length],
+            image1_mascot: `${imageBaseUrl}${name.replace(' ', '+')}`,
+        });
+    }
+    return mockData;
 }
 
 /**
 * Convierte edad en meses a formato legible (años y meses).
 */
 function formatAge(months) {
-  if (months < 12) {
-      return `${months} meses`;
-  }
-  const years = Math.floor(months / 12);
-  const remainingMonths = months % 12;
-  if (remainingMonths === 0) {
-      return `${years} años`;
-  }
-  return `${years} años, ${remainingMonths} meses`;
+    if (months < 12) {
+        return `${months} meses`;
+    }
+    const years = Math.floor(months / 12);
+    const remainingMonths = months % 12;
+    if (remainingMonths === 0) {
+        return `${years} años`;
+    }
+    return `${years} años, ${remainingMonths} meses`;
 }
 
 /**
@@ -285,43 +289,43 @@ function formatAge(months) {
 * Se han movido las clases de Tailwind a PetCard classes y chips.
 */
 const PetCard = ({ mascota }) => {
-  const ageDisplay = formatAge(mascota.edadme_mascot);
-  const imageUrl = mascota.image1_mascot || `https://placehold.co/400x400/9933FF/FFFFFF/png?text=Sin+Foto`;
+    const ageDisplay = formatAge(mascota.edadme_mascot);
+    const imageUrl = mascota.image1_mascot || `https://placehold.co/400x400/9933FF/FFFFFF/png?text=Sin+Foto`;
 
-  return h('div', { class: 'pet-card' }, [
-      // Imagen
-      h('div', { class: 'pet-card-image-container' }, [
-          h('img', { 
-              src: imageUrl, 
-              alt: `Foto de ${mascota.nombre_mascot}`, 
-              class: 'pet-card-image',
-              onerror: (e) => e.target.src = `https://placehold.co/400x400/9933FF/FFFFFF/png?text=Sin+Foto`
-          })
-      ]),
-      
-      // Contenido
-      h('div', { class: 'pet-card-content' }, [
-          h('h3', { class: 'pet-card-name' }, mascota.nombre_mascot),
-          
-          // Detalles (Chips)
-          h('div', { class: 'pet-card-chips' }, [
-              h('span', { class: 'chip chip-indigo' }, mascota.sexoxx_mascot),
-              h('span', { class: 'chip chip-yellow' }, ageDisplay),
-              h('span', { class: 'chip chip-grey' }, mascota.razaxx_mascot || 'Mestizo'),
-          ])
-          
-      ]),
+    return h('div', { class: 'pet-card' }, [
+        // Imagen
+        h('div', { class: 'pet-card-image-container' }, [
+            h('img', { 
+                src: imageUrl, 
+                alt: `Foto de ${mascota.nombre_mascot}`, 
+                class: 'pet-card-image',
+                onerror: (e) => e.target.src = `https://placehold.co/400x400/9933FF/FFFFFF/png?text=Sin+Foto`
+            })
+        ]),
         
-      h('div', { class: 'pet-card-content-button' }, [
-        
-          // Botón Ver Perfil
-          h('button', { 
-              class: 'pet-card-button',
-              onClick: () => console.log('Ver perfil de:', mascota.nombre_mascot)
-          }, 'Ver perfil')
-      ])
+        // Contenido
+        h('div', { class: 'pet-card-content' }, [
+            h('h3', { class: 'pet-card-name' }, mascota.nombre_mascot),
+            
+            // Detalles (Chips)
+            h('div', { class: 'pet-card-chips' }, [
+                h('span', { class: 'chip chip-indigo' }, mascota.sexoxx_mascot),
+                h('span', { class: 'chip chip-yellow' }, ageDisplay),
+                h('span', { class: 'chip chip-grey' }, mascota.razaxx_mascot || 'Mestizo'),
+            ])
+            
+        ]),
+            
+        h('div', { class: 'pet-card-content-button' }, [
+            
+            // Botón Ver Perfil
+            h('button', { 
+                class: 'pet-card-button',
+                onClick: () => console.log('Ver perfil de:', mascota.nombre_mascot)
+            }, 'Ver perfil')
+        ])
 
-  ]);
+    ]);
 };
 </script>
 
@@ -430,6 +434,8 @@ const PetCard = ({ mascota }) => {
     cursor: pointer;
     font-size: 0.875rem; /* text-sm */
     width: 12.2%;
+
+    appearance: base-select;
 }
 
 .filter-select:focus {
@@ -590,7 +596,7 @@ const PetCard = ({ mascota }) => {
 /* ----------------------------------------------------- */
 
 :deep(.pet-card-content) {
-  padding-right: 1rem;
+    padding-right: 1rem;
     padding-left: 1rem;
     padding-top: 1rem;
     display: flex;

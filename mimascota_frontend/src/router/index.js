@@ -11,6 +11,7 @@ import ResetPassword from '../views/ResetPassword.vue';
 import VerifyEmail from '../views/VerifyEmail.vue';
 import PerfilUsuario from '../views/PerfilUsuario.vue';
 import AddMascot from '@/views/AddMascot.vue';
+import TarjetaMascota from '@/components/TarjetaMascota.vue';
 
 import { isAuthenticated } from '../utils/auth'; // Importa la función de autenticación
 
@@ -78,7 +79,16 @@ const router = createRouter({
             name: 'AgregarMascota',
             component: AddMascot,
             meta: { requiresAuth: true }
-         },
+        },
+
+        {
+            // ⭐️ Esta es la ruta que necesitas
+            path: '/card/:id', 
+            name: 'TarjetaMascota',
+            component: TarjetaMascota,
+            meta: { requiresAuth: false }
+        },
+
         // Ruta comodín para manejar rutas no encontradas
         {
             path: '/:pathMatch(.*)*',

@@ -56,7 +56,7 @@ const cleanupUploadedFiles = (filePaths) => {
 // =================================================================
 // RUTAS
 // =================================================================
-// --- RUTA GET PARA LISTAR MASCOTAS PARA EL FEED PRINCIPAL (Optimizado) ---
+// --- RUTA GET PARA LISTAR GATOS PARA EL FEED PRINCIPAL (Optimizado) ---
 router.get('/feed', async (req, res) => {
     try {
         // Seleccionamos SOLO los campos esenciales para mostrar en el feed de tarjetas.
@@ -74,6 +74,43 @@ router.get('/feed', async (req, res) => {
                 mascotas m
             WHERE 
                 m.eliminado_logico = FALSE
+            AND
+                m.especi_mascot = 'Gato'
+            ORDER BY 
+                m.idxxxx_mascot DESC;
+            `;
+
+        const result = await pool.query(query);
+
+        // Envía el array de mascotas al cliente
+        res.status(200).json(result.rows);
+
+    } catch (dbError) {
+        console.error('Error al obtener la lista de mascotas para el feed:', dbError);
+        res.status(500).json({ mensaje: 'Error interno del servidor al obtener mascotas para el feed.', error: dbError.message });
+    }
+});
+
+// --- RUTA GET PARA LISTAR GATOS PARA EL FEED PRINCIPAL (Optimizado) ---
+router.get('/perros', async (req, res) => {
+    try {
+        // Seleccionamos SOLO los campos esenciales para mostrar en el feed de tarjetas.
+        const query = `
+            SELECT 
+                m.idxxxx_mascot, 
+                m.nombre_mascot, 
+                m.especi_mascot, 
+                m.sexoxx_mascot, 
+                m.edadme_mascot, 
+                m.razaxx_mascot, 
+                m.tamano_mascot, 
+                m.image1_mascot
+            FROM 
+                mascotas m
+            WHERE 
+                m.eliminado_logico = FALSE
+            AND
+                m.especi_mascot = 'Perro'
             ORDER BY 
                 m.idxxxx_mascot DESC;
             `;
@@ -120,6 +157,43 @@ router.get('/home2nd', async (req, res) => {
     } catch (dbError) {
         console.error('Error al obtener la lista de mascotas para el feed:', dbError);
         res.status(500).json({ mensaje: 'Error interno del servidor al obtener mascotas para el feed.', error: dbError.message });
+    }
+});
+
+router.get('/card/:id', async (req, res) => { 
+    // 1. Obtener el ID de la mascota desde los parámetros de la URL
+    const petId = req.params.id;
+
+    if (isNaN(petId)) {
+        return res.status(400).json({ mensaje: 'ID de mascota inválido.' });
+    }
+
+    const client = await pool.connect();
+    try {
+        // 2. Consulta SQL para obtener todos los detalles de la mascota
+        const query = `
+            SELECT 
+                idxxxx_mascot, nombre_mascot, especi_mascot, sexoxx_mascot, 
+                edadme_mascot, razaxx_mascot, pesokg_mascot, tamano_mascot, 
+                infoad_mascot, image1_mascot, image2_mascot, image3_mascot, 
+                forane_usuari_id, status_mascot
+            FROM mascotas  
+            WHERE idxxxx_mascot = $1 AND eliminado_logico = false; 
+        `;
+        const result = await client.query(query, [petId]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ mensaje: 'Mascota no encontrada.' });
+        }
+
+        // 3. Devolver los detalles de la mascota
+        res.json(result.rows[0]);
+
+    } catch (dbError) {
+        console.error('Error al consultar la BD para la mascota:', dbError); 
+        res.status(500).json({ mensaje: 'Error interno del servidor al obtener la mascota.' });
+    } finally {
+        client.release();
     }
 });
 
