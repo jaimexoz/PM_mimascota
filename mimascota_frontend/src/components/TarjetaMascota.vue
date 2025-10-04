@@ -1,5 +1,10 @@
 <template>
+    
+    <button @click="irAtras" class="back-button4">
+                &#8592; volver 
+        </button>
   <div class="profile-container">
+    
     <Navbar /> 
     <!-- Estado de Carga -->
     <div v-if="loading" class="loading-message">
@@ -7,14 +12,14 @@
       <!-- Icono de spinner simple -->
       <div class="spinner"></div>
     </div>
-
+    
     <!-- Estado de Error -->
     <div v-else-if="error" class="loading-message">
       <h2 class="error-title">Error al cargar</h2>
       <p class="error-text mt-2">{{ error }}</p>
       <p class="error-small-text">Asegúrate de que el servidor Express esté corriendo y la ruta esté configurada correctamente.</p>
     </div>
-
+    
     <!-- Contenido Principal del Perfil -->
     <div v-else-if="pet.id" class="profile-card">
       
@@ -58,9 +63,24 @@
             >
               {{ pet.status }}
             </div>
-            <div class="star-chip favorite-chip">
-              <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.636-.921 1.936 0l1.246 3.827h4.026c.969 0 1.371 1.244.588 1.81l-3.25 2.36 1.246 3.827c.3.921-.755 1.688-1.54 1.115L10 14.54l-3.25 2.36c-.784.573-1.84-.194-1.54-1.115l1.246-3.827-3.25-2.36c-.784-.566-.382-1.81.588-1.81h4.026l1.246-3.827z"></path></svg>
-            </div>
+
+            <!-- ⭐️ Botón de Favoritos (Usando clases CSS simples) ⭐️ -->
+            <button 
+                @click="toggleFavorite"
+                class="favorite-button"
+                :class="{
+                    'is-favorite': isFavorite,
+                    'not-favorite': !isFavorite
+                }"
+                aria-label="Alternar favorito"
+                title="Añadir a favoritos"
+            >
+                <!-- CAMBIO CLAVE: Aumentamos el tamaño del icono de w-8 h-8 a w-10 h-10 (más grande) -->
+                <font-awesome-icon 
+                    :icon="[isFavorite ? 'fas' : 'far', 'star']" 
+                    class="w-10 h-10" 
+                />
+            </button>
 
             
           </div>
@@ -105,183 +125,299 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { useRoute } from 'vue-router'; // Necesitas Vue Router instalado
+import { useRoute } from 'vue-router';
 import Navbar from '../components/Navbar.vue';
+import { useAuthStore } from "@/stores/authStore";
+
+// NO es necesario importar FontAwesomeIcon aquí si ya está registrado GLOBALMENTE en main.js
 
 // Inicialización de Router para obtener el ID
-const route = useRoute();
 
-// --- Estados Reactivos ---
+
+const route = useRoute();
+const authStore = useAuthStore();
+
+// Función para obtener el token JWT directamente de Pinia
+const getAuthToken = () => {
+    // Retorna el token almacenado en el estado de Pinia
+    return authStore.token; 
+};
+
+// --- ESTADO REACTIVO PARA EL FAVORITO ---
+const isFavorite = ref(false);
+
+// --- ESTADOS Y LÓGICA EXISTENTE ---
 const pet = ref({
-  id: null,
-  nombre: '',
-  especie: '',
-  sexo: '',
-  edad: 0,
-  raza: '',
-  peso: 0,
-  tamano: '',
-  personalidad: [],
-  informacionAdicional: '',
-  imagenes: [], // Rutas de las imágenes
-  status: '',
+  id: null,
+  nombre: '',
+  especie: '',
+  sexo: '',
+  edad: 0,
+  raza: '',
+  peso: 0,
+  tamano: '',
+  personalidad: [],
+  informacionAdicional: '',
+  imagenes: [],
+  status: '',
 });
 const loading = ref(true);
 const error = ref(null);
 const currentImageIndex = ref(0);
 
+// ... (Todas tus funciones y computed existentes: formatAge, currentImage, formattedPetAge, nextImage, prevImage, getTraitColor) ...
 const formatAge = (totalMonths) => {
-    if (typeof totalMonths !== 'number' || totalMonths < 0) {
-        return 'Edad no disponible';
-    }
+    if (typeof totalMonths !== 'number' || totalMonths < 0) {
+        return 'Edad no disponible';
+    }
 
-    const years = Math.floor(totalMonths / 12);
-    const months = totalMonths % 12;
-    let ageString = '';
+    const years = Math.floor(totalMonths / 12);
+    const months = totalMonths % 12;
+    let ageString = '';
 
-    if (years > 0) {
-        ageString += `${years} año${years > 1 ? 's' : ''}`;
-    }
+    if (years > 0) {
+        ageString += `${years} año${years > 1 ? 's' : ''}`;
+    }
 
-    if (months > 0) {
-        if (years > 0) {
-            ageString += ', '; // Añade coma si ya se mostraron los años
-        }
-        ageString += `${months} mes${months > 1 ? 'es' : ''}`;
-    }
+    if (months > 0) {
+        if (years > 0) {
+            ageString += ', ';
+        }
+        ageString += `${months} mes${months > 1 ? 'es' : ''}`;
+    }
 
-    if (ageString === '') {
-        return 'Menos de un mes'; // Para 0 meses
-    }
+    if (ageString === '') {
+        return 'Menos de un mes';
+    }
 
-    return ageString;
+    return ageString;
 };
 
-// --- Propiedades Calculadas (Computed) ---
-// Calcula la URL de la imagen actual
 const currentImage = computed(() => {
-    if (pet.value && pet.value.imagenes && pet.value.imagenes.length > 0) {
-        return pet.value.imagenes[currentImageIndex.value];
-    }
-    return null;
+    if (pet.value && pet.value.imagenes && pet.value.imagenes.length > 0) {
+        return pet.value.imagenes[currentImageIndex.value];
+    }
+    return null;
 });
 
-// Nueva propiedad computada para la edad formateada
 const formattedPetAge = computed(() => {
-    return pet.value ? formatAge(pet.value.edad) : 'Cargando...';
+    return pet.value ? formatAge(pet.value.edad) : 'Cargando...';
 });
 
-// Lógica de navegación del carrusel
 const nextImage = () => {
-    if (pet.value && pet.value.imagenes.length > 0) {
-        currentImageIndex.value = (currentImageIndex.value + 1) % pet.value.imagenes.length;
-    }
+    if (pet.value && pet.value.imagenes.length > 0) {
+        currentImageIndex.value = (currentImageIndex.value + 1) % pet.value.imagenes.length;
+    }
 };
 
 const prevImage = () => {
-    if (pet.value && pet.value.imagenes.length > 0) {
-        currentImageIndex.value = (currentImageIndex.value - 1 + pet.value.imagenes.length) % pet.value.imagenes.length;
-    }
+    if (pet.value && pet.value.imagenes.length > 0) {
+        currentImageIndex.value = (currentImageIndex.value - 1 + pet.value.imagenes.length) % pet.value.imagenes.length;
+    }
 };
 
-// --- Lógica de Colores de Chips ---
+const traitColorMap = {};
+
 const getTraitColor = (trait) => {
-  const hash = trait.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  // Definiciones de colores específicas para cada grupo
-  const colors = [
-    'bg-indigo-chip text-indigo-chip', 
-    'bg-yellow-chip text-yellow-chip', 
-    'bg-green-chip text-green-chip', 
-    'bg-red-chip text-red-chip'
-  ];
-  return colors[hash % colors.length];
+
+  const colorPalette = [
+    'bg-purple-chip text-purple-chip', 
+    'bg-blue-chip text-blue-chip', 
+    'bg-pink-chip text-pink-chip', 
+    'bg-gray-chip text-gray-chip',
+    'bg-yellow-chip text-yellow-chip', 
+    'bg-green-chip text-green-chip', 
+    'bg-red-chip text-red-chip',
+    
+    'bg-cyan-chip text-cyan-chip',      
+    'bg-orange-chip text-orange-chip',  
+    'bg-lime-chip text-lime-chip',      
+    
+    'bg-brown-chip text-brown-chip',    
+    'bg-indigo-chip text-indigo-chip',  
+    'bg-teal-chip text-teal-chip',      
+  ];
+    if (traitColorMap[trait]) {
+        return traitColorMap[trait];
+    }
+    
+    const hash = trait.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    
+    const randomIndex = hash % colorPalette.length;
+    const assignedColor = colorPalette[randomIndex];
+    
+    traitColorMap[trait] = assignedColor;
+    
+    return assignedColor;
 };
 
-// --- Manejo de Adopción (Placeholder) ---
 const handleAdopcion = () => {
-  // ⚠️ IMPORTANTE: No usar alert() en la aplicación final. Usar un modal o notificación.
-  // Se deja para fines de demostración simple.
-  alert(`Iniciando proceso de adopción para: ${pet.value.nombre}`); 
-  // Aquí iría la lógica para redirigir a un formulario de aplicación
+  alert(`Iniciando proceso de adopción para: ${pet.value.nombre}`); 
 };
 
-// --- Función para Cargar Datos ---
-const fetchPetData = async () => {
-  const petId = route.params.id; // Obtiene el ID de la URL (ej: /mascotas/42)
-  if (!petId) {
-    error.value = 'No se proporcionó un ID de mascota.';
-    loading.value = false;
-    return;
-  }
+// --- NUEVA FUNCIÓN: Verificar el estado de favorito al cargar ---
+const checkFavoriteStatus = async (petId) => {
+    // Solo verificar si el usuario está autenticado
+    const userToken = authStore.token;
 
-  try {
-    // ⚠️ Asegúrate que tu servidor Express esté corriendo en localhost:3000
-    const response = await fetch(`http://localhost:3000/api/mascotas/card/${petId}`);
-    
-    if (!response.ok) {
-      const errData = await response.json();
-      throw new Error(errData.mensaje || `Error HTTP: ${response.status}`);
+    if (!userToken) {
+        // Si no hay token, se asume no favorito y se termina la ejecución
+        isFavorite.value = false;
+        return;
     }
 
-    const data = await response.json();
-    
-    // Mapeo de datos para Vue (asumiendo que los datos vienen de la BD)
-    pet.value = {
-      id: data.idxxxx_mascot,
-      nombre: data.nombre_mascot,
-      especie: data.especi_mascot,
-      sexo: data.sexoxx_mascot,
-      edad: parseInt(data.edadme_mascot),
-      raza: data.razaxx_mascot,
-      peso: data.pesokg_mascot,
-      tamano: data.tamano_mascot,
-      // Los datos vienen como una cadena separada por comas, la volvemos array
-      personalidad: data.infoad_mascot ? data.infoad_mascot.split('Personalidad:')[1]?.split('.')[0]?.split(',').map(s => s.trim()).filter(s => s) : [], 
-      informacionAdicional: data.infoad_mascot,
-      // Filtra las rutas de imagen que no sean nulas
-      imagenes: [data.image1_mascot, data.image2_mascot, data.image3_mascot].filter(img => img),
-      status: data.status_mascot,
-    };
-    
-    // Ajuste de parseo para personalidad: busca el texto entre "Personalidad:" y "."
-    // El código de arriba es un ejemplo robusto de cómo se podría hacer.
+    try {
+        const response = await fetch(`http://localhost:3000/api/favorites/status/${petId}`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${userToken}`,
+            }
+        });
 
-  } catch (err) {
-    console.error('Fetch error:', err);
-    error.value = `No se pudo obtener el perfil: ${err.message}`;
-  } finally {
-    loading.value = false;
-  }
+        if (response.ok) {
+            const data = await response.json();
+            // El backend devuelve { isFavorite: true/false }
+            isFavorite.value = data.isFavorite;
+        } else if (response.status === 401) {
+            // El token falló, pero por defecto es no favorito
+            isFavorite.value = false;
+        } else {
+            console.error("Error al obtener estado de favorito:", response.statusText);
+        }
+    } catch (err) {
+        console.error("Error de red al verificar favorito:", err);
+    }
+}
+
+// --- NUEVA FUNCIÓN: Alternar favorito y llamar a Express ---
+const toggleFavorite = async () => {
+    const petId = pet.value?.id;
+    const userToken = authStore.token;
+
+    if (!petId) return;
+
+    // 1. Bloquear si no está logueado
+    if (!userToken) {
+        alert("Debes iniciar sesión para gestionar tus favoritos.");
+        return;
+    }
+
+    // 2. Optimistic UI: Cambiar el estado visual inmediatamente
+    const previousStatus = isFavorite.value;
+    isFavorite.value = !isFavorite.value; 
+
+    const url = `http://localhost:3000/api/favorites/${petId}`;
+
+    try {
+        // 3. ⭐️ ENVIAR SIEMPRE POST para alternar el estado en el backend ⭐️
+        const response = await fetch(url, {
+            method: 'POST', // Siempre POST
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${userToken}`,
+            }
+        });
+
+        if (response.ok || response.status === 201) {
+            const data = await response.json();
+            // 4. Confirmación: El backend nos devuelve el nuevo estado (data.newStatus)
+            isFavorite.value = data.newStatus;
+            console.log(data.message);
+        } else {
+            // 5. Rollback: Si falla la llamada, revertir el estado visual
+            isFavorite.value = previousStatus;
+            alert(`Error ${response.status}: No se pudo actualizar el estado de favorito.`);
+        }
+
+    } catch (error) {
+        // 5. Rollback en caso de error de red
+        isFavorite.value = previousStatus;
+        console.error("Error de red al alternar favorito:", error);
+    }
 };
+
+
+// --- Función para Cargar Datos (Modificada para Favoritos) ---
+const fetchPetData = async () => {
+  const petId = route.params.id;
+  if (!petId) {
+    error.value = 'No se proporcionó un ID de mascota.';
+    loading.value = false;
+    return;
+  }
+
+  try {
+    const response = await fetch(`http://localhost:3000/api/mascotas/card/${petId}`);
+    
+    if (!response.ok) {
+      const errData = await response.json();
+      throw new Error(errData.mensaje || `Error HTTP: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    pet.value = {
+      id: data.idxxxx_mascot,
+      nombre: data.nombre_mascot,
+      especie: data.especi_mascot,
+      sexo: data.sexoxx_mascot,
+      edad: parseInt(data.edadme_mascot),
+      raza: data.razaxx_mascot,
+      peso: data.pesokg_mascot,
+      tamano: data.tamano_mascot,
+      personalidad: data.personalidad_array, 
+      informacionAdicional: data.infoad_mascot,
+      imagenes: [data.image1_mascot, data.image2_mascot, data.image3_mascot].filter(img => img),
+      status: data.status_mascot,
+    };
+    
+    // ⚠️ Llama a la función para verificar el estado de favorito DESPUÉS de obtener el ID de la mascota
+    await checkFavoriteStatus(pet.value.id); 
+
+  } catch (err) {
+    console.error('Fetch error:', err);
+    error.value = `No se pudo obtener el perfil: ${err.message}`;
+  } finally {
+    loading.value = false;
+  }
+};
+function irAtras() {
+    window.history.back();
+}
 
 // --- Ciclo de Vida ---
 onMounted(() => {
-  fetchPetData();
+  fetchPetData();
 });
 </script>
 
 <style scoped>
-/* ======================================= */
-/* === Paleta de Colores y Variables === */
-/* ======================================= */
 
-:root {
-    --primary-orange: #FF9933;
-    --soft-peach: #FFE8D9;
-    --success-green: #10B981;
-    --gray-50: #f9fafb;
-    --gray-900: #1f2937;
-    --gray-600: #4b5563;
-    --gray-700: #374151;
-    --gray-800: #1f2937;
-    --indigo-chip-bg: #e0e7ff;
-    --indigo-chip-text: #4f46e5;
-    --yellow-chip-bg: #fffbe6;
-    --yellow-chip-text: #ca8a04;
-    --green-chip-bg: #d1fae5;
-    --green-chip-text: #059669;
-    --red-chip-bg: #fee2e2;
-    --red-chip-text: #dc2626;
+.back-button4 {
+    width: 125px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    color: #6c757d;
+    box-shadow: 0px 6px 10px -1px #757373; 
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    display: flex;
+    position: relative;
+    transition: all 0.3s ease;
+    gap: 0.5rem;
+    margin-left: 30px;
+    margin-top: 110px;
+    z-index: 3;
+}
+
+
+
+.back-button4:hover {
+  background: #e9ecef;
+  color: #495057;
 }
 
 /* ======================================= */
@@ -294,7 +430,6 @@ onMounted(() => {
     display: flex;
     flex-direction: column;
     align-items: center;
-    background-color: var(--gray-50);
     font-family: 'Inter', sans-serif;
     box-sizing: border-box;
 }
@@ -319,8 +454,7 @@ onMounted(() => {
     width: 100%;
     position: relative;
     overflow: hidden;
-    border: 1px solid #f3f4f6;
-    margin-top: 100px;
+    border: 1px solid #d8d8d8;
 }
 
 .peach-background {
@@ -329,7 +463,7 @@ onMounted(() => {
     bottom: 0;
     right: 0;
     width: 50%;
-    background-color: rgb(255, 250, 246);
+    background-color: rgb(255, 255, 255);
     display: none;
 }
 
@@ -358,6 +492,12 @@ onMounted(() => {
     display: flex;
     align-items: center;
     justify-content: center;
+    background-image: linear-gradient(
+                135deg, 
+                #404040 0%, /* Rojo oscuro (inicio) */
+                #a8a8a8 50%, /* Naranja intermedio */
+                #eeeeee 100% /* Dorado (final) */
+            );
 }
 
 .info-column {
@@ -378,8 +518,9 @@ onMounted(() => {
     font-size: 2.25rem; /* text-4xl */
     font-weight: 800; /* font-extrabold */
     color: var(--gray-900);
-    margin-bottom: 1.5rem; /* mb-6 */
+    margin-bottom: 0.5rem; /* mb-6 */
     margin-top: 1rem; /* mt-4 */
+    color: #000000;
 }
 
 @media (min-width: 768px) {
@@ -389,12 +530,13 @@ onMounted(() => {
 }
 
 .section-title {
-    font-size: 1.25rem; /* text-xl */
+    font-size: 1.55rem; /* text-xl */
     font-weight: 700; /* font-bold */
     color: var(--gray-800);
     margin-bottom: 0.5rem; /* mb-2 */
     border-bottom: 2px solid rgba(var(--primary-orange), 0.5);
     display: inline-block;
+    color: #000000;
 }
 
 .data-list {
@@ -404,15 +546,17 @@ onMounted(() => {
     font-size: 1.125rem; /* text-lg */
     color: var(--gray-700);
     line-height: 1.5;
+    color: #675e5e;
 }
 
 .data-label {
-    font-weight: 600; /* font-semibold */
-    color: var(--gray-900);
+    font-weight: 800; /* font-semibold */
+    color: #000000;
+    
 }
 
 .info-text {
-    color: var(--gray-600);
+  color: #675e5e;
     margin-bottom: 2rem; /* mb-8 */
     line-height: 1.625; /* leading-relaxed */
     text-align: justify;
@@ -559,21 +703,111 @@ onMounted(() => {
 }
 
 /* Clases de colores dinámicos para personalidad */
-.bg-indigo-chip { background-color: var(--indigo-chip-bg); }
-.text-indigo-chip { color: var(--indigo-chip-text); }
-.bg-yellow-chip { background-color: var(--yellow-chip-bg); }
-.text-yellow-chip { color: var(--yellow-chip-text); }
-.bg-green-chip { background-color: var(--green-chip-bg); }
-.text-green-chip { color: var(--green-chip-text); }
-.bg-red-chip { background-color: var(--red-chip-bg); }
-.text-red-chip { color: var(--red-chip-text); }
+.bg-blue-chip {
+  background-color: rgb(199, 196, 255); 
+  }
+.text-blue-chip{
+  color: #0800a6
+  }
+
+.bg-pink-chip {
+  background-color: rgb(255, 231, 242); 
+  }
+.text-pink-chip{
+  color: #dd00b0
+  }
+
+.bg-purple-chip {
+  background-color: rgb(254, 231, 255); 
+  }
+.text-purple-chip{
+  color: #ce00c7
+  }
+
+.bg-gray-chip {
+  background-color: rgb(235, 235, 235); 
+  }
+.text-gray-chip{
+  color: #7e7e7e
+  }
+
+
+.bg-yellow-chip { 
+  background-color: #fffaca; 
+}
+
+.text-yellow-chip {
+  color: #ca8a04;
+}
+.bg-green-chip { 
+  background-color: #d1fae5; 
+}
+.text-green-chip { 
+  color: #059669;
+}
+
+.bg-red-chip { 
+  background-color: #ffbdbd;
+}
+.text-red-chip { 
+  color: rgb(155, 0, 0);
+}
+
+
+.bg-cyan-chip {
+    background-color: #8ff2ff; /* Turquesa brillante */
+    color: #212529; /* Texto oscuro para contraste */
+}
+.text-cyan-chip {
+    color: #006e7c;
+}
+
+.bg-orange-chip {
+    background-color: #ffd597; /* Naranja estándar */
+    color: #212529; 
+}
+.text-orange-chip {
+    color: #FF9800;
+}
+
+.bg-lime-chip {
+    background-color: #e8f28f; /* Verde Lima */
+    color: #212529; 
+}
+.text-lime-chip {
+    color: #CDDC39;
+}
+
+.bg-brown-chip {
+    background-color: #b19d95; /* Marrón */
+    color: #FFFFFF; /* Texto blanco para contraste */
+}
+.text-brown-chip {
+    color: #4a352d;
+}
+
+.bg-indigo-chip {
+    background-color: hsl(231, 100%, 84%); /* Índigo */
+    color: #FFFFFF;
+}
+.text-indigo-chip {
+    color: #3F51B5;
+}
+
+.bg-teal-chip {
+    background-color: #bdfff8; /* Teal */
+    color: #FFFFFF;
+}
+.text-teal-chip {
+    color: #009688;
+}
 
 
 /* Botón de Adopción */
 .adopt-button {
     width: 100%;
     padding: 0.75rem 2rem;
-    background-color: #f59e0b;
+    background-color: #ff9933;
     color: white;
     font-size: 1.25rem;
     font-weight: 700;
@@ -587,7 +821,7 @@ onMounted(() => {
 }
 
 .adopt-button:hover {
-    background-color: #E0852A; /* Color más oscuro para hover */
+    background-color: #f47004; /* Color más oscuro para hover */
 }
 
 @media (min-width: 768px) {
@@ -638,6 +872,8 @@ onMounted(() => {
     color: var(--gray-600);
 }
 
+
+
 @keyframes spin {
     from {
         transform: rotate(0deg);
@@ -645,6 +881,70 @@ onMounted(() => {
     to {
         transform: rotate(360deg);
     }
+}
+
+
+
+/* Estilos base del botón */
+.favorite-button {
+    /* CAMBIO CLAVE: Aumentamos el tamaño de la fuente para asegurar que el icono crezca */
+    font-size: 2.0rem; /* Esto hace que el icono sea significativamente más grande */
+    
+    padding: 0.25rem; 
+    border-radius: 0; 
+    
+    background-color: transparent !important; 
+    box-shadow: none !important; 
+    
+    transition: all 0.3s ease-in-out; 
+    transform: scale(1);
+    outline: none; 
+    cursor: pointer; 
+    border: none;
+}
+
+/* Estado de enfoque (focus-ring) - Mantenemos un anillo sutil alrededor de la estrella */
+.favorite-button:focus {
+    /* El box-shadow ahora actúa como un halo de enfoque alrededor del icono */
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0), 0 0 0 2px rgba(100, 116, 139, 0.4);
+}
+
+/* ------------------------------------ */
+/* ESTADO: NO FAVORITO (Sutil Gris/Rojo) */
+/* ------------------------------------ */
+.not-favorite {
+    /* **CAMBIO 2: Solo color del icono** */
+    color: #6b7280; /* text-gray-500 */
+}
+
+.not-favorite:hover {
+    /* **CAMBIO 3: Efecto de hover solo en el color** */
+    color: #efb644; /* hover:text-red-500 */
+    transform: scale(1.15); /* Efecto de escala más pronunciado */
+}
+.not-favorite:focus {
+    /* Mantenemos el ring, pero es más sutil */
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.5); 
+}
+
+
+/* ------------------------------------ */
+/* ESTADO: FAVORITO (Dorado/Medalla) */
+/* ------------------------------------ */
+.is-favorite {
+    /* **CAMBIO 4: Color dorado para el icono** */
+    color: #f59e0b; /* bg-yellow-500 */
+    /* La sombra se simula con text-shadow para dar un ligero relieve al icono */
+    text-shadow: 0 0 4px rgba(0, 0, 0, 0.2); 
+}
+
+.is-favorite:hover {
+    color: #fbbf24; /* hover:bg-yellow-400 */
+    transform: scale(1.15); 
+}
+.is-favorite:focus {
+    /* Ring de enfoque para el estado favorito (amarillo) */
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.5); 
 }
 
 </style>

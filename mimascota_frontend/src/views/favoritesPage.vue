@@ -125,7 +125,7 @@
     isLoading.value = true;
     try {
         // NOTA: Asegúrate de que tu backend tenga un endpoint que devuelva todas las mascotas
-        const response = await fetch('http://localhost:3000/api/mascotas/feed', { 
+        const response = await fetch('http://localhost:3000/api/mascotas/perros', { 
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -650,7 +650,7 @@
   
   :deep(.chip-grey) {
     background-color: #c8c7c7;
-  color: #565656; 
+    color: #565656; 
   }
   
   :deep(.pet-card-content-button){

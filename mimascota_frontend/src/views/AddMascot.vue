@@ -2,9 +2,9 @@
     <div class="AddMascot">
         <Navbar />
     <div class="contenedor-principal"> 
-        <button @click="irAtras" class="back-button">
-                &#8592; Regresar 
-            </button>
+        <button @click="irAtras" class="back-button3">
+                &#8592; volver 
+        </button>
         <div class="form-add">
             
             <div class="header-content">
@@ -77,9 +77,9 @@
                             <label>Tamaño:</label>
                             <select v-model="mascota.tamano">
                                 <option disabled value="">Selecciona</option>
-                                <option value="pequeno">Pequeño</option>
-                                <option value="mediano">Mediano</option>
-                                <option value="grande">Grande</option>
+                                <option value="Pequeño">Pequeño</option>
+                                <option value="Mediano">Mediano</option>
+                                <option value="Grande">Grande</option>
                             </select> 
                         </div> 
                     </div>
@@ -436,28 +436,31 @@ function irAtras() {
 </script>
 
 <style>
-.back-button {
+.back-button3 {
     width: 125px;
-    background: rgb(197, 197, 197);
-    border-radius: 25px;
-    border: none;
-    color: #ffffff;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    color: #6c757d;
     box-shadow: 0px 6px 10px -1px #757373; 
-    font-size: 1.1em;
+    font-size: 0.9rem;
     font-weight: 700;
     cursor: pointer;
-    padding: 10px;
+    padding: 0.5rem 1rem;
     display: flex;
-    align-items: left;
-    position: absolute;
+    align-items: center;
+    transition: all 0.3s ease;
+    gap: 0.5rem;
     margin-left: 30px;
-    margin-top: 30px;
+    margin-top: 10px;
+    position: absolute;
 }
 
-/* Estilo al pasar el mouse */
+
+
 .back-button:hover {
-    border: none;
-    background-color: #8b8b8b;
+  background: #e9ecef;
+  color: #495057;
 }
 
 .AddMascot{

@@ -172,13 +172,41 @@ router.get('/card/:id', async (req, res) => {
     try {
         // 2. Consulta SQL para obtener todos los detalles de la mascota
         const query = `
-            SELECT 
-                idxxxx_mascot, nombre_mascot, especi_mascot, sexoxx_mascot, 
-                edadme_mascot, razaxx_mascot, pesokg_mascot, tamano_mascot, 
-                infoad_mascot, image1_mascot, image2_mascot, image3_mascot, 
-                forane_usuari_id, status_mascot
-            FROM mascotas  
-            WHERE idxxxx_mascot = $1 AND eliminado_logico = false; 
+            SELECT
+                m.idxxxx_mascot, 
+                m.nombre_mascot, 
+                m.especi_mascot, 
+                m.sexoxx_mascot, 
+                m.edadme_mascot, 
+                m.razaxx_mascot, 
+                m.pesokg_mascot, 
+                m.tamano_mascot, 
+                m.infoad_mascot, 
+                m.image1_mascot, 
+                m.image2_mascot, 
+                m.image3_mascot, 
+                m.forane_usuari_id, 
+                m.status_mascot,
+                -- 👇 Columna que devuelve las características como un array JSON
+                COALESCE(
+                    json_agg(c.nombre_caract) FILTER (WHERE c.nombre_caract IS NOT NULL),
+                    '[]'
+                ) AS personalidad_array
+            FROM
+                mascotas m
+            LEFT JOIN
+                mascota_caracteristicas mc ON m.idxxxx_mascot = mc.forane_mascot_id
+            LEFT JOIN
+                caracteristicas c ON mc.forane_caract_id = c.idxxxx_caract -- Asumiendo 'idxxxx_caract' es la PK de 'caracteristicas'
+            WHERE
+                m.idxxxx_mascot = $1 
+                AND m.eliminado_logico = FALSE
+            GROUP BY
+                m.idxxxx_mascot, m.nombre_mascot, m.especi_mascot, 
+                m.sexoxx_mascot, m.edadme_mascot, m.razaxx_mascot, 
+                m.pesokg_mascot, m.tamano_mascot, m.infoad_mascot, 
+                m.image1_mascot, m.image2_mascot, m.image3_mascot, 
+                m.forane_usuari_id, m.status_mascot
         `;
         const result = await client.query(query, [petId]);
 

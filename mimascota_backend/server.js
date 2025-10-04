@@ -10,6 +10,7 @@ const authRoutes = require('./routes/authRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 // ⭐️ ¡NUEVO! Importar las rutas de mascota
 const mascotaRoutes = require('./routes/mascotaRoutes'); 
+const favoritesRoutes = require('./routes/favoritesRoutes');
 
 const app = express();
 
@@ -33,6 +34,8 @@ app.use('/api/upload', uploadRoutes);
 // ⭐️ ¡NUEVO! Configurar las rutas de mascota con el prefijo '/api/mascotas'
 app.use('/api/mascotas', mascotaRoutes); 
 
+app.use('/api/favorites', favoritesRoutes); 
+
 // Ruta de prueba simple (opcional)
 app.get('/', (req, res) => {
     res.send('API de Mi Mascota funcionando!');
@@ -46,6 +49,10 @@ app.use((err, req, res, next) => {
 
 // Configuración del puerto
 const PORT = process.env.PORT || 3000;
+
+app.use((req, res) => {
+    res.status(404).send('Ruta no encontrada');
+});
 
 // Iniciar el servidor
 app.listen(PORT, () => {

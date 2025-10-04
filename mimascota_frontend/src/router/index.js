@@ -12,18 +12,22 @@ import VerifyEmail from '../views/VerifyEmail.vue';
 import PerfilUsuario from '../views/PerfilUsuario.vue';
 import AddMascot from '@/views/AddMascot.vue';
 import TarjetaMascota from '@/components/TarjetaMascota.vue';
+import favoritesPage from '@/views/favoritesPage.vue';
 
 import { isAuthenticated } from '../utils/auth'; // Importa la función de autenticación
+
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
+
         {
             path: '/',
             name: 'auth',
             component: AuthPage, // AuthPage está en la carpeta 'views'
             meta: { requiresAuth: false } // No requiere autenticación para acceder
         },
+        
         {
             path: '/home',
             name: 'home',
@@ -87,6 +91,13 @@ const router = createRouter({
             name: 'TarjetaMascota',
             component: TarjetaMascota,
             meta: { requiresAuth: false }
+        },
+        {
+            // ⭐️ Esta es la ruta que necesitas
+            path: '/favoritos', 
+            name: 'Favoritos',
+            component: favoritesPage,
+            meta: { requiresAuth: true }
         },
 
         // Ruta comodín para manejar rutas no encontradas

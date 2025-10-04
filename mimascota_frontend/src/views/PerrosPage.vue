@@ -277,7 +277,7 @@ function formatAge(months) {
   if (remainingMonths === 0) {
       return `${years} años`;
   }
-  return `${years} años, ${remainingMonths} meses`;
+  return `${years} a ${remainingMonths} m`;
 }
 
 /**
@@ -313,8 +313,8 @@ const PetCard = ({ mascota }) => {
           
           // Detalles (Chips)
           h('div', { class: 'pet-card-chips' }, [
-              h('span', { class: 'chip chip-indigo' }, mascota.sexoxx_mascot),
-              h('span', { class: 'chip chip-yellow' }, ageDisplay),
+              h('span', { class: 'chip chip-grey' }, mascota.sexoxx_mascot),
+              h('span', { class: 'chip chip-grey' }, ageDisplay),
               h('span', { class: 'chip chip-grey' }, mascota.razaxx_mascot || 'Mestizo'),
           ])
           
@@ -613,7 +613,7 @@ aplicarse a las clases internas de PetCard.
 
 :deep(.pet-card-name) {
   font-size: 1.5rem; /* text-2xl */
-  font-weight: 700; /* font-bold */
+  font-weight: 800; /* font-bold */
   color: #1f2937; /* gray-800 */
   margin-bottom: 0.25rem;
 }
@@ -649,8 +649,8 @@ aplicarse a las clases internas de PetCard.
 }
 
 :deep(.chip-grey) {
-  background-color: #f4f4f4;
-  color: #6b7280; 
+  background-color: #c8c7c7;
+  color: #565656; 
 }
 
 :deep(.pet-card-content-button){
@@ -682,7 +682,7 @@ aplicarse a las clases internas de PetCard.
   transition: background-color 300ms ease;
 }
 :deep(.pet-card-button:hover) {
-  background-color: #E0852A; 
+  background-color: #f47004; 
 }
 
 

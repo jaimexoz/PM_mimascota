@@ -1,5 +1,9 @@
 {
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^7.1.0",
+    "@fortawesome/free-regular-svg-icons": "^7.1.0",
+    "@fortawesome/free-solid-svg-icons": "^7.1.0",
+    "@fortawesome/vue-fontawesome": "^3.1.2",
     "cloudinary": "^2.7.0",
     "express": "^5.1.0",
     "lucide-vue-next": "^0.544.0",

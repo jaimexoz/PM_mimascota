@@ -4,6 +4,7 @@
     <div class="perfil-fondo"> 
     </div>
     <div class="perfil-contenido">
+      
       <div class="perfil-card">
         <div class="perfil-foto-section">
           <div class="perfil-foto-wrapper">
@@ -60,7 +61,7 @@
 
         <div class="perfil-col solicitud">
           <div class="fun-top">
-            <h2>Funcionalidades</h2>
+            <h2>Adopciones y solicitudes</h2>
           </div>
           
             <div class="func-grid">
@@ -333,6 +334,8 @@ const changePassword = async () => {
     changingPassword.value = false;
   }
 }
+
+
 </script>
 
 <style scoped>
@@ -370,8 +373,8 @@ const changePassword = async () => {
 }
 
 .perfil-card {
-  background: #fffbf8;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  background: #ffffff4d;
+  box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.332);
   border-radius: 24px;
   padding: 1rem;
   margin: 20px;
@@ -395,6 +398,7 @@ const changePassword = async () => {
   width: 100%;
   gap: 20px; /* Espacio entre el Recuadro 2 y el Recuadro 3 */
   flex-grow: 1;
+  
 }
 
 .perfil-foto-section {
@@ -422,7 +426,7 @@ const changePassword = async () => {
 }
 
 .subir-foto-btn {
-  background: #fff;
+  background: #f6f6f6;
   border: white;
   box-shadow: 0px 6px 10px -1px #d0cfcf;
   border-radius: 24px;
@@ -432,12 +436,12 @@ const changePassword = async () => {
   color: #000000;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  box-shadow: 0px 2px 5px hsl(0, 0%, 50%);
   margin-top: 0.5rem;
   text-align: center;
 }
 .subir-foto-btn:hover {
-  background: #f8f8f8;
+  background: #d1d1d1;
   border-color: #333;
 }
 
@@ -539,18 +543,21 @@ const changePassword = async () => {
   flex: 1;
   width: 90%;
   padding: 0.5rem 0.8rem;
+  margin-left: -1px;
   border: white;
   box-shadow: 0px 6px 10px -1px #d0cfcf;
   border-radius: 8px;
   font-size: 1rem;
   color: #333;
   outline: none;
+  
 }
 
 .info-item-21 input {
   flex: 1;
   width: 100%;
   padding: 0.5rem 0.8rem;
+  margin-left: -1px;
   border: white;
   box-shadow: 0px 6px 10px -1px #d0cfcf;
   border-radius: 8px;
@@ -584,22 +591,22 @@ const changePassword = async () => {
 }
 
 .funcionalidades {
-  background: #fffbf8;
+  background: #ffffffa0;
   margin-top: -40px;
   margin-bottom: 1px;
   align-items: flex-start;
-  box-shadow: 0 8px 32px rgba(77, 68, 68, 0.12);
   border-radius: 24px;
   min-width: 500px;
   max-width: 600px;
   width: 100%;
   backdrop-filter: blur(8px);
+  box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.332);
 }
 
 .fun-top{
   width: auto;
   justify-items: center;
-  height: 40px;
+  height: 49px;
   margin-bottom: 20px;
   border-bottom: 2px solid #ebebeb; 
   box-shadow: 0 2px 0px rgba(77, 68, 68, 0.12);
@@ -608,14 +615,14 @@ const changePassword = async () => {
 
 .solicitud{
   align-items: flex-start;
-  background: #fffbf8;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  background: #ffffffb1;
   border-radius: 24px;
   margin-top: 1px;
   min-width: 500px;
   max-width: 600px;
   width: 100%;
   backdrop-filter: blur(8px);
+  box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.332);
 
 }
 .func-grid {
@@ -634,10 +641,10 @@ const changePassword = async () => {
 }
 .func-btn {
   padding: 0.7rem 1.2rem;
-  background: #fff;
+  background: #f6f6f6;
   border: white;
   box-shadow: 0px 6px 10px -1px #d0cfcf;
-  border-radius: 12px;
+  border-radius: 25px;
   font-weight: 600;
   color: #000000;
   font-size: 18px;
@@ -645,10 +652,11 @@ const changePassword = async () => {
   transition: all 0.2s;
   width: 70%;
   text-align: center;
+  box-shadow: 0px 2px 5px hsl(0, 0%, 50%);
 }
 .func-btn:hover {
-  background: #f8f8f8;
-  border-color: #333;
+  background: #d1d1d1;
+  border-color: #d2d2d2;
 }
 
 .footer-bar {

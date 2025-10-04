@@ -103,7 +103,7 @@
                     </li>
                 </ol>
 
-                <a href="/adopcion" class="adopcion-boton">
+                <a href="/auth" class="adopcion-boton">
                     Comienza ahora 
                     <svg class="boton-icono" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                 </a>
@@ -255,8 +255,8 @@ const PetCard = ({ mascota }) => {
             
             // Detalles (Chips)
             h('div', { class: 'pet-card-chips' }, [
-                h('span', { class: 'chip chip-indigo' }, mascota.sexoxx_mascot),
-                h('span', { class: 'chip chip-yellow ' }, ageDisplay),
+                h('span', { class: 'chip chip-grey' }, mascota.sexoxx_mascot),
+                h('span', { class: 'chip chip-grey' }, ageDisplay),
                 h('span', { class: 'chip chip-grey ' }, mascota.razaxx_mascot || 'Mestizo'),
             ])
             
@@ -286,7 +286,13 @@ const PetCard = ({ mascota }) => {
 }
 
 .page-header {
-  background: #fef6f2;
+
+  background-image: linear-gradient(
+                135deg, 
+                #ffe3be 0%, /* Naranja intermedio */
+                #ffecd4 24%,
+                #ffffff 100% /* Dorado (final) */
+            );
   padding: 2rem 0;
   border-bottom: 1px solid #e9ecef;
   margin-bottom: 2rem;
@@ -666,7 +672,7 @@ const PetCard = ({ mascota }) => {
 
 :deep(.pet-card-name) {
     font-size: 1.5rem; /* text-2xl */
-    font-weight: 700; /* font-bold */
+    font-weight: 800; /* font-bold */
     color: #1f2937; /* gray-800 */
     margin-bottom: 0.25rem;
 }
@@ -702,8 +708,8 @@ const PetCard = ({ mascota }) => {
 }
 
 :deep(.chip-grey) {
-    background-color: #f4f4f4;
-    color: #6b7280; 
+    background-color: #c8c7c7;
+    color: #565656; 
 }
 
 :deep(.pet-card-content-button){
@@ -735,7 +741,7 @@ const PetCard = ({ mascota }) => {
     transition: background-color 300ms ease;
 }
 :deep(.pet-card-button:hover) {
-    background-color: #E0852A; 
+    background-color: #f47004; 
 }
 
 
@@ -785,10 +791,10 @@ const PetCard = ({ mascota }) => {
     width: 70%;
     margin-left: auto;
     margin-right: auto;
-    
     border-radius: 0.75rem; /* rounded-xl */
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); /* shadow-2xl */
+    box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.332);
     overflow: hidden;
+    
 }
 
 /* Solo en pantallas grandes (lg) */
@@ -824,9 +830,8 @@ const PetCard = ({ mascota }) => {
  */
 
 .adopcion-pasos-container {
-    /* Clases equivalentes a: p-8 sm:p-12 lg:p-16 bg-orange-500 text-white flex flex-col justify-center */
-    background-color: #FF9933; /* bg-orange-500 */
-    color: white;
+    
+    color: rgb(0, 0, 0);
     padding: 2rem; /* p-8 */
     display: flex;
     flex-direction: column;
@@ -885,7 +890,7 @@ const PetCard = ({ mascota }) => {
 
 .paso-numero {
     /* Clases equivalentes a: mr-3 font-extrabold text-orange-900 text-3xl */
-    color: #ffffff; /* text-orange-900 */
+    color: #000000; /* text-orange-900 */
     font-weight: 800; /* font-extrabold */
     font-size: 1.3rem; /* text-3xl */
     margin-right: 0.75rem; /* mr-3 */
@@ -913,16 +918,16 @@ const PetCard = ({ mascota }) => {
     padding: 0.75rem 1.5rem; /* px-6 py-3 */
     font-size: 1.125rem; /* text-lg */
     font-weight: 700; /* font-bold */
-    color: #FF9933; /* text-orange-600 */
-    background-color: white; /* bg-white */
-    border-radius: 9999px; /* rounded-full */
+    color: #ffffff; /* text-orange-600 */
+    background-color: #FF9933; /* bg-white */
+    border-radius: 25px; /* rounded-full */
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
     transition: background-color 0.3s; /* transition duration-300 */
     text-decoration: none; /* Asegura que no tenga subrayado de enlace */
 }
 
 .adopcion-boton:hover {
-    background-color: #f3f4f6; /* hover:bg-gray-100 */
+    background-color: #f47004; /* hover:bg-gray-100 */
 }
 
 .boton-icono {

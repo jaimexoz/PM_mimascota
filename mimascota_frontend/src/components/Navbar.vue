@@ -90,6 +90,21 @@
               </svg>
               Ver Perfil
             </router-link>
+
+            <router-link 
+              to="/favoritos" 
+              class="dropdown-item"
+              @click="closeDropdown"
+            >
+              
+                <!-- CAMBIO CLAVE: Aumentamos el tamaño del icono de w-8 h-8 a w-10 h-10 (más grande) -->
+                <font-awesome-icon 
+                  :icon="['fas', 'star']" 
+                  class="w-10 h-10" 
+                />
+              
+              Favoritos
+            </router-link>
             <!-- Opción solo para Admin -->
             <router-link 
               v-if="isAdmin" 
@@ -492,5 +507,9 @@ onUnmounted(() => {
   .dropdown-menu {
     right: -1rem;
   }
+}
+
+.dropdown-item font-awesome-icon {
+  font-size: 2.5rem;
 }
 </style> 
