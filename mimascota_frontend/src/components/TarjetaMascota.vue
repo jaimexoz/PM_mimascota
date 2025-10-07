@@ -114,7 +114,7 @@
           </p>
 
           <!-- 6. Botón de Acción -->
-          <button @click="handleAdopcion" class="adopt-button">
+          <button @click="navigateToAdoptionForm" class="adopt-button">
             ADOPTAR
           </button>
         </div>
@@ -126,6 +126,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { useRouter } from 'vue-router'; 
 import Navbar from '../components/Navbar.vue';
 import { useAuthStore } from "@/stores/authStore";
 
@@ -135,16 +136,27 @@ import { useAuthStore } from "@/stores/authStore";
 
 
 const route = useRoute();
+const router = useRouter();
 const authStore = useAuthStore();
 
-// Función para obtener el token JWT directamente de Pinia
-const getAuthToken = () => {
-    // Retorna el token almacenado en el estado de Pinia
-    return authStore.token; 
+const navigateToAdoptionForm = () => {
+    // 1. Obtener el ID de la mascota actualmente cargada
+    const mascotId = pet.value.id; 
+
+    if (!mascotId) {
+        console.error("ID de mascota no disponible para iniciar adopción.");
+        return;
+    }
+
+    // 2. Usamos 'router.push' para navegar a la ruta del formulario.
+    // Importante: Verifica que tu ruta en Vue Router esté definida como '/adoptform/:mascotId'
+    router.push(`/adoptform/${mascotId}`); 
 };
 
 // --- ESTADO REACTIVO PARA EL FAVORITO ---
 const isFavorite = ref(false);
+
+
 
 // --- ESTADOS Y LÓGICA EXISTENTE ---
 const pet = ref({
@@ -251,8 +263,9 @@ const getTraitColor = (trait) => {
     return assignedColor;
 };
 
-const handleAdopcion = () => {
-  alert(`Iniciando proceso de adopción para: ${pet.value.nombre}`); 
+const handleAdopcion = async (petId) => {
+    alert(`Iniciando proceso de adopción para: ${pet.value.nombre}`);
+
 };
 
 // --- NUEVA FUNCIÓN: Verificar el estado de favorito al cargar ---

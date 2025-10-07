@@ -7,10 +7,10 @@
     <div class="content-wrapper">
         <h1 class="main-title">
             <PawPrint class="paw-icon-main" />
-            ¡Adopta con Amor!
+            Los Favoritos que esperan un Hogar
             <PawPrint class="paw-icon-main" />
         </h1>
-        <p class="subtitle">Encuentra a tu nuevo mejor amigo entre miles de mascotas.</p>
+        
   
         <!-- BARRA DE FILTROS -->
         <div class="filter-bar"> 
@@ -87,6 +87,10 @@
   import { ref, onMounted, computed, reactive, h } from 'vue';
   import { PawPrint, Search, Loader } from 'lucide-vue-next';
   import { useRouter } from 'vue-router'; 
+
+  import { useAuthStore } from "@/stores/authStore";
+
+const authStore = useAuthStore();
   
   // Inicialización
   const router = useRouter(); 
@@ -123,35 +127,49 @@
   */
   async function getMascotas() {
     isLoading.value = true;
+    const userToken = authStore.token;
+    
+    if (!userToken) {
+        // Manejar el caso de que no haya token (usuario no autenticado)
+        console.error("Usuario no autenticado. No se puede cargar la lista de favoritos.");
+        // Opcional: Redirigir al login
+        // router.push('/login'); 
+        isLoading.value = false;
+        return;
+    }
+
     try {
-        // NOTA: Asegúrate de que tu backend tenga un endpoint que devuelva todas las mascotas
-        const response = await fetch('http://localhost:3000/api/mascotas/perros', { 
-            method: 'GET',
+        // ✅ CORRECCIÓN: Llama a la ruta que devuelve la lista de favoritos del usuario.
+        // No necesitas pasar un ID de mascota.
+        const response = await fetch(`http://localhost:3000/api/favorites/favorites`, { 
             headers: {
-                'Content-Type': 'application/json'
-            },
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${userToken}`,
+            }
         });
-  
+
         if (!response.ok) {
-            throw new Error('Error al cargar las mascotas: ' + response.statusText);
+            throw new Error('Error al cargar los favoritos: ' + response.statusText);
         }
-  
+
         const data = await response.json();
         
+        // Asignar los datos recibidos a 'mascotas.value'
         if (data.length === 0) {
-            mascotas.value = createMockMascotas(8); // Usar mocks si no hay datos
+            // Mostrar estado vacío o usar mocks
+            mascotas.value = []; 
         } else {
             mascotas.value = data;
         }
         
     } catch (error) {
-        console.error("Error al obtener las mascotas:", error);
-        // Fallback a datos simulados
-        mascotas.value = createMockMascotas(8); 
+        console.error("Error al obtener las mascotas favoritas:", error);
+        // Fallback a datos simulados o mostrar error
+        mascotas.value = createMockMascotas(0); // Pasa 0 para mostrar "no results"
     } finally {
         isLoading.value = false;
     }
-  }
+}
   
   /**
   * Función de filtrado y ordenamiento principal.
@@ -377,7 +395,7 @@
     font-weight: 800; /* font-extrabold */
     color: #111827; /* gray-900 */
     text-align: center;
-    margin-bottom: 1rem;
+    margin-bottom: 2rem;
   }
   
   .paw-icon-main {

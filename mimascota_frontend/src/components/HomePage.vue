@@ -11,7 +11,7 @@
           <h1 class="page-title-1st">ENCUENTRA A <br>TU NUEVO</h1>
           <h1 class="page-title-2nd">MEJOR AMIGO</h1>
           <p class="page-title-3rd">Adopta una mascota</p>
-          <a href="#loq"  class="explore-button">Explorar</a>
+          <a href="#loq" @click.prevent="scrollToSection('#loq')" class="explore-button">Explorar</a>
           
       </div>
         
@@ -136,6 +136,22 @@ const isLoading = ref(true);
 * Función para obtener las 4 mascotas más recientes desde el backend.
 * Nota: El endpoint ahora es '/home2nd' que ya aplica el LIMIT 4.
 */
+const scrollToSection = (selector) => {
+    // 1. Busca el elemento en el DOM
+    const targetElement = document.querySelector(selector);
+    
+    // 2. Si el elemento existe, aplica el desplazamiento suave
+    if (targetElement) {
+        targetElement.scrollIntoView({
+            behavior: 'smooth', // Esto hace la animación lenta
+            block: 'start'      // Asegura que el elemento quede en la parte superior de la vista
+        });
+        
+        // Opcional: Actualiza la URL para mostrar el ancla sin recargar
+        // window.history.pushState(null, null, selector);
+    }
+};
+
 async function getMascotasRecientes() {
     isLoading.value = true;
     try {
@@ -274,6 +290,7 @@ const PetCard = ({ mascota }) => {
 </script>
 
 <style scoped>
+
 .home-page {
   min-height: 100vh;
   background-color: #ffffff;
@@ -293,7 +310,7 @@ const PetCard = ({ mascota }) => {
                 #ffecd4 24%,
                 #ffffff 100% /* Dorado (final) */
             );
-  padding: 2rem 0;
+  padding: 2.5rem 0;
   border-bottom: 1px solid #e9ecef;
   margin-bottom: 2rem;
   display: flex;
@@ -385,6 +402,7 @@ const PetCard = ({ mascota }) => {
   font-weight: 800; 
   color: #000000;
   margin-bottom: 1rem;
+  padding-top: 3.5rem;
 }
 
 
@@ -431,7 +449,7 @@ const PetCard = ({ mascota }) => {
 }
 
 .feed-content {
-    padding-bottom: 3rem;
+    padding-bottom: 4rem;
 }
 
 .main-title {
@@ -861,6 +879,7 @@ const PetCard = ({ mascota }) => {
   justify-items: center;
   height: auto;
   margin-bottom: 50px;
+  padding-top: 3.5rem;
 }
 
  .container-3 h2{

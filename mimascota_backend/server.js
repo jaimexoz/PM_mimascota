@@ -11,6 +11,7 @@ const uploadRoutes = require('./routes/uploadRoutes');
 // ⭐️ ¡NUEVO! Importar las rutas de mascota
 const mascotaRoutes = require('./routes/mascotaRoutes'); 
 const favoritesRoutes = require('./routes/favoritesRoutes');
+const adoptionRoutes = require('./routes/adoptionRoutes');
 
 const app = express();
 
@@ -35,6 +36,8 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/mascotas', mascotaRoutes); 
 
 app.use('/api/favorites', favoritesRoutes); 
+
+app.use('/api/adoptions', adoptionRoutes); 
 
 // Ruta de prueba simple (opcional)
 app.get('/', (req, res) => {

@@ -5,10 +5,12 @@ const pool = require('../config/db'); // Necesitamos el pool para buscar permiso
 // Middleware para proteger rutas, verifica el token JWT y decodifica la información del usuario
 const protect = (req, res, next) => {
     let token;
-    
+    console.log("SECRET siendo usado para VERIFICAR:", process.env.JWT_SECRET);
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         try {
             token = req.headers.authorization.split(' ')[1];
+
+
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
             // El token ya contiene id, email, id_rol, roleName, permissions (cargados durante el login)
             req.user = decoded; // Adjunta la información decodificada del token a la solicitud

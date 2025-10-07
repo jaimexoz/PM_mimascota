@@ -225,6 +225,50 @@ router.get('/card/:id', async (req, res) => {
     }
 });
 
+// --- RUTA GET PARA OBTENER DETALLE DE MASCOTA POR ID (PARA EL FORMULARIO DE ADOPCIÓN) ---
+router.get('/shortcard/:mascotId', async (req, res) => {
+    // Reutilizamos la lógica del endpoint /card/:id para estandarizar el endpoint REST
+    const petId = req.params.mascotId;
+
+    if (isNaN(petId)) {
+        return res.status(400).json({ mensaje: 'ID de mascota inválido.' });
+    }
+
+    const client = await pool.connect();
+    try {
+        // La misma consulta SQL optimizada que usas en /card/:id
+        const query = `
+            SELECT
+                m.idxxxx_mascot, 
+                m.nombre_mascot, 
+                m.sexoxx_mascot, 
+                m.edadme_mascot, 
+                m.pesokg_mascot, 
+                m.image1_mascot 
+                -- Solo los campos necesarios para la sección de perfil del formulario
+            FROM
+                mascotas m
+            WHERE
+                m.idxxxx_mascot = $1 
+                AND m.eliminado_logico = FALSE
+        `;
+        const result = await client.query(query, [petId]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ mensaje: 'Mascota no encontrada.' });
+        }
+
+        // Devolver los detalles de la mascota
+        res.json(result.rows[0]);
+
+    } catch (dbError) {
+        console.error('Error al consultar la BD para el formulario de adopción:', dbError); 
+        res.status(500).json({ mensaje: 'Error interno del servidor al obtener la mascota.' });
+    } finally {
+        client.release();
+    }
+});
+
 // --- RUTA GET PARA LISTAR TODAS LAS MASCOTAS ---
 router.get('/', async (req, res) => {
     try {

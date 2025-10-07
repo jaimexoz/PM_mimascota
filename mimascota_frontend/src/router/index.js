@@ -13,6 +13,7 @@ import PerfilUsuario from '../views/PerfilUsuario.vue';
 import AddMascot from '@/views/AddMascot.vue';
 import TarjetaMascota from '@/components/TarjetaMascota.vue';
 import favoritesPage from '@/views/favoritesPage.vue';
+import adoptForm from '@/views/adoptForm.vue'; 
 
 import { isAuthenticated } from '../utils/auth'; // Importa la función de autenticación
 
@@ -97,6 +98,13 @@ const router = createRouter({
             path: '/favoritos', 
             name: 'Favoritos',
             component: favoritesPage,
+            meta: { requiresAuth: true }
+        },
+        {
+            // ⭐️ Esta es la ruta que necesitas
+            path: '/adoptform/:mascotId', 
+            name: 'AdoptForm',
+            component: adoptForm,
             meta: { requiresAuth: true }
         },
 

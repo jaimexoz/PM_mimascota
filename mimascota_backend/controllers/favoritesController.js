@@ -33,6 +33,40 @@ exports.checkFavoriteStatus = async (req, res) => {
     }
 };
 
+
+exports.checkFavorites = async (req, res) => {
+    const userId = req.user.id; 
+
+    if (!userId) {
+        return res.status(400).json({ message: 'ID de usuario o mascota faltante.' });
+    }
+
+    try {
+        const query = `
+            SELECT
+                m.* -- Selecciona todas las columnas de la tabla 'mascotas'
+            FROM
+                favoritos AS f
+            JOIN
+                mascotas AS m ON f.forane_mascot_id = m.idxxxx_mascot
+            WHERE
+                f.forane_usuari_id = $1
+                AND f.status_favori = TRUE 
+                AND m.eliminado_logico = FALSE 
+            ORDER BY
+                m.nombre_mascot;
+        `;
+        const result = await pool.query(query, [userId]); 
+
+        // Envía el array de mascotas al cliente
+        res.status(200).json(result.rows);
+
+    } catch (dbError) {
+        console.error('Error al obtener la lista de mascotas para el feed:', dbError);
+        res.status(500).json({ mensaje: 'Error interno del servidor al obtener mascotas para el feed.', error: dbError.message });
+    }
+};
+
 /**
  * Endpoint para alternar el estado de favorito (TRUE/FALSE).
  * RUTA: POST /api/favorites/:mascotId

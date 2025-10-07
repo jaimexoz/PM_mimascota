@@ -5,12 +5,7 @@
     
     <!-- Contenido Principal -->
     <main class="main-content">
-      <button @click="goBack" class="back-button">
-            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
-            </svg>
-            Volver
-          </button>
+      
       <div class="user-list-container">
         
         <div class="header-section">
@@ -241,12 +236,12 @@ const handleClickOutside = (event) => {
 
 .user-list-container {
   max-width: 1100px;
-  margin: 0 auto;
+  margin: auto;
   padding: 40px 20px;
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-  margin-top: 20px;
+  margin-top: 46px;
 }
 
 .header-section {
@@ -256,30 +251,7 @@ const handleClickOutside = (event) => {
   margin-bottom: 24px;
 }
 
-.back-button {
-    width: 125px;
-    background: #f8f9fa;
-    border-radius: 6px;
-    border: 1px solid #dee2e6;
-    color: #6c757d;
-    box-shadow: 0px 6px 10px -1px #757373; 
-    font-size: 0.9rem;
-    font-weight: 700;
-    cursor: pointer;
-    padding: 0.5rem 1rem;
-    display: flex;
-    align-items: center;
-    transition: all 0.3s ease;
-    gap: 0.5rem;
-    margin-left: 30px;
-    margin-top: 30px;
-    position: absolute;
-}
 
-.back-button:hover {
-  background: #e9ecef;
-  color: #495057;
-}
 
 .header-section h2 {
   margin: 0;
