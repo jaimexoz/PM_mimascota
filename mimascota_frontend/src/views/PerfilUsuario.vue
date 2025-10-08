@@ -52,9 +52,13 @@
                         Agregar Mascotas
                 </router-link>
 
+
                 <button class="func-btn">Editar Mascotas</button>
                 <button class="func-btn">Eliminar Mascotas</button>
-                <button class="func-btn">Mis Publicaciones</button>
+
+                <router-link to="/mypost" class="func-btn">
+                  Mis Publicaciones
+                </router-link>
                 </div>
             </div>
         </div>
@@ -67,8 +71,13 @@
             <div class="func-grid">
               
               <div class="func-column">
-                  <button class="func-btn">Solicitudes enviadas</button>
-                  <button class="func-btn">Solicitudes recibidas</button>
+                <router-link to="/solicitudesenviadas" class="func-btn">
+                  Solicitudes enviadas
+                </router-link>
+
+                <router-link to="/solicitudesrecibidas" class="func-btn">
+                  Solicitudes recibidas
+                </router-link>
                   <button class="func-btn">Adopciones Realizadas</button>
               </div>
             </div>

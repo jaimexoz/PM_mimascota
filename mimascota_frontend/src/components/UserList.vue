@@ -19,8 +19,12 @@
             type="text"
             placeholder="Buscar por nombre de usuario..."
           />
+          <Search class="search-icon" />
         </div>
 
+        <div class="table-container">
+
+        
         <table class="user-table">
           <thead>
             <tr>
@@ -82,6 +86,7 @@
           </tbody>
         </table>
       </div>
+      </div>
     </main>
   </div>
 </template>
@@ -91,6 +96,8 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import Navbar from './Navbar.vue';
 import { getToken } from '../utils/auth';
+
+import { Search } from 'lucide-vue-next';
 
 const router = useRouter();
 
@@ -237,7 +244,7 @@ const handleClickOutside = (event) => {
 .user-list-container {
   max-width: 1100px;
   margin: auto;
-  padding: 40px 20px;
+  padding: 10px 20px;
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.07);
@@ -247,6 +254,7 @@ const handleClickOutside = (event) => {
 .header-section {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 1rem;
   margin-bottom: 24px;
 }
@@ -255,6 +263,8 @@ const handleClickOutside = (event) => {
 
 .header-section h2 {
   margin: 0;
+  font-weight: 700;
+  font-size: 2rem;
 }
 
 h2 {
@@ -263,18 +273,49 @@ h2 {
   color: #2c3e50;
 }
 
+
 .search-bar {
-  display: flex;
+  position: relative;
   justify-content: center;
-  margin-bottom: 24px;
+  flex-grow: 1;
+  max-width: 26rem; /* max-w-sm */
+  margin: auto;
+  width: 100%;
 }
 
 .search-bar input {
-  width: 350px;
-  padding: 10px 16px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  font-size: 1em;
+  width: 97%;
+  padding: 0.5rem 1rem 0.5rem 2.5rem; /* py-2 pl-10 pr-4 */
+  border-radius: 9999px; /* rounded-full */
+  border: 2px solid #d1d5db; /* border-gray-300 */
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); /* shadow-inner */
+  transition: all 200ms ease;
+}
+
+.search-input:focus {
+  border-color: #6366f1; /* focus:border-indigo-500 */
+  box-shadow: 0 0 0 1px #6366f1; /* focus:ring-indigo-500 */
+  outline: none;
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.75rem; /* left-3 */
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #9ca3af; /* text-gray-400 */
+}
+
+
+.table-container {
+    max-width: 1000px;
+    margin: 30px auto;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    
 }
 
 .user-table {
@@ -284,17 +325,29 @@ h2 {
   color: #555;
 }
 
-.user-table th, .user-table td {
-  padding: 14px 12px;
+.user-table th {
+  padding: 15px;
   text-align: left;
-  border-bottom: 1px solid #eaeaea;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.user-table td{
+  overflow: visible;
+  position: relative;
+  padding-left: 15px;
+  padding-top: 5px;
+  padding-bottom: 10px;
+  text-align: left;
+  border-bottom: 1px solid #dee2e6;
 }
 
 .user-table th {
-  background: #f5f6fa;
-  color: #555;
-  font-weight: 600;
+  background-color: #495057; /* Fondo oscuro para el encabezado */
+  color: #fff;
+  font-weight: bold;
+  text-transform: uppercase;
 }
+
 
 .rol-user {
   background: #eafaf1;
@@ -347,18 +400,18 @@ h2 {
   position: relative;
   display: inline-block;
   margin: 7px;
+  padding-bottom: 0; 
 }
 
 .role-dropdown {
   position: absolute;
   top: 100%;
-  left: 0;
   background: white;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
-  min-width: 150px;
+  z-index: 10000;
+  min-width: 100px;
   margin-top: 5px;
 }
 

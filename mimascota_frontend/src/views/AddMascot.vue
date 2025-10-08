@@ -435,7 +435,7 @@ function irAtras() {
 }
 </script>
 
-<style>
+<style scoped>
 .back-button3 {
     width: 125px;
     background: #f8f9fa;
@@ -458,7 +458,7 @@ function irAtras() {
 
 
 
-.back-button:hover {
+.back-button3:hover {
   background: #e9ecef;
   color: #495057;
 }

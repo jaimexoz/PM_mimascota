@@ -11,4 +11,16 @@ const { protect } = require('../middleware/authMiddleware');
 // Ruta protegida para enviar el formulario de adopción
 router.post('/', protect, adoptionController.submitAdoptionForm);
 
+// 1. RUTA ESPECÍFICA: Obtener solicitudes del usuario autenticado (Debe ir primero)
+router.get('/user', protect, adoptionController.getUserAdoptionForms); 
+
+// 2. RUTA DINÁMICA: Obtener un formulario específico por ID (Debe ir después)
+// Ahora, el :formId solo interceptará números, no la palabra 'user'
+router.get('/form/:formId', protect, adoptionController.getAdoptionFormById); 
+
+router.get('/received', protect, adoptionController.getReceivedAdoptionForms);
+
+router.patch('/:formId/status', protect, adoptionController.updateAdoptionStatus); 
+
+
 module.exports = router;

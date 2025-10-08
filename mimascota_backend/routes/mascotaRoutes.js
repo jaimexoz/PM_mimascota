@@ -269,6 +269,45 @@ router.get('/shortcard/:mascotId', async (req, res) => {
     }
 });
 
+// --- RUTA GET PARA OBTENER LAS PUBLICACIONES DEL USUARIO AUTENTICADO ---
+router.get('/MypostUser', protect, async (req, res) => {
+        // La línea siguiente es redundante, ya tienes const userId = req.user.id;
+        const userId = req.user.id; 
+
+    console.log(`Cargando publicaciones para userId: ${userId}`);
+        
+        const client = await pool.connect();
+        try {
+            // Consulta para obtener TODAS las mascotas publicadas por ese usuario
+            const query = `
+                SELECT
+                m.idxxxx_mascot, 
+                m.nombre_mascot, 
+                m.sexoxx_mascot, 
+                m.edadme_mascot, 
+                m.pesokg_mascot, 
+                m.image1_mascot 
+                FROM
+                mascotas m
+                WHERE
+                m.forane_usuari_id = $1
+                AND m.eliminado_logico = FALSE
+                ORDER BY m.idxxxx_mascot DESC;
+            `;
+            const result = await client.query(query, [userId]);
+
+            // ⭐️ CORRECCIÓN: Devolver el array completo (result.rows) con 200 OK.
+                // Si no hay publicaciones, devuelve un array vacío: [].
+            res.status(200).json(result.rows); 
+    
+        } catch (dbError) {
+            console.error('Error al consultar la BD para las publicaciones del usuario:', dbError); 
+            res.status(500).json({ mensaje: 'Error interno del servidor al obtener las publicaciones.' });
+        } finally {
+            client.release();
+        }
+    });
+
 // --- RUTA GET PARA LISTAR TODAS LAS MASCOTAS ---
 router.get('/', async (req, res) => {
     try {
