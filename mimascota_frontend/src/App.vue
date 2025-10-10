@@ -38,7 +38,7 @@ html, body {
 
 .success-message {
   color: #155724;
-  background-color: #d4edda;
+  background-color: #dcedd4;
   border: 1px solid #c3e6cb;
 }
 

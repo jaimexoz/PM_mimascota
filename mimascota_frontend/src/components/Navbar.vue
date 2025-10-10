@@ -253,6 +253,14 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+
+.nav-link:hover{
+  background-color: #ffffff;
+}
+
+.logo-link:hover{
+  background-color: #ffffff;
+}
 .navbar {
   position: fixed;
   top: 0;

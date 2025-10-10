@@ -26,15 +26,6 @@
         <div class="title-adopt-section" >
           <h2>MASCOTAS DISPONIBLES PARA ADOPTAR</h2>
         </div>
-        <section class="mascotas-disponibles">
-          <div class="tarjetas-grid">
-            <TarjetaMascota
-              v-for="mascota in mascotas"
-              :key="mascota.id"
-              :mascota="mascota"
-            />
-          </div>
-        </section>
 
       </div>
 
@@ -122,6 +113,10 @@ import Navbar from '../components/Navbar.vue';
 import { ref, onMounted, h } from 'vue';
 import { Loader } from 'lucide-vue-next';
 import { useAuthStore } from "@/stores/authStore";
+import { useRouter } from 'vue-router'; 
+  
+  // Inicialización
+  const router = useRouter(); 
 
 // Inicialización
 const authStore = useAuthStore();
@@ -253,7 +248,13 @@ const PetCard = ({ mascota }) => {
     const ageDisplay = formatAge(mascota.edadme_mascot);
     const imageUrl = mascota.image1_mascot || `https://placehold.co/400x400/9933FF/FFFFFF/png?text=Sin+Foto`;
 
-    // NOTA: Se mantienen las clases genéricas 'pet-card-*' para que uses tu propio CSS/Tailwind
+    // NOTA: Se mantienen las clases genéricas 'pet-card-*' para que uses tu propio CSS/
+    const navigateToProfile = () => {
+        // Utilizamos el router del componente padre
+        router.push(`/card/${mascota.id || mascota.idxxxx_mascot}`);
+    };
+
+
     return h('div', { class: 'pet-card' }, [
         // Imagen
         h('div', { class: 'pet-card-image-container' }, [
@@ -282,7 +283,7 @@ const PetCard = ({ mascota }) => {
         h('div', { class: 'pet-card-content-button ' }, [
             h('button', { 
                 class: 'pet-card-button',
-                onClick: () => console.log('Ver perfil de:', mascota.idxxxx_mascot)
+                onClick: navigateToProfile 
             }, 'Ver perfil')
         ])
     ]);

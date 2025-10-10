@@ -1,10 +1,14 @@
 <template>
     <div class="AddMascot">
         <Navbar />
+        
     <div class="contenedor-principal"> 
-        <button @click="irAtras" class="back-button3">
-                &#8592; volver 
-        </button>
+        <button @click="irAtras" class="back-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                    Volver
+                </button>
         <div class="form-add">
             
             <div class="header-content">
@@ -436,8 +440,9 @@ function irAtras() {
 </script>
 
 <style scoped>
-.back-button3 {
-    width: 125px;
+.back-button {
+    width: 110px;
+    height: 40px;
     background: #f8f9fa;
     border-radius: 6px;
     border: 1px solid #dee2e6;
@@ -458,7 +463,7 @@ function irAtras() {
 
 
 
-.back-button3:hover {
+.back-button:hover {
   background: #e9ecef;
   color: #495057;
 }
