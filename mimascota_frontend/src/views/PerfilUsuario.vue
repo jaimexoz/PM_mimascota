@@ -52,8 +52,10 @@
                         Agregar Mascotas
                 </router-link>
 
+                <router-link to="/editarmascota" class="func-btn">
+                        Editar Mascotas
+                </router-link>
 
-                <button class="func-btn">Editar Mascotas</button>
                 <button class="func-btn">Eliminar Mascotas</button>
 
                 <router-link to="/mypost" class="func-btn">
@@ -392,6 +394,7 @@ const changePassword = async () => {
   max-width: 500px;
   width: 100%;
   backdrop-filter: blur(8px);
+  height: 85.3vh;
 }
 
 .perfil-card-fun {
@@ -580,7 +583,7 @@ const changePassword = async () => {
 .info-buttons {
   display: flex;
   gap: 1rem;
-  margin-top: 1.5rem;
+  margin-top: 4rem;
 }
 .info-btn {
   flex: 1;

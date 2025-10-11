@@ -2,7 +2,12 @@
     <div class="adoption-feed-container">
   
     <Navbar /> 
-    
+    <button @click="irAtras" class="back-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                    Volver
+                </button>
     <!-- 1. ENCABEZADO Y FILTROS -->
     <div class="content-wrapper">
         <h1 class="main-title">
@@ -57,6 +62,8 @@
     </div>
   
   </div>
+
+  
   </template>
   
   <script setup>
@@ -185,6 +192,10 @@ const authStore = useAuthStore();
         busqueda: ''
     });
   }
+
+  function irAtras() {
+    window.history.back();
+}
   
   // Llama a la función al cargar el componente
   onMounted(() => {
@@ -295,6 +306,32 @@ const authStore = useAuthStore();
   
   
   <style scoped>
+
+.back-button {
+    width: 110px;
+    height: 40px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    color: #6c757d;
+    box-shadow: 0px 6px 10px -1px #757373; 
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+    gap: 0.5rem;
+    margin-left: 30px;
+    margin-top: 94px;
+    position: absolute;
+}
+
+.back-button:hover {
+  background: #e9ecef;
+  color: #495057;
+}
   /* Colores y Variables */
   .paw-icon-color {
     color: #FF9933; /* Naranja principal */

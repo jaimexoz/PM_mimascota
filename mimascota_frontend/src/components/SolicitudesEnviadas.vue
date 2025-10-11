@@ -45,7 +45,7 @@
                     <tbody>
                         <tr v-for="(solicitud, index) in solicitudes" :key="solicitud.idxxxx_forado">
                             <td>{{ index + 1 }}</td>
-                            <td>{{ formatDate(solicitud.fechax_forado) }}</td>
+                            <td>{{ formatDate(solicitud.fechax_solici) }}</td>
                             <td>{{ solicitud.nombre_mascot || 'Cargando...' }}</td> <td>
                                 <button @click="verFichaInformacion(solicitud.forane_mascot_id)" class="detail-button">
                                     Ver detalles 
@@ -59,8 +59,8 @@
                                 </button>
                             </td>
                             <td>
-                                <span :class="['status-badge', getStatusClass(solicitud.status_forado)]">
-                                    {{ solicitud.status_forado }}
+                                <span :class="['status-badge', getStatusClass(solicitud.estado_solici)]">
+                                    {{ solicitud.estado_solici }}
                                 </span>
                             </td>
                         </tr>
@@ -95,6 +95,7 @@ const error = ref(null);
  */
 const verFichaInformacion = (mascotId) => {
     // Redirige al componente TarjetaMascota.vue
+    
     router.push(`/card/${mascotId}`); 
 };
 

@@ -18,6 +18,7 @@ import ViewAdoptionForm from '@/views/ViewAdoptionForm.vue';
 import SolicitudesEnviadas from '@/components/SolicitudesEnviadas.vue';
 import SolicitudesRecibidas from '@/components/SolicitudesRecibidas.vue';
 import MyPost from '@/views/MyPost.vue';
+import MyPostsEdit from '@/views/MyPostsEdit.vue';
 
 import { isAuthenticated } from '../utils/auth'; // Importa la función de autenticación
 
@@ -87,6 +88,13 @@ const router = createRouter({
             path: '/agregarmascota', 
             name: 'AgregarMascota',
             component: AddMascot,
+            meta: { requiresAuth: true }
+        },
+        {
+            // ⭐️ Esta es la ruta que necesitas
+            path: '/editarmascota', 
+            name: 'EditarMascota',
+            component: MyPostsEdit,
             meta: { requiresAuth: true }
         },
 

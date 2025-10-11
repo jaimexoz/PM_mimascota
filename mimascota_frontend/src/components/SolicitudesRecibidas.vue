@@ -12,7 +12,7 @@
                 
                 <h1 class="main-title">
                     <PawPrint class="paw-icon-main" />
-                    Solicitudes Enviadas
+                    Solicitudes Recibidas
                     <PawPrint class="paw-icon-main" />
                 </h1>
             </div>
@@ -40,13 +40,15 @@
                             <th>Ficha de Información</th>
                             <th>Formulario de Adopción</th>
                             <th>Estado de Solicitud</th>
+                            <th>Estado de Mascota</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="(solicitud, index) in solicitudes" :key="solicitud.idxxxx_forado">
+                        <tr v-for="(solicitud, index) in solicitudes" :key="solicitud.idxxxx_solici">
                             <td>{{ index + 1 }}</td>
-                            <td>{{ formatDate(solicitud.fechax_forado) }}</td>
-                            <td>{{ solicitud.nombre_mascot || 'Cargando...' }}</td> <td>
+                            <td>{{ formatDate(solicitud.fechax_solici) }}</td>
+                            <td>{{ solicitud.nombre_mascot || 'Cargando...' }}</td> 
+                            <td>
                                 <button @click="verFichaInformacion(solicitud.forane_mascot_id)" class="detail-button">
                                     Ver detalles 
                                     <span class="detail-icon">➤</span>
@@ -59,14 +61,26 @@
                                 </button>
                             </td>
                             <td>
-                                <select :value="solicitud.status_forado"  
-                                @change="event => updateStatus(solicitud.idxxxx_forado, event.target.value)"
-                                :class="['status-select', getStatusClass(solicitud.status_forado)]">
+                                <select :value="solicitud.estado_solici"  
+                                @change="event => updateStatus(solicitud.idxxxx_solici, event.target.value)"
+                                :class="['status-select', getStatusClass(solicitud.estado_solici)]">
                                 <option class="classPendiente" value="Pendiente">Pendiente</option>
                                 <option class="classAceptada"  value="Aceptada">Aceptar</option>
                                 <option class="classRechazada"  value="Rechazada">Rechazar</option>
                                 </select>
                             </td>
+                            
+                            <td>
+                                <select 
+                                    :value="solicitud.status_mascot"  
+                                    @change="event => updateMascotStatus(solicitud.forane_mascot_id, event.target.value)"
+                                    :class="['status-select', getMascotStatusClass(solicitud.status_mascot)]">
+                                    
+                                    <option class="classDisponible" value="Disponible">Disponible</option>
+                                    <option class="classAdoptado" value="Adoptado">Adoptado</option>
+                                </select>
+                            </td>
+                            
                         </tr>
                     </tbody>
                 </table>
@@ -127,12 +141,12 @@ const verFormularioAdopcion = (formId) => {
     }
 
     // Encuentra la solicitud localmente y guarda su estado anterior
-    const solicitudIndex = solicitudes.value.findIndex(s => s.idxxxx_forado === formId);
+    const solicitudIndex = solicitudes.value.findIndex(s => s.idxxxx_solici === formId);
     if (solicitudIndex === -1) return;
-    const oldStatus = solicitudes.value[solicitudIndex].status_forado;
+    const oldStatus = solicitudes.value[solicitudIndex].estado_solici;
 
     // OPTIMISTA: Actualiza la interfaz inmediatamente
-    solicitudes.value[solicitudIndex].status_forado = newStatus;
+    solicitudes.value[solicitudIndex].estado_solici = newStatus;
 
     try {
         // ⭐️ IMPORTANTE: Necesitas crear este endpoint en Express (PATCH /api/adoptions/:formId/status)
@@ -153,7 +167,7 @@ const verFormularioAdopcion = (formId) => {
 
         if (!response.ok) {
             // Si el backend falla, revierte el estado local y lanza un error
-            solicitudes.value[solicitudIndex].status_forado = oldStatus; 
+            solicitudes.value[solicitudIndex].estado_solici = oldStatus; 
             const errData = await response.json();
             throw new Error(errData.message || `Error HTTP: ${response.status}`);
         }
@@ -164,6 +178,53 @@ const verFormularioAdopcion = (formId) => {
         console.error('Error al actualizar estado:', err);
         error.value = `Fallo al cambiar estado: ${err.message}`;
         // En caso de fallo, el estado ya fue revertido arriba (si no fue un 401)
+    }
+};
+
+
+const updateMascotStatus = async (mascotId, newStatus) => {
+    const userToken = authStore.token || localStorage.getItem('userToken');
+
+    if (!userToken) {
+        console.error("No hay token para actualizar estado de mascota.");
+        return;
+    }
+
+    // Buscamos todas las solicitudes que usan esta mascota para actualizar todas las filas en la vista
+    const solicitudsToUpdate = solicitudes.value.filter(s => s.forane_mascot_id === mascotId);
+    if (solicitudsToUpdate.length === 0) return;
+    
+    const oldStatus = solicitudsToUpdate[0].status_mascot; 
+
+    // OPTIMISTA: Actualiza la interfaz para todas las filas inmediatamente
+    solicitudsToUpdate.forEach(s => {
+        s.status_mascot = newStatus;
+    });
+
+    try {
+        // Debes implementar esta nueva ruta en tu backend de Express/Node.js
+        const response = await fetch(`http://localhost:3000/api/adoptions/${mascotId}/statusM`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${userToken}`,
+            },
+            body: JSON.stringify({ status: newStatus }),
+        });
+
+        if (!response.ok) {
+            // Revertir el estado local en caso de fallo
+            solicitudsToUpdate.forEach(s => { s.status_mascot = oldStatus; });
+            const errData = await response.json();
+            throw new Error(errData.message || `Error HTTP: ${response.status}`);
+        }
+
+        console.log(`Estado de mascota ${mascotId} actualizado a ${newStatus} con éxito.`);
+
+    } catch (err) {
+        console.error('Error al actualizar estado de mascota:', err);
+        error.value = `Fallo al cambiar estado de mascota: ${err.message}`;
+        // En caso de fallo, el estado local ya fue revertido arriba
     }
 };
 
@@ -243,6 +304,18 @@ const getStatusClass = (status) => {
             return 'status-default';
     }
 };
+
+const getMascotStatusClass = (status) => {
+    switch (status) {
+        case 'Disponible':
+            return 'status-disponible'; // Color para Disponible (ej: un verde claro)
+        case 'Adoptado':
+            return 'status-adoptado'; // Color para Adoptado (ej: un color de éxito/cierre)
+        default:
+            return 'status-default';
+    }
+};
+
 
 /**
  * Función para formatear la fecha a DD/MM/YYYY
@@ -375,7 +448,29 @@ select{
     
 }
 
+.status-disponible{
+    font-size: 1rem;
+    background-color: #e7e7e7;
+    color: #6b6b6b;
+    font-weight: 700;
+    padding-left: 20px;
+    padding-right: 15px;
+    border: none;
+    border-radius: 25px;
+    appearance: base-select;
+}
 
+.status-adoptado{
+    font-size: 1rem;
+    background-color: #afff5f70;
+    color: #5c9920;
+    font-weight: 700;
+    padding-left: 20px;
+    padding-right: 18px;
+    border: none;
+    border-radius: 25px;
+    appearance: base-select;
+}
 
 .status-pendiente{
     font-size: 1rem;
@@ -394,7 +489,7 @@ select{
     background-color: #afff5f70;
     color: #5c9920;
     font-weight: 700;
-    padding-left: 20px;
+    padding-left: 30px;
     padding-right: 18px;
     border: none;
     border-radius: 25px;
@@ -406,14 +501,14 @@ select{
     background-color: #ff3d3d70;
     color: #a82424;
     font-weight: 700;
-    padding-left: 20px;
+    padding-left: 22px;
     padding-right: 18px;
     border: none;
     border-radius: 25px;
     appearance: base-select;
 }
 
-.classPendiente, .classRechazada, .classAceptada{
+.classPendiente, .classRechazada, .classAceptada, .classDisponible, .classAdoptado{
     font-size: 1rem;
     background-color: #ffffff;
     color: #6b6b6b;

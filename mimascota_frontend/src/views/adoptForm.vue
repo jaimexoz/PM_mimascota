@@ -1,8 +1,14 @@
 <template>
   <div class="adoption-page">
     <Navbar />
-
+<button @click="irAtras" class="back-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                    Volver
+                </button>
     <div class="content-wrapper">
+      
       <h1 class="main-title">
         <PawPrint class="paw-icon-main" />
         Formulario de Adopción
@@ -167,6 +173,32 @@
         </button>
       </form>
     </div>
+
+    <div v-if="modal.visible" class="modal-overlay">
+    <div class="modal-content" :class="modal.tipo">
+        <div class="modal-x">
+            <button @click="cerrarModal" class="btn-x">
+                X
+            </button>
+        </div>
+        <div class="modal-header">
+                <template v-if="modal.tipo === 'success'">
+                    <h2>Su mascota ha sido añadida correctamente</h2>
+                </template>
+                <template v-if="modal.tipo === 'error'">
+                    <h2>El archivo excede el tamaño (5MB)</h2>
+                </template>
+            
+            
+        </div>
+        
+        <div class="modal-actions">
+            <button @click="cerrarModal" class="btn-primary">
+                Aceptar
+            </button>
+        </div>
+    </div>
+</div>
   </div>
 </template>
 
@@ -212,6 +244,30 @@ const formData = reactive({
   // forane_mascot_id: null, // Lo obtiene el backend de los parámetros
 });
 
+const modal = reactive({
+    visible: false,
+    mensaje: '',
+    tipo: 'success' // 'success' o 'error'
+});
+
+function mostrarModal(msg, type) {
+    modal.mensaje = msg;
+    modal.tipo = type;
+    modal.visible = true;
+}
+
+/**
+ * Cierra el modal y redirige o resetea el formulario.
+ */
+function cerrarModal() {
+    modal.visible = false;
+    if (modal.tipo === 'success') {
+        // Redirigir al perfil o a la lista de mascotas después del éxito
+        router.push('/perfil');
+    }else{
+        window.location.reload();
+    }
+}
 // Función para formatear la edad (ya la tenías en otros componentes)
 function formatAge(months) {
     if (months === null || months === undefined) return 'Edad desconocida';
@@ -286,12 +342,12 @@ async function submitForm() {
 
   try {
       console.log("User ID (Valor):", userId); 
-    const payload = {
-      ...formData,
-      forane_usuari_id: userId,
-      forane_mascot_id: mascotId.value,
-      // El status_forado y fechax_forado se pueden establecer en el backend
-    };
+      const payload = {
+        ...formData,
+        // ⭐️ NOTA: El forane_usuari_id NO se envía. El backend lo obtiene del token.
+        forane_mascot_id: mascotId.value, // ✅ Este SÍ debe enviarse.
+      };
+
     console.log("User ID (Valor):", userId); 
     const response = await fetch('http://localhost:3000/api/adoptions', { // Nuevo endpoint para enviar formularios
       method: 'POST',
@@ -307,8 +363,7 @@ async function submitForm() {
       throw new Error(errorData.message || 'Error al enviar el formulario.');
     }
 
-    alert('¡Formulario enviado con éxito! Nos pondremos en contacto contigo pronto.');
-    router.push('/success-adoption'); // O a una página de confirmación
+    mostrarModal('Se ha enviado su solicitud de adopción', 'success');
 
   } catch (error) {
     console.error('Error al enviar el formulario:', error);
@@ -318,6 +373,10 @@ async function submitForm() {
   }
 }
 
+function irAtras() {
+    window.history.back();
+}
+
 // Se ejecuta al montar el componente
 onMounted(() => {
   getMascotaDetails();
@@ -325,6 +384,34 @@ onMounted(() => {
 </script>
 
 <style scoped>
+
+.back-button {
+    width: 110px;
+    height: 40px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+    color: #6c757d;
+    box-shadow: 0px 6px 10px -1px #757373; 
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+    gap: 0.5rem;
+    margin-left: 30px;
+    margin-top: 110px;
+    position: absolute;
+}
+
+
+
+.back-button:hover {
+  background: #e9ecef;
+  color: #495057;
+}
 /* Estilos básicos para el formulario (usa Tailwind o tu CSS global para más detalle) */
 .adoption-page {
   display: flex;
@@ -495,7 +582,7 @@ onMounted(() => {
 }
 
 .submit-button:hover {
-  background-color: #e68a2e; /* Naranja más oscuro */
+  background-color: #f47004; /* Naranja más oscuro */
   transform: translateY(-2px);
 }
 
@@ -554,4 +641,122 @@ onMounted(() => {
     grid-template-columns: 1fr;
   }
 }
+/* Modal */
+
+/* ESTILOS CSS PARA EL MODAL (Añadir en el bloque <style> o archivo CSS) */
+
+.modal-overlay {
+    /* Fondo que cubre toda la pantalla */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Oscurece el fondo */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Asegura que esté por encima de todo */
+}
+
+.modal-content {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    animation: fadeIn 0.3s ease-out;
+    justify-items: center;
+}
+
+.modal-header {
+  margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.modal-header h2 {
+    font-size: 1.4rem;
+    color: #333;
+    margin: 10px;
+    font-weight: 700;
+}
+
+.modal-icon {
+    font-size: 3rem;
+    display: inline-block;
+    width: 60px;
+    height: 60px;
+    line-height: 60px;
+    border-radius: 50%;
+    color: white;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.modal-content.success .modal-header{
+    font-size: 1.5rem;
+    color: #333;
+    margin: 10px;
+    font-weight: 400;
+}
+
+.modal-content.error .modal-header{
+    font-size: 1.4rem;
+    color: #333;
+    margin: 10px;
+    font-weight: 700;
+
+}
+
+.modal-content.error .modal-icon {
+    background-color: #f44336; /* Rojo para error */
+}
+
+.modal-actions {
+    width: 40%;
+}
+
+.btn-primary {
+    margin-top: 20px;
+    background: #FF9933;
+    border-radius: 25px;
+    margin-bottom: 10px;
+    padding: 10px 25px;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.btn-primary:hover{
+    background: #f47004;
+}
+
+.modal-x{
+  display: flex;
+  width: 100%;
+  justify-content: right;
+  border-bottom: 1px solid #dbdbdb; 
+  
+}
+
+
+.btn-x{
+  color: #adadad;
+  background: none;
+  font-weight: 700;
+  font-size: 1.5rem;
+  border: none;
+  margin-top: 5px;
+  margin-right: 10px;
+}
+
+
+.btn-x:hover {
+    color: #4f4f4f;
+   
+}
+
 </style>

@@ -684,7 +684,7 @@ textarea {
 
 .upload-button {
     appearance: none; 
-    background-color: #ffad31;
+    background-color: #ff9900;
     color: white;
     padding: 10px 20px;
     border-radius: 25px;
@@ -695,7 +695,7 @@ textarea {
 }
 
 .upload-button:hover {
-    background-color: #ff9900;
+    background-color: #f47004;
      box-shadow: 0px 6px 10px -1px #757373; 
    
 }
@@ -848,7 +848,7 @@ textarea {
 
 .btn-primary {
     margin-top: 20px;
-    background: #ffb84d;
+    background: #FF9933;
     border-radius: 25px;
     margin-bottom: 10px;
     padding: 10px 25px;
@@ -860,7 +860,7 @@ textarea {
 }
 
 .btn-primary:hover{
-    background: #ff9900;
+    background: #f47004;
 }
 
 .modal-x{

@@ -56,6 +56,205 @@ const cleanupUploadedFiles = (filePaths) => {
 // =================================================================
 // RUTAS
 // =================================================================
+
+// ⭐️ NUEVA RUTA: GET /api/mascotas/:id 
+// Objetivo: Obtener TODOS los datos de una mascota para la precarga del formulario de edición.
+router.get('/editar/:id', protect, async (req, res) => {
+    const petId = req.params.id;
+    const userId = req.user.id; 
+
+    if (isNaN(petId)) {
+        return res.status(400).json({ mensaje: 'ID de mascota inválido.' });
+    }
+
+    const client = await pool.connect();
+    try {
+        const query = `
+            SELECT
+                m.idxxxx_mascot, 
+                m.nombre_mascot, 
+                m.especi_mascot, 
+                m.sexoxx_mascot, 
+                m.edadme_mascot, 
+                m.razaxx_mascot, 
+                m.pesokg_mascot, 
+                m.tamano_mascot, 
+                m.infoad_mascot, 
+                m.image1_mascot, 
+                m.image2_mascot, 
+                m.image3_mascot, 
+                m.forane_usuari_id, 
+                m.status_mascot,  -- ⬅️ ¡Asegura la COMA aquí!
+                COALESCE(         -- ⬅️ JSON fue eliminado
+                    json_agg(c.nombre_caract) FILTER (WHERE c.nombre_caract IS NOT NULL),
+                    '[]'   -- ⬅️ Cast explícito a JSONB (o json) recomendado
+                ) AS personalidad_array
+            FROM
+                mascotas m
+            LEFT JOIN
+                mascota_caracteristicas mc ON m.idxxxx_mascot = mc.forane_mascot_id
+            LEFT JOIN
+                caracteristicas c ON mc.forane_caract_id = c.idxxxx_caract
+            WHERE
+                m.idxxxx_mascot = $1 
+                AND m.eliminado_logico = FALSE
+                AND m.forane_usuari_id = $2
+            GROUP BY
+                m.idxxxx_mascot, m.nombre_mascot, m.especi_mascot, 
+                m.sexoxx_mascot, m.edadme_mascot, m.razaxx_mascot, 
+                m.pesokg_mascot, m.tamano_mascot, m.infoad_mascot, 
+                m.image1_mascot, m.image2_mascot, m.image3_mascot, 
+                m.forane_usuari_id, m.status_mascot
+        `;
+        const result = await client.query(query, [petId, userId]);
+
+        if (result.rows.length === 0) {
+            // Error 404 (no existe) o 403 (no es el dueño)
+            return res.status(404).json({ mensaje: 'Mascota no encontrada o no tienes permiso para editarla.' });
+        }
+
+        res.json(result.rows[0]);
+
+    } catch (dbError) {
+        console.error('Error al consultar la BD para la edición de mascota:', dbError); 
+        res.status(500).json({ mensaje: 'Error interno del servidor al obtener la mascota.' });
+    } finally {
+        client.release();
+    }
+});
+
+// ⭐️ NUEVA RUTA: PUT /api/mascotas/:id
+// Objetivo: Actualizar los datos de la mascota.
+router.put('/actualizar/:id', protect, uploadArrayMascota, async (req, res) => {
+    const petId = req.params.id;
+    const userId = req.user.id; 
+
+    // Rutas locales temporales que Multer acaba de crear (si el usuario subió algo)
+    const localImagePaths = req.files ? req.files.map(file => file.path) : [];
+    let datosMascota;
+
+    try {
+        // 1. Parsear el campo 'datos' de FormData (Contiene todos los campos de texto/URLs existentes)
+        datosMascota = JSON.parse(req.body.datos);
+    } catch (e) {
+        // Limpiar y retornar si el JSON es inválido
+        cleanupUploadedFiles(localImagePaths); 
+        return res.status(400).json({ mensaje: 'Formato de datos de la mascota inválido (JSON no válido).' });
+    }
+    
+    // Desestructuración de campos
+    const {
+        nombre_mascot, especi_mascot, sexoxx_mascot, edadme_mascot, 
+        razaxx_mascot, pesokg_mascot, tamano_mascot, infoad_mascot,
+        // URLs existentes/a conservar (vienen del JSON del frontend)
+        image1_mascot: existingUrl1, 
+        image2_mascot: existingUrl2, 
+        image3_mascot: existingUrl3, 
+    } = datosMascota; 
+
+    if (isNaN(petId) || !nombre_mascot || !especi_mascot || !sexoxx_mascot) {
+        cleanupUploadedFiles(localImagePaths);
+        return res.status(400).json({ mensaje: 'Faltan campos requeridos (nombre, especie, sexo).' });
+    }
+
+    // --- Lógica de Subida a Cloudinary ---
+    let newCloudinaryUrls = [];
+
+    if (localImagePaths.length > 0) {
+        try {
+            // Subir archivos nuevos y obtener URLs seguras
+            const uploadPromises = localImagePaths.map(path => 
+                uploadToCloudinary(path, 'mascotas_para_adopcion')
+            );
+            newCloudinaryUrls = await Promise.all(uploadPromises);
+
+            if (newCloudinaryUrls.includes(null)) {
+                // Si algo falla en Cloudinary, lanza error.
+                throw new Error("Una o más imágenes fallaron al subir a Cloudinary.");
+            }
+        } catch (uploadError) {
+            // Limpiar archivos locales ANTES de responder con error 500
+            cleanupUploadedFiles(localImagePaths); 
+            console.error('Fallo grave durante la subida de imágenes a Cloudinary:', uploadError);
+            return res.status(500).json({ 
+                mensaje: 'Error al subir una o más imágenes a Cloudinary.',
+                error: uploadError.message
+            });
+        }
+    }
+    
+    // ⚠️ CRÍTICO: Limpiar archivos locales temporales SIEMPRE al final de la lógica de archivos
+    cleanupUploadedFiles(localImagePaths); 
+
+    // --- Combinación de URLs ---
+    let urlIndex = 0;
+
+    const isValidCloudinaryUrl = (url) => {
+        return url && typeof url === 'string' && url.startsWith('http') && !url.includes('blob:');
+    }
+
+    // Lógica para el slot 1:
+    const finalImage1 = isValidCloudinaryUrl(existingUrl1) 
+    ? existingUrl1 
+    : (newCloudinaryUrls[urlIndex] !== undefined ? newCloudinaryUrls[urlIndex++] : null);
+
+    // Lógica para el slot 2:
+    const finalImage2 = isValidCloudinaryUrl(existingUrl2) 
+    ? existingUrl2 
+    : (newCloudinaryUrls[urlIndex] !== undefined ? newCloudinaryUrls[urlIndex++] : null);
+
+    // Lógica para el slot 3:
+    const finalImage3 = isValidCloudinaryUrl(existingUrl3) 
+    ? existingUrl3 
+    : (newCloudinaryUrls[urlIndex] !== undefined ? newCloudinaryUrls[urlIndex++] : null);
+
+    
+    const client = await pool.connect(); 
+    
+    try {
+        // ... (Verificación de dueño y consulta UPDATE) ...
+        
+        const updateQuery = `
+             UPDATE mascotas 
+             SET 
+                 nombre_mascot = $1, especi_mascot = $2, sexoxx_mascot = $3, 
+                 edadme_mascot = $4, razaxx_mascot = $5, pesokg_mascot = $6, 
+                 tamano_mascot = $7, infoad_mascot = $8, 
+                 image1_mascot = $9, image2_mascot = $10, image3_mascot = $11
+             WHERE idxxxx_mascot = $12 
+             RETURNING idxxxx_mascot;
+         `;
+
+         const updateValues = [
+             nombre_mascot, especi_mascot, sexoxx_mascot, edadme_mascot, 
+             razaxx_mascot, pesokg_mascot, tamano_mascot, infoad_mascot, 
+             finalImage1, finalImage2, finalImage3, // ⬅️ URLs de Cloudinary o NULL
+             petId 
+         ];
+        
+        const result = await client.query(updateQuery, updateValues);
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ mensaje: 'Mascota no encontrada o no se pudo actualizar.' });
+        }
+        
+        res.status(200).json({ 
+            mensaje: 'Mascota actualizada con éxito.',
+            mascota_id: petId
+        });
+
+    } catch (dbError) {
+        console.error('Error de base de datos al actualizar la mascota:', dbError);
+        res.status(500).json({ 
+            mensaje: 'Error interno del servidor al actualizar la mascota.', 
+            error: dbError.message 
+        });
+    } finally {
+        client.release();
+    }
+});
+
+
 // --- RUTA GET PARA LISTAR GATOS PARA EL FEED PRINCIPAL (Optimizado) ---
 router.get('/feed', async (req, res) => {
     try {

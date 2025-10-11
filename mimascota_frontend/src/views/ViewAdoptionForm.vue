@@ -201,9 +201,9 @@ const formData = reactive({
 });
 
 // Función para el botón Regresar
-const irAtras = () => {
-    router.back(); 
-};
+function irAtras() {
+    window.history.back();
+}
 
 // Función de utilidad
 function formatAge(months) {
@@ -294,6 +294,7 @@ const fetchFormData = async (id) => {
         isLoadingForm.value = false;
     }
 };
+
 
 // Se ejecuta al montar el componente
 onMounted(() => {

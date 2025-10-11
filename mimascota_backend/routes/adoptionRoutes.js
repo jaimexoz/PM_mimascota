@@ -22,5 +22,8 @@ router.get('/received', protect, adoptionController.getReceivedAdoptionForms);
 
 router.patch('/:formId/status', protect, adoptionController.updateAdoptionStatus); 
 
+router.patch('/:mascotId/statusM', protect, adoptionController.updateMascotStatus); 
+
+
 
 module.exports = router;
