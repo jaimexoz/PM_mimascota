@@ -123,6 +123,8 @@ router.get('/editar/:id', protect, async (req, res) => {
     }
 });
 
+
+
 // ⭐️ NUEVA RUTA: PUT /api/mascotas/:id
 // Objetivo: Actualizar los datos de la mascota.
 router.put('/actualizar/:id', protect, uploadArrayMascota, async (req, res) => {
@@ -149,7 +151,7 @@ router.put('/actualizar/:id', protect, uploadArrayMascota, async (req, res) => {
         // URLs existentes/a conservar (vienen del JSON del frontend)
         image1_mascot: existingUrl1, 
         image2_mascot: existingUrl2, 
-        image3_mascot: existingUrl3, 
+        image3_mascot: existingUrl3,  
     } = datosMascota; 
 
     if (isNaN(petId) || !nombre_mascot || !especi_mascot || !sexoxx_mascot) {
