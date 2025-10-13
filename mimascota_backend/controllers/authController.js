@@ -207,6 +207,81 @@ const loginUser = async (req, res) => {
         res.status(500).json({ message: 'Error interno del servidor.' });
     }
 };
+// @desc    Actualizar información básica del usuario
+// @route   PUT /api/auth/update-user-info
+// @access  Privado
+const updateUserInfo = async (req, res) => {
+    try {
+        // 1. Verificar autenticación (el ID proviene del token, asumido en req.user.id)
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({ message: 'No autorizado. Se requiere un token de usuario válido.' });
+        }
+        
+        const userId = req.user.id;
+        // Campos que se pueden actualizar
+        const { nombre, apellido, celular, edad } = req.body; 
+
+        // 2. Validación de campos requeridos
+        if (!nombre || nombre.trim() === '' || !apellido || apellido.trim() === '') {
+            return res.status(400).json({ message: 'Nombre y Apellido son campos obligatorios.' });
+        }
+
+        // 3. Preparar la edad para la consulta (asegurar que sea un número válido o NULL)
+        let edadValue = parseInt(edad, 10);
+        // Si no es un número o es menor a 1, lo establecemos como NULL (asumiendo que la columna lo permite)
+        if (isNaN(edadValue) || edadValue < 1) {
+            edadValue = null; 
+        }
+
+        // 4. Consulta de Actualización (PostgreSQL)
+        const updateResult = await pool.query(
+            `UPDATE usuarios SET 
+                nombre_usuari = $1, 
+                apelli_usuari = $2, 
+                celula_usuari = $3, 
+                edadxx_usuari = $4,
+                feactu_usuari = NOW()
+             WHERE idxxxx_usuari = $5
+             RETURNING *`, 
+            [nombre, apellido, celular, edad, userId]
+        );
+
+        if (updateResult.rows.length === 0) {
+            return res.status(404).json({ message: 'Usuario no encontrado para actualizar.' });
+        }
+
+        // 5. Obtener datos completos del usuario actualizado (incluyendo el rol)
+        const updatedUserResult = await pool.query(`
+            SELECT 
+                u.idxxxx_usuari AS id, 
+                u.nombre_usuari AS nombre,
+                u.apelli_usuari AS apellido, 
+                u.emailx_usuari AS email,
+                u.celula_usuari AS celular, 
+                u.imagep_usuari AS imageUrl,
+                u.mailve_usuari AS mailVerified,
+                u.edadxx_usuari AS edad,
+                r.nombre_rolesx AS role
+            FROM usuarios u
+            JOIN roles r ON u.idxxxx_rolesx = r.idxxxx_rolesx
+            WHERE u.idxxxx_usuari = $1
+        `, [userId]);
+        
+        const updatedUser = updatedUserResult.rows[0];
+
+        // 6. Respuesta exitosa
+        res.status(200).json({
+            message: 'Información de perfil actualizada exitosamente.',
+            user: updatedUser
+        });
+
+    } catch (error) {
+        console.error('Error al actualizar la información del usuario:', error);
+        res.status(500).json({ message: 'Error interno del servidor al guardar los cambios.' });
+    }
+};
+
+
 
 // @desc    Verificar correo electrónico con token
 // @route   GET /api/auth/verify-email
@@ -587,6 +662,7 @@ const changeUserRole = async (req, res) => {
 module.exports = {
     registerUser,
     loginUser,
+    updateUserInfo,
     verifyEmail,
     requestPasswordReset,
     resetPassword,

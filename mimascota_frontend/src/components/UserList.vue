@@ -29,6 +29,7 @@
           <thead>
             <tr>
               <th>Nombre</th>
+              <th>Apellido</th>
               <th>Correo</th>
               <th>Celular</th>
               <th>Rol</th>
@@ -47,6 +48,7 @@
             </tr>
             <tr v-for="usuario in filteredUsuarios" :key="usuario.id">
               <td>{{ usuario.nombre }}</td>
+              <td>{{ usuario.apellido }}</td>
               <td>{{ usuario.correo }}</td>
               <td>{{ usuario.celular }}</td>
               <td>

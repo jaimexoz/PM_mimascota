@@ -93,13 +93,13 @@ router.get('/editar/:id', protect, async (req, res) => {
                 mascotas m
             LEFT JOIN
                 mascota_caracteristicas mc ON m.idxxxx_mascot = mc.forane_mascot_id
+                                                    AND mc.status_mascar= TRUE
             LEFT JOIN
                 caracteristicas c ON mc.forane_caract_id = c.idxxxx_caract
             WHERE
                 m.idxxxx_mascot = $1 
                 AND m.eliminado_logico = FALSE
                 AND m.forane_usuari_id = $2
-                AND mc.status_mascar= TRUE
             GROUP BY
                 m.idxxxx_mascot, m.nombre_mascot, m.especi_mascot, 
                 m.sexoxx_mascot, m.edadme_mascot, m.razaxx_mascot, 

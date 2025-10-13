@@ -1,6 +1,7 @@
 <template>
   <div class="perfil-page">
-    <Navbar />
+    <!-- Componente de navegación (asumiendo que existe en la ruta) -->
+    <Navbar /> 
     <div class="perfil-fondo"> 
     </div>
     <div class="perfil-contenido">
@@ -8,42 +9,100 @@
       <div class="perfil-card">
         <div class="perfil-foto-section">
           <div class="perfil-foto-wrapper">
+            <!-- La imagen de perfil -->
             <img :src="userImageUrl" :alt="userName" class="perfil-foto" @error="handleImageError" />
+            
+            <!-- Botón para subir/cambiar foto -->
             <label class="subir-foto-btn">
               <input type="file" accept="image/*" @change="onFileChange" hidden />
               {{ loading ? 'Subiendo...' : (userImageUrl === defaultAvatar ? 'Subir Foto ↑' : 'Cambiar Foto ↑') }}
             </label>
           </div>
         </div>
+
+        <div style="justify-content: center; position: absolute; justify-items: center; width: 93%;">
         
-        <!-- Mensajes de estado -->
-        <div v-if="error" class="error-message">{{ error }}</div>
-        <div v-if="success" class="success-message">{{ success }}</div>
-        
+        <div v-if="error" class="error-message" >{{ error }}</div>
+        <div v-if="success" class="success-message" :class="{ 'fade-out': isSuccessFading }">{{ success }}</div>
+        </div>
+
         <div class="perfil-info-section">
           <div class="perfil-col info">
             <h2>Información</h2>
-            <div class="info-item"><span>Nombre</span><input type="text" :value="userName" readonly /></div>
+            
+            <!-- Nombre -->
+            <div class="info-item">
+              <span>Nombre</span>
+              <input type="text" 
+                     :value="isEditing ? editableData.name : userName" 
+                     :readonly="!isEditing"
+                     @input="isEditing ? editableData.name = $event.target.value : null"
+                     :class="{ 'editable-input': isEditing }" />
+            </div>
 
-            <div class="info-item"><span>Apellido</span><input type="text" :value="userLastname" readonly /></div>
+            <!-- Apellido -->
+            <div class="info-item">
+              <span>Apellido</span>
+              <input type="text" 
+                     :value="isEditing ? editableData.lastname : userLastname" 
+                     :readonly="!isEditing"
+                     @input="isEditing ? editableData.lastname = $event.target.value : null"
+                     :class="{ 'editable-input': isEditing }" />
+            </div>
 
-            <div class="info-item"><span>Correo electrónico</span><input type="text" :value="userEmail" readonly /></div>
+            <!-- Correo electrónico (siempre solo lectura) -->
+            <div class="info-item">
+              <span>Correo electrónico</span>
+              <input type="text" :value="userEmail" readonly />
+            </div>
 
-           
-              <div class="info-item-2"><span>Teléfono</span><input type="text" :value="userPhone" readonly /></div>
-              <div class="info-item-21"><span>Edad</span><input type="text" :value="userAge" readonly /></div>
+            <!-- Teléfono -->
+            <div class="info-item-2">
+              <span>Teléfono</span>
+              <input type="text" 
+                     :value="isEditing ? editableData.phone : userPhone" 
+                     :readonly="!isEditing"
+                     @input="isEditing ? editableData.phone = $event.target.value : null"
+                     :class="{ 'editable-input': isEditing }" />
+            </div>
+            
+            <!-- Edad -->
+            <div class="info-item-21">
+              <span>Edad</span>
+              <input type="number" 
+                     :value="isEditing ? editableData.age : userAge" 
+                     :readonly="!isEditing"
+                     @input="isEditing ? editableData.age = $event.target.value : null"
+                     :class="{ 'editable-input': isEditing }" />
+            </div>
             
             
             <div class="info-buttons">
-              <button class="info-btn">Guardar</button>
-              <button class="info-btn" @click="showChangePasswordModal = true">Cambiar contraseña</button>
+              <!-- Botón Cancelar (solo visible en modo edición) -->
+              
+
+              <!-- Botón principal de Edición/Guardado -->
+              <button class="info-btnG" 
+                @click="isEditing ? saveChanges() : toggleEdit()" 
+                :disabled="loading" >
+                <span v-if="loading && isEditing" class="loading-spinner-small"></span> {{ isEditing ? 'Guardar' : 'Editar Información' }}
+            </button>
+              
+              <button v-if="isEditing" class="info-btnC cancel-btn-edit" @click="toggleEdit" :disabled="loading">
+                  Cancelar
+              </button>
+              
+              <!-- Botón de cambio de contraseña (siempre visible) -->
+              <button class="info-btn" @click="showChangePasswordModal = true" :disabled="isEditing || loading">
+                Cambiar contraseña
+              </button>
             </div>
           </div>
         </div>
       </div>
       
-
-
+      
+      <!-- Sección de Funcionalidades -->
       <div class="perfil-card-fun">
         <div class="perfil-col funcionalidades">
             <div class="fun-top">
@@ -52,11 +111,11 @@
             <div class="func-grid">
               <div class="func-column">
                 <router-link to="/agregarmascota" class="func-btn">
-                        Agregar Mascotas
+                  Agregar Mascotas
                 </router-link>
 
                 <router-link to="/editarmascota" class="func-btn">
-                        Editar Mascotas
+                  Editar Mascotas
                 </router-link>
 
                 <button class="func-btn">Eliminar Mascotas</button>
@@ -64,10 +123,11 @@
                 <router-link to="/mypost" class="func-btn">
                   Mis Publicaciones
                 </router-link>
-                </div>
+              </div>
             </div>
         </div>
 
+        <!-- Sección de Adopciones y Solicitudes -->
         <div class="perfil-col solicitud">
           <div class="fun-top">
             <h2>Adopciones y solicitudes</h2>
@@ -158,12 +218,16 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
-import Navbar from '../components/Navbar.vue';
-import { getToken, updateUserData, onUserDataChange } from '../utils/auth';
+// Asumiendo que Navbar es un componente funcional
+import Navbar from '../components/Navbar.vue'; 
+// Asumiendo que estas utilidades existen y manejan el token y localStorage
+import { getToken, updateUserData, onUserDataChange } from '../utils/auth'; 
 
 const router = useRouter();
 const defaultAvatar = '/default-avatar.png';
 const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+
+// Datos de usuario actuales (solo lectura/fuente de verdad)
 const userName = ref(userData.nombre || userData.name || '');
 const userLastname = ref(userData.apellido || userData.lastname || '');
 const userEmail = ref(userData.email || userData.emailx_usuari || '');
@@ -171,34 +235,173 @@ const userPhone = ref(userData.celular || userData.celula_usuari || '');
 const userAge = ref(userData.edad_usuari || '');
 const userImageUrl = ref(userData.imageUrl && userData.imageUrl.startsWith('http') ? userData.imageUrl : defaultAvatar);
 
-// Función para actualizar los datos del usuario
-const updateUserInfo = (newUserData) => {
-  userName.value = newUserData.nombre || newUserData.name || '';
-  userLastname.value = newUserData.apellido || newUserData.lastname || '';
-  userEmail.value = newUserData.email || newUserData.emailx_usuari || '';
-  userPhone.value = newUserData.celular || newUserData.celula_usuari || '';
-  userAge.value = newUserData.edad_usuari || '';
-  userImageUrl.value = newUserData.imageUrl && newUserData.imageUrl.startsWith('http') ? newUserData.imageUrl : defaultAvatar;
-};
-
-// Suscribirse a cambios en los datos del usuario
-let unsubscribe = null;
-
-const loading = ref(false);
+// Variables de control
+const loading = ref(false); // Para subir foto
 const error = ref('');
 const success = ref('');
 
-// Variables para el modal de cambio de contraseña
-const showChangePasswordModal = ref(false);
-const changingPassword = ref(false);
-const passwordData = ref({
-  currentPassword: '',
-  newPassword: '',
-  confirmPassword: ''
-});
-const passwordError = ref('');
-const passwordSuccess = ref('');
+const isSuccessFading = ref(false); // <--- FALTA DECLARAR
+const isPasswordSuccessFading = ref(false); // <--- FALTA DECLARAR
 
+// --- NUEVA LÓGICA DE EDICIÓN DE INFORMACIÓN ---
+const isEditing = ref(false); // Estado para controlar el modo de edición
+// Datos editables (para v-model)
+const editableData = ref({
+    name: userName.value,
+    lastname: userLastname.value,
+    phone: userPhone.value,
+    age: userAge.value
+});
+
+// Función para sincronizar datos reactivos cuando userData cambia (externamente o internamente)
+const updateUserInfo = (newUserData) => {
+    // 1. Actualizar los datos de la "fuente de verdad"
+    userName.value = newUserData.nombre || newUserData.name || '';
+    userLastname.value = newUserData.apellido || newUserData.lastname || '';
+    userEmail.value = newUserData.email || newUserData.emailx_usuari || '';
+    userPhone.value = newUserData.celular || newUserData.celula_usuari || '';
+    userAge.value = newUserData.edad || newUserData.edad_usuari  || '';
+    userImageUrl.value = newUserData.imageUrl && newUserData.imageUrl.startsWith('http') ? newUserData.imageUrl : defaultAvatar;
+    
+    // 2. Asegurarse de que los datos editables reflejen los datos actuales si no estamos editando
+    if (!isEditing.value) {
+        editableData.value.name = userName.value;
+        editableData.value.lastname = userLastname.value;
+        editableData.value.phone = userPhone.value;
+        editableData.value.age = userAge.value;
+    }
+};
+
+// ---------------------------------------------
+// Función de Auto-Ocultar (FADE OUT)
+// ---------------------------------------------
+
+/**
+ * Inicia el temporizador y la transición de desvanecimiento para el mensaje global de éxito.
+ */
+ const autoHideSuccess = () => {
+    // Limpiar cualquier fade previo
+    isSuccessFading.value = false;
+    
+    // Tiempo de visualización antes de empezar el fade (ej: 3 segundos)
+    const displayDuration = 3000; 
+    // Duración del CSS transition (ej: 1000ms = 1s, debe coincidir con el CSS)
+    const transitionDuration = 1000; 
+
+    setTimeout(() => {
+        isSuccessFading.value = true;
+        setTimeout(() => {
+            success.value = '';
+        }, transitionDuration); // <--- Faltaba resetear isSuccessFading aquí
+    }, displayDuration);
+};
+
+// ---------------------------------------------
+// Funciones para Edición y Guardado
+// ---------------------------------------------
+
+// Función para alternar entre ver y editar
+const toggleEdit = () => {
+    if (isEditing.value) {
+        // Si cancelamos la edición, restaurar editableData a los valores actuales
+        editableData.value.name = userName.value;
+        editableData.value.lastname = userLastname.value;
+        editableData.value.phone = userPhone.value;
+        editableData.value.age = userAge.value;
+        isEditing.value = false;
+    } else {
+        isEditing.value = true;
+    }
+    // Limpiar mensajes de estado
+    error.value = '';
+    success.value = '';
+};
+
+
+const saveChanges = async () => {
+    // Basic validation
+    if (!editableData.value.name || !editableData.value.lastname) {
+        error.value = 'El nombre y el apellido son obligatorios.';
+        return;
+    }
+    
+    // Verificar si los datos realmente cambiaron
+    if (
+        editableData.value.name === userName.value &&
+        editableData.value.lastname === userLastname.value &&
+        editableData.value.phone === userPhone.value &&
+        editableData.value.age === userAge.value
+    ) {
+        error.value = 'No se detectaron cambios. Cancelando edición.';autoHideSuccess();
+        isEditing.value = false; // Salir del modo edición si no hay cambios
+         
+        return;
+
+        
+    }
+    
+    loading.value = true;
+    error.value = '';
+    success.value = '';
+
+    try {
+        const token = getToken();
+        if (!token) {
+            throw new Error('No hay token de autenticación');
+        }
+
+        const dataToSave = {
+            nombre: editableData.value.name,
+            apellido: editableData.value.lastname,
+            celular: editableData.value.phone,
+            edad_usuari: editableData.value.age
+        };
+
+        // Simulación de llamada a API para guardar la información
+        const response = await fetch('http://localhost:3000/api/auth/update-user-info', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(dataToSave)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Error al guardar los cambios');
+        }
+
+        // 1. Actualizar datos del usuario usando la función centralizada
+        const updatedUserData = {
+            ...JSON.parse(localStorage.getItem('userData') || '{}'),
+            ...data.user, // La respuesta de la API (si devuelve el objeto de usuario actualizado)
+            // Aseguramos que los campos locales actualizados se reflejen
+            nombre: dataToSave.nombre,
+            apellido: dataToSave.apellido,
+            celular: dataToSave.celular,
+            edad_usuari: dataToSave.edad_usuari,
+        };
+        updateUserData(updatedUserData); // Actualiza localStorage y notifica a los suscriptores
+
+        // 2. Actualizar estado local (esto también lo hace onUserDataChange si está correctamente implementado)
+        updateUserInfo(updatedUserData);
+
+        success.value = 'Información actualizada exitosamente!';
+        isEditing.value = false; // Salir del modo edición después de guardar
+        autoHideSuccess(); 
+
+    } catch (err) {
+        error.value = err.message;
+    } finally {
+        loading.value = false;
+    }
+};
+
+// ---------------------------------------------
+// Funciones de Foto de Perfil (existentes)
+// ---------------------------------------------
 function handleImageError(e) {
   e.target.src = defaultAvatar;
 }
@@ -207,13 +410,11 @@ async function onFileChange(e) {
   const file = e.target.files[0];
   if (!file) return;
 
-  // Validar tipo de archivo
+  // Validaciones...
   if (!file.type.startsWith('image/')) {
     error.value = 'Por favor selecciona un archivo de imagen válido.';
     return;
   }
-
-  // Validar tamaño (máximo 5MB)
   if (file.size > 5 * 1024 * 1024) {
     error.value = 'La imagen debe ser menor a 5MB.';
     return;
@@ -248,8 +449,9 @@ async function onFileChange(e) {
 
     // Actualizar datos del usuario usando la función centralizada
     const updatedUserData = {
-      ...userData,
-      ...data.user
+      ...JSON.parse(localStorage.getItem('userData') || '{}'),
+      ...data.user,
+      imageUrl: data.user.imageUrl // Aseguramos que la URL se actualice
     };
     updateUserData(updatedUserData);
 
@@ -257,9 +459,8 @@ async function onFileChange(e) {
     updateUserInfo(updatedUserData);
 
     success.value = 'Foto de perfil actualizada exitosamente!';
-
-    // Limpiar el input de archivo
-    e.target.value = '';
+    e.target.value = ''; // Limpiar el input de archivo
+    autoHideSuccess(); 
 
   } catch (err) {
     error.value = err.message;
@@ -268,20 +469,19 @@ async function onFileChange(e) {
   }
 }
 
-// Lifecycle hooks
-onMounted(() => {
-  // Suscribirse a cambios en los datos del usuario
-  unsubscribe = onUserDataChange(updateUserInfo);
+// ---------------------------------------------
+// Funciones de Modal y Contraseña (existentes)
+// ---------------------------------------------
+const showChangePasswordModal = ref(false);
+const changingPassword = ref(false);
+const passwordData = ref({
+  currentPassword: '',
+  newPassword: '',
+  confirmPassword: ''
 });
+const passwordError = ref('');
+const passwordSuccess = ref('');
 
-onUnmounted(() => {
-  // Desuscribirse cuando el componente se desmonte
-  if (unsubscribe) {
-    unsubscribe();
-  }
-});
-
-// Funciones para el cambio de contraseña
 const closeChangePasswordModal = () => {
   showChangePasswordModal.value = false;
   passwordData.value = {
@@ -296,11 +496,9 @@ const closeChangePasswordModal = () => {
 };
 
 const changePassword = async () => {
-  // Limpiar mensajes anteriores
   passwordError.value = '';
   passwordSuccess.value = '';
 
-  // Validaciones
   if (passwordData.value.newPassword !== passwordData.value.confirmPassword) {
     passwordError.value = 'Las contraseñas nuevas no coinciden.';
     return;
@@ -338,11 +536,18 @@ const changePassword = async () => {
     }
 
     passwordSuccess.value = 'Contraseña cambiada exitosamente!';
-    
-    // Cerrar modal después de 2 segundos
-    setTimeout(() => {
-      closeChangePasswordModal();
-    }, 2000);
+    // 💡 LÓGICA DE FADE-OUT DEL MODAL
+        const displayDuration = 2000; 
+    const transitionDuration = 1000; 
+    
+    setTimeout(() => {
+        isPasswordSuccessFading.value = true;
+        
+        setTimeout(() => {
+            closeChangePasswordModal(); // Cierra el modal después de que el mensaje se desvanece
+        }, transitionDuration);
+        
+    }, displayDuration);
 
   } catch (err) {
     passwordError.value = err.message;
@@ -352,12 +557,33 @@ const changePassword = async () => {
 }
 
 
+
+// ---------------------------------------------
+// Lifecycle Hooks (existentes)
+// ---------------------------------------------
+let unsubscribe = null;
+
+onMounted(() => {
+  unsubscribe = onUserDataChange(updateUserInfo);
+});
+
+onUnmounted(() => {
+  if (unsubscribe) {
+    unsubscribe();
+  }
+});
 </script>
 
 <style scoped>
-
-
-
+/* Estilos para hacer visible el campo de entrada cuando es editable */
+.info-item input:not([readonly]),
+.info-item-2 input:not([readonly]),
+.info-item-21 input:not([readonly]) {
+    border: 2px solid #ff9100; /* Borde más visible al editar */
+    box-shadow: 0px 0px 8px rgba(255, 145, 0, 0.5); /* Sombra suave para indicar edición */
+    color: #000000;
+}
+/* Estilos existentes */
 
 .perfil-page {
   min-height: 100vh;
@@ -422,7 +648,7 @@ const changePassword = async () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 3.5rem;
 }
 
 .perfil-foto-wrapper {
@@ -447,7 +673,7 @@ const changePassword = async () => {
   border: white;
   box-shadow: 0px 6px 10px -1px #d0cfcf;
   border-radius: 24px;
-  padding: 0.7rem 2.2rem;
+  padding: 0.4rem 1rem;
   font-weight: 600;
   font-size: 1.1rem;
   color: #000000;
@@ -465,21 +691,31 @@ const changePassword = async () => {
 .error-message {
   background: #fee;
   color: #c33;
-  padding: 1rem;
   border-radius: 8px;
   margin: 1rem 0;
   text-align: center;
   border: 1px solid #fcc;
+  margin-top: -40px;
+  opacity: 1; 
+  transition: opacity 1s ease-out, visibility 1s ease-out;
+  visibility: visible;
 }
 
 .success-message {
   background: #efe;
   color: #363;
-  padding: 1rem;
   border-radius: 8px;
-  margin: 1rem 0;
+  margin-top: -60px;
   text-align: center;
   border: 1px solid #cfc;
+  opacity: 1; 
+  transition: opacity 1s ease-out, visibility 1s ease-out;
+  visibility: visible;
+}
+
+.fade-out {
+  opacity: 0;
+  visibility: hidden; /* Oculta el elemento para que no se pueda hacer clic */
 }
 
 .perfil-info-section {
@@ -501,7 +737,7 @@ const changePassword = async () => {
   font-size: 1.6rem;
   font-weight: 700;
   margin-top: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.8rem;
   color: #000000;
 }
 
@@ -521,7 +757,7 @@ const changePassword = async () => {
 .info-item input {
   flex: 1;
   padding: 0.5rem 0.8rem;
-  border: white;
+  border: 1px solid #bdbdbd;
   box-shadow: 0px 6px 10px -1px #d0cfcf;
   border-radius: 8px;
   font-size: 1rem;
@@ -561,7 +797,7 @@ const changePassword = async () => {
   width: 90%;
   padding: 0.5rem 0.8rem;
   margin-left: -1px;
-  border: white;
+  border: 1px solid #bdbdbd;
   box-shadow: 0px 6px 10px -1px #d0cfcf;
   border-radius: 8px;
   font-size: 1rem;
@@ -575,7 +811,7 @@ const changePassword = async () => {
   width: 100%;
   padding: 0.5rem 0.8rem;
   margin-left: -1px;
-  border: white;
+  border: 1px solid #bdbdbd;
   box-shadow: 0px 6px 10px -1px #d0cfcf;
   border-radius: 8px;
   font-size: 1rem;
@@ -583,15 +819,23 @@ const changePassword = async () => {
   outline: none;
 }
 
-
+/* ESTILO NUEVO PARA EL BOTÓN CANCELAR EN MODO EDICIÓN */
+.cancel-btn-edit {
+    background: #ccc !important;
+    color: #ffffff !important;
+}
+.cancel-btn-edit:hover {
+    background: #aaa !important;
+    border-color: #aaa !important;
+}
+/* FIN ESTILO NUEVO */
 
 .info-buttons {
   display: flex;
   gap: 1rem;
-  margin-top: 4rem;
+  margin-top: 0.5rem;
 }
 .info-btn {
-  flex: 1;
   padding: 0.7rem 1.2rem;
   background: #ff9100;
   border: none;
@@ -601,11 +845,54 @@ const changePassword = async () => {
   color: #ffffff;
   cursor: pointer;
   transition: all 0.2s;
+  width: 50%;
 }
-.info-btn:hover {
+
+.info-btnG {
+  flex: 1;
+  background: #ff9100;
+  border: none;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 15px;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 90px;
+}
+
+.info-btnC {
+  flex: 1;
+  background: #ff9100;
+  border: none;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 15px;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.info-btn:hover:not(:disabled) {
   background: #ff7700;
   border-color: #ffffff;
 }
+.info-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+/* Spinner pequeño para el botón de guardado/edición */
+.loading-spinner-small {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s ease-in-out infinite;
+    margin-right: 5px;
+}
+
 
 .funcionalidades {
   background: #ffffffa0;
@@ -770,6 +1057,9 @@ const changePassword = async () => {
   font-size: 0.9rem;
   border: 1px solid #cfc;
   margin-bottom: 0.5rem;
+  opacity: 1; 
+  transition: opacity 1s ease-out, visibility 1s ease-out;
+  visibility: visible;
 }
 
 .password-hint {
@@ -802,7 +1092,7 @@ const changePassword = async () => {
 }
 
 .form-group input::placeholder {
-    color: #939393;    
+    color: #939393; 
     font-weight: 500;
 }
 
@@ -887,4 +1177,4 @@ const changePassword = async () => {
     align-items: center;
   }
 }
-</style> 
+</style>

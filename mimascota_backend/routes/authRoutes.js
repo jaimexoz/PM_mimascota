@@ -4,7 +4,8 @@ const router = express.Router();
 // Importa el controlador de autenticación
 const { 
     registerUser, 
-    loginUser, 
+    loginUser,
+    updateUserInfo, 
     verifyEmail,
     requestPasswordReset,
     resetPassword,
@@ -68,6 +69,8 @@ router.get('/usuarios', protect, getAllUsers);
 
 // Ruta para actualizar foto de perfil (solo usuarios autenticados)
 router.put('/update-profile-image', protect, upload.single('profileImage'), updateProfileImage);
+
+router.put('/update-user-info', protect, updateUserInfo);
 
 // Ruta para cambiar contraseña (solo usuarios autenticados)
 router.put('/change-password', protect, changePassword);
