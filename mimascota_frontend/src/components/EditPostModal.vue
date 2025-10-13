@@ -31,38 +31,56 @@
                         <label for="nombre">Nombre:</label>
                         <input type="text" id="nombre" v-model="formData.nombre_mascot" required>
                         
-                        <label>Especie:</label>
-                        <div class="radio-group">
-                            <input type="radio" id="perro" value="Perro" v-model="formData.especi_mascot">
-                            <label for="perro">Perro</label>
-                            <input type="radio" id="gato" value="Gato" v-model="formData.especi_mascot">
-                            <label for="gato">Gato</label>
-                        </div>
-                        
-                        <label>Sexo:</label>
-                        <div class="radio-group">
-                            <input type="radio" id="macho" value="Macho" v-model="formData.sexoxx_mascot">
-                            <label for="macho">Macho</label>
-                            <input type="radio" id="hembra" value="Hembra" v-model="formData.sexoxx_mascot">
-                            <label for="hembra">Hembra</label>
+                        <div class="container-row"> 
+        
+                            <div class="container-col column-half"> 
+                                <label>Especie:</label>
+                                <div class="button-group">
+                                    <button :class="{ active: formData.especi_mascot === 'Perro' }" @click="formData.especi_mascot = 'Perro'">Perro</button>
+                                    <button :class="{ active: formData.especi_mascot === 'Gato' }" @click="formData.especi_mascot = 'Gato'">Gato</button>
+                                </div>
+                            </div>
+
+                            <div class="container-col column-half"> 
+                                <label>Sexo:</label>
+                                <div class="button-group">
+                                    <button :class="{ active: formData.sexoxx_mascot === 'Macho' }" @click="formData.sexoxx_mascot = 'Macho'">Macho</button>
+                                    <button :class="{ active: formData.sexoxx_mascot === 'Hembra' }" @click="formData.sexoxx_mascot = 'Hembra'">Hembra</button>
+                                </div>
+                            </div>
+
                         </div>
 
-                        <label for="edad">Edad (Meses):</label>
-                        <input type="number" id="edad" v-model.number="formData.edadme_mascot" min="0">
+
+                        <div class="column">
+
+                        <div class="container-col">
+                            <label for="edad">Edad (Meses):</label>
+                            <input type="number" id="edad" v-model.number="formData.edadme_mascot" min="0">
+                        </div>
                         
+                        <div class="container-col">
                         <label for="raza">Raza:</label>
                         <input type="text" id="raza" v-model="formData.razaxx_mascot">
-                        
+                        </div>
+                        </div >
+
+                        <div class="column">
+
+                        <div class="container-col">
                         <label for="peso">Peso (kg):</label>
                         <input type="number" step="0.1" id="peso" v-model.number="formData.pesokg_mascot">
+                        </div>
 
+                        <div class="container-col">
                         <label for="tamano">Tamaño:</label>
                         <select id="tamano" v-model="formData.tamano_mascot">
                             <option value="Pequeño">Pequeño</option>
                             <option value="Mediano">Mediano</option>
                             <option value="Grande">Grande</option>
                         </select>
-
+                        </div>
+                        </div>
                         <h3 class="section-title">Personalidad y Temperamento</h3>
 
                         <div class="traits-container checkbox-grid">
@@ -384,7 +402,9 @@ width: 90%;
 max-width: 1000px; 
 max-height: 90vh; 
 overflow-y: auto; 
-padding: 2rem; }
+padding: 2rem;
+scrollbar-width: none;
+}
 
 .modal-header { 
 display: flex; 
@@ -428,8 +448,19 @@ grid-template-columns: repeat(2, 1fr); }
 .info-section { 
 padding: 1rem; 
 border: 1px solid #f3f4f6; 
-border-radius: 0.5rem; }
+border-radius: 0.5rem;
+display: flex;
+flex-direction: column;
+}
 
+.column{
+    display: flex;
+}
+
+.container-col{
+    width: 100%;
+    margin: 10px;
+}
 .info-section h3 { 
 font-size: 1.25rem; 
 font-weight: 600; 
@@ -441,7 +472,6 @@ border-bottom: 1px solid #eee; }
 .info-section label { 
 display: block; 
 font-weight: 500; 
-margin-top: 0.75rem; 
 margin-bottom: 0.25rem; }
 
 .info-section input[type="text"], .info-section input[type="number"], .info-section textarea, .info-section select { 
@@ -450,6 +480,10 @@ padding: 0.5rem;
 border: 1px solid #d1d5db; 
 border-radius: 0.375rem; 
 box-sizing: border-box; }
+
+.info-section textarea{
+    height: 150px;
+}
 
 .radio-group { 
 display: flex; 
@@ -541,7 +575,7 @@ color: white;
 padding: 0.75rem 1.5rem; 
 border: none; 
 border-radius: 25px; 
-font-size: 1.25rem; 
+font-size: 1rem; 
 font-weight: 700; 
 cursor: pointer; 
 transition: background-color 0.3s; 
@@ -558,33 +592,83 @@ box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
 /* Añade esto a tu sección de estilos (o archivo CSS) */
 .checkbox-grid {
     display: flex;
+    margin: 10px;
     flex-wrap: wrap;
-    gap: 8px; /* Espacio entre los chips */
+    gap: 8px;
+    margin-bottom: 20px;
+    justify-content: center;
 }
 
 .trait-checkbox-wrapper {
-    display: contents; /* No afecta el flujo flex */
+    width: 100px;
 }
 
 .selectable-chip {
+    padding: 3px 15px;
+    border: 2px solid #ff9900;
+    border-radius: 25px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    margin-right: 10px;
+    margin-top: 5px;
+    background-color: #fff;
     cursor: pointer;
-    padding: 6px 12px;
-    border-radius: 20px;
-    border: 1px solid #ccc;
-    background-color: #f0f0f0;
-    transition: all 0.2s ease;
+    transition: all 0.2s;
     user-select: none; /* Evita selección de texto al hacer clic */
+    width: 100%;
+    text-align: center;
 }
 
 .selectable-chip:hover {
-    background-color: #e0e0e0;
+    background-color: #ff9900; /* Color naranja de la imagen */
+    color: white;
+    border-color: #ff9900;
 }
 
 .is-selected {
     /* Estilo para un chip marcado */
-    background-color: #4CAF50; /* Color primario, ej. verde */
-    color: white;
-    border-color: #4CAF50;
-    font-weight: bold;
+    border: 1px solid #ff9900;
+    background-color: rgb(255, 170, 0);
+    color: #ffffff;
+    font-size: 0.9em;
 }
+
+.button-group button {
+    padding: 8px 15px;
+    border: 2px solid #ff9900;
+    border-radius: 25px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    margin-right: 10px;
+    margin-top: 5px;
+    background-color: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.button-group button.active {
+    background-color: #ff9900; /* Color naranja de la imagen */
+    color: white;
+    border-color: #ff9900;
+}
+
+/* 1. Define el comportamiento de Fila */
+.container-row {
+    display: flex; /* Convierte el contenedor en una fila flexible */
+    gap: 20px;     /* Espacio entre las columnas */
+    margin-bottom: 20px; /* Espacio entre filas */
+    width: 100%;
+}
+
+/* 2. Define el comportamiento de Media Columna */
+.column-half {
+    flex: 1 1 50%; /* Ocupa el 50% del espacio, puede crecer y encogerse */
+}
+
+/* 3. Asegura que los botones se vean bien (si no lo tienes) */
+.button-group {
+    display: flex;
+    gap: 10px;
+}
+
 </style>

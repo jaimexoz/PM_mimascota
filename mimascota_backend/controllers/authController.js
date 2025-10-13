@@ -37,7 +37,7 @@ const transporter = nodemailer.createTransport({
 // @route   POST /api/auth/register
 // @access  Public
 const registerUser = async (req, res) => {
-    const { nombre_usuari, emailx_usuari, contra_usuari, celula_usuari } = req.body;
+    const { nombre_usuari, emailx_usuari, contra_usuari, celula_usuari, apelli_usuari } = req.body;
     let imagep_usuari = null;
 
     // Subir imagen a Cloudinary si existe
@@ -58,7 +58,7 @@ const registerUser = async (req, res) => {
     }
 
     // Validaciones básicas
-    if (!nombre_usuari || !emailx_usuari || !contra_usuari) {
+    if (!nombre_usuari || !apelli_usuari || !emailx_usuari || !contra_usuari) {
         return res.status(400).json({ message: 'Por favor, introduce todos los campos requeridos.' });
     }
 
@@ -94,13 +94,14 @@ const registerUser = async (req, res) => {
                 idxxxx_rolesx, 
                 mailve_usuari, 
                 tokeve_usuari,      
-                tokexp_usuari       
+                tokexp_usuari,
+                apelli_usuari     
             ) VALUES ($1, $2, $3, $4, $5, 
-                (SELECT idxxxx_rolesx FROM roles WHERE nombre_rolesx = 'Usuario Normal'), 
-                FALSE, $6, $7) 
-            RETURNING idxxxx_usuari, nombre_usuari, emailx_usuari, celula_usuari, imagep_usuari, mailve_usuari`,
+                (SELECT idxxxx_rolesx FROM roles WHERE nombre_rolesx = 'Usuario'), 
+                FALSE, $6, $7, $8) 
+            RETURNING idxxxx_usuari, nombre_usuari, emailx_usuari, celula_usuari, imagep_usuari, mailve_usuari, apelli_usuari`,
             // Pasa imagep_usuari (la ruta relativa al servidor) como el valor del parámetro $5
-            [nombre_usuari, emailx_usuari, hashedPassword, celula_usuari, imagep_usuari, verificationToken, verificationExpires]
+            [nombre_usuari, emailx_usuari, hashedPassword, celula_usuari, imagep_usuari, verificationToken, verificationExpires, apelli_usuari]
         );
 
         // Enviar correo de verificación
@@ -196,7 +197,8 @@ const loginUser = async (req, res) => {
                 celular: user.celula_usuari,
                 role: user.nombre_rolesx,
                 imageUrl: user.imagep_usuari,
-                mailVerified: user.mailve_usuari
+                mailVerified: user.mailve_usuari,
+                apellido: user.apelli_usuari
             },
         });
 
@@ -355,7 +357,8 @@ const getAllUsers = async (req, res) => {
         const result = await pool.query(`
             SELECT 
                 idxxxx_usuari AS id, 
-                nombre_usuari AS nombre, 
+                nombre_usuari AS nombre,
+                apelli_usuari AS apellido, 
                 emailx_usuari AS correo, 
                 celula_usuari AS celular, 
                 idxxxx_rolesx AS rol
@@ -431,6 +434,7 @@ const updateProfileImage = async (req, res) => {
             SELECT 
                 u.idxxxx_usuari AS id,
                 u.nombre_usuari AS nombre,
+                u.apelli_usuari AS apellido, 
                 u.emailx_usuari AS email,
                 u.celula_usuari AS celular,
                 u.imagep_usuari AS imageUrl,
@@ -447,6 +451,7 @@ const updateProfileImage = async (req, res) => {
             user: {
                 id: updatedUser.id,
                 nombre: updatedUser.nombre,
+                nombre: updatedUser.apellido,
                 email: updatedUser.email,
                 celular: updatedUser.celular,
                 role: updatedUser.role,

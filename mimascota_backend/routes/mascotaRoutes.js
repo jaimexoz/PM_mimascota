@@ -99,6 +99,7 @@ router.get('/editar/:id', protect, async (req, res) => {
                 m.idxxxx_mascot = $1 
                 AND m.eliminado_logico = FALSE
                 AND m.forane_usuari_id = $2
+                AND mc.status_mascar= TRUE
             GROUP BY
                 m.idxxxx_mascot, m.nombre_mascot, m.especi_mascot, 
                 m.sexoxx_mascot, m.edadme_mascot, m.razaxx_mascot, 
@@ -123,6 +124,25 @@ router.get('/editar/:id', protect, async (req, res) => {
     }
 });
 
+// ⭐️ FUNCIONES DE AYUDA NECESARIAS (Colócalas fuera del router.put)
+/**
+ * Obtiene los IDs de las características (personalidades) a partir de sus nombres.
+ * @param {object} client - El cliente de la pool con la transacción activa.
+ * @param {string[]} nombres - Array de nombres de características.
+ * @returns {Promise<number[]>} Array de IDs de características.
+ */
+async function getCaracteristicaIds(client, nombres) {
+    if (!nombres || nombres.length === 0) return [];
+
+    const placeholders = nombres.map((_, i) => `$${i + 1}`).join(', ');
+    const query = `
+        SELECT idxxxx_caract 
+        FROM caracteristicas 
+        WHERE nombre_caract IN (${placeholders})
+    `;
+    const result = await client.query(query, nombres);
+    return result.rows.map(row => row.idxxxx_caract);
+}
 
 
 // ⭐️ NUEVA RUTA: PUT /api/mascotas/:id
@@ -133,31 +153,32 @@ router.put('/actualizar/:id', protect, uploadArrayMascota, async (req, res) => {
 
     // Rutas locales temporales que Multer acaba de crear (si el usuario subió algo)
     const localImagePaths = req.files ? req.files.map(file => file.path) : [];
+
     let datosMascota;
 
     try {
-        // 1. Parsear el campo 'datos' de FormData (Contiene todos los campos de texto/URLs existentes)
         datosMascota = JSON.parse(req.body.datos);
     } catch (e) {
-        // Limpiar y retornar si el JSON es inválido
         cleanupUploadedFiles(localImagePaths); 
         return res.status(400).json({ mensaje: 'Formato de datos de la mascota inválido (JSON no válido).' });
     }
     
-    // Desestructuración de campos
+    // ⭐️ 1. Desestructurar también el campo status_mascot
     const {
         nombre_mascot, especi_mascot, sexoxx_mascot, edadme_mascot, 
         razaxx_mascot, pesokg_mascot, tamano_mascot, infoad_mascot,
-        // URLs existentes/a conservar (vienen del JSON del frontend)
         image1_mascot: existingUrl1, 
         image2_mascot: existingUrl2, 
-        image3_mascot: existingUrl3,  
+        image3_mascot: existingUrl3,
+        personalidad_array: newPersonalidades,
+        status_mascot // ⭐️ Capturamos el nuevo valor del estado (true/false)
     } = datosMascota; 
 
     if (isNaN(petId) || !nombre_mascot || !especi_mascot || !sexoxx_mascot) {
         cleanupUploadedFiles(localImagePaths);
         return res.status(400).json({ mensaje: 'Faltan campos requeridos (nombre, especie, sexo).' });
     }
+
 
     // --- Lógica de Subida a Cloudinary ---
     let newCloudinaryUrls = [];
@@ -214,31 +235,81 @@ router.put('/actualizar/:id', protect, uploadArrayMascota, async (req, res) => {
     const client = await pool.connect(); 
     
     try {
-        // ... (Verificación de dueño y consulta UPDATE) ...
+        // 1. INICIAR TRANSACCIÓN
+        await client.query('BEGIN');
         
+        // ⭐️ 2. Actualizar datos básicos de la Mascota, incluyendo status_mascot
         const updateQuery = `
              UPDATE mascotas 
              SET 
                  nombre_mascot = $1, especi_mascot = $2, sexoxx_mascot = $3, 
                  edadme_mascot = $4, razaxx_mascot = $5, pesokg_mascot = $6, 
                  tamano_mascot = $7, infoad_mascot = $8, 
-                 image1_mascot = $9, image2_mascot = $10, image3_mascot = $11
-             WHERE idxxxx_mascot = $12 
+                 image1_mascot = $9, image2_mascot = $10, image3_mascot = $11,
+                 status_mascot = $12  -- ⭐️ Añadimos el nuevo campo
+             WHERE idxxxx_mascot = $13 
              RETURNING idxxxx_mascot;
          `;
 
          const updateValues = [
              nombre_mascot, especi_mascot, sexoxx_mascot, edadme_mascot, 
              razaxx_mascot, pesokg_mascot, tamano_mascot, infoad_mascot, 
-             finalImage1, finalImage2, finalImage3, // ⬅️ URLs de Cloudinary o NULL
+             finalImage1, finalImage2, finalImage3, 
+             status_mascot, // ⭐️ Nuevo valor
              petId 
          ];
         
         const result = await client.query(updateQuery, updateValues);
 
         if (result.rowCount === 0) {
+            await client.query('ROLLBACK'); 
             return res.status(404).json({ mensaje: 'Mascota no encontrada o no se pudo actualizar.' });
         }
+        
+        // --- Sincronizar Características (Se mantiene la misma lógica) ---
+        
+        // Obtener los IDs de las nuevas características a partir de sus nombres
+        const newCaractIds = await getCaracteristicaIds(client, newPersonalidades);
+        
+        // 3. ELIMINAR características viejas (No se toca el estado de la mascota, solo las características)
+        if (newCaractIds.length > 0) {
+            // ⭐️ Actualizar a status_caract = FALSE (Soft Delete) para las que NO están en la lista nueva
+            const deactivateQuery = `
+                UPDATE mascota_caracteristicas
+                SET status_mascar = FALSE
+                WHERE forane_mascot_id = $1
+                AND forane_caract_id NOT IN (${newCaractIds.map((_, i) => `$${i + 2}`).join(', ')})
+                AND status_mascar = TRUE; -- Opcional: solo actualizar si estaban activas
+            `;
+            await client.query(deactivateQuery, [petId, ...newCaractIds]);
+        } else {
+            // Si la lista de nuevas personalidades está vacía, desactivar TODAS las existentes
+            const deactivateAllQuery = `
+                UPDATE mascota_caracteristicas
+                SET status_mascar = FALSE
+                WHERE forane_mascot_id = $1
+                AND status_mascar = TRUE;
+            `;
+            await client.query(deactivateAllQuery, [petId]);
+        }
+
+        // 4. INSERTAR nuevas características (Usando ON CONFLICT para evitar duplicados)
+        if (newCaractIds.length > 0) {
+            const insertValues = newCaractIds.map(caractId => 
+                `(${petId}, ${caractId}, TRUE)`
+            ).join(', ');
+
+            const insertQuery = `
+            INSERT INTO mascota_caracteristicas (forane_mascot_id, forane_caract_id, status_mascar)
+            VALUES ${insertValues}
+            ON CONFLICT (forane_mascot_id, forane_caract_id) 
+            DO UPDATE SET status_mascar = TRUE;
+            `;
+            await client.query(insertQuery);
+        }
+
+        // 5. CONFIRMAR TRANSACCIÓN
+        await client.query('COMMIT');
         
         res.status(200).json({ 
             mensaje: 'Mascota actualizada con éxito.',
@@ -246,7 +317,9 @@ router.put('/actualizar/:id', protect, uploadArrayMascota, async (req, res) => {
         });
 
     } catch (dbError) {
-        console.error('Error de base de datos al actualizar la mascota:', dbError);
+        // 6. REVERTIR TRANSACCIÓN EN CASO DE ERROR
+        await client.query('ROLLBACK'); 
+        console.error('Error de base de datos al actualizar la mascota y características:', dbError);
         res.status(500).json({ 
             mensaje: 'Error interno del servidor al actualizar la mascota.', 
             error: dbError.message 
@@ -254,6 +327,7 @@ router.put('/actualizar/:id', protect, uploadArrayMascota, async (req, res) => {
     } finally {
         client.release();
     }
+
 });
 
 
@@ -647,11 +721,11 @@ router.post('/', protect, uploadArrayMascota, async (req, res) => {
             const caracteristicaIds = caracteristicasResult.rows.map(row => row.idxxxx_caract);
 
             if (caracteristicaIds.length > 0) {
-                const relacionValues = caracteristicaIds.map(charId => `(${mascotaId}, ${charId})`).join(',');
+                const relacionValues = caracteristicaIds.map(charId => `(${mascotaId}, ${charId}, TRUE)`).join(',');
                 
                 // Nota: Aquí se usa 'forane_caract_id' según tu código anterior.
                 const relacionQuery = `
-                    INSERT INTO mascota_caracteristicas (forane_mascot_id, forane_caract_id) 
+                    INSERT INTO mascota_caracteristicas (forane_mascot_id, forane_caract_id, status_mascar) 
                     VALUES ${relacionValues};
                 `;
                 await client.query(relacionQuery);

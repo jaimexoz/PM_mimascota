@@ -122,33 +122,48 @@
                 
             <div 
             class="drag-drop-area"
-            :class="{ 'drag-activo': dragActivo }"
-            @dragover.prevent="manejarDragOver"
-            @dragleave="manejarDragLeave"
-            @drop.prevent="manejarDrop">
+    :class="{ 'drag-activo': dragActivo }"
+    @dragover.prevent="manejarDragOver"
+    @dragleave="manejarDragLeave"
+    @drop.prevent="manejarDrop">
 
-                <div v-if="archivosSubidos.length === 0" class="upload-box">
-                    <img src="../assets/upload.jpg" alt="Arrastrar y Soltar Ilustración" class="upload-illustration">
-                    <p>Drag & Drop here</p>
-                    <p>- or -</p>
-                    <label for="file-upload" class="upload-button">
-                        Upload an Image
-                    </label>
-                    <input 
-                        type="file" 
-                        id="file-upload" 
-                        @change="manejarSubidaArchivo" 
-                        style="display: none;"
-                        multiple
-                    >
-                </div>
+    <div v-if="archivosSubidos.length === 0" class="upload-box">
+        <img src="../assets/upload.jpg" alt="Arrastrar y Soltar Ilustración" class="upload-illustration">
+        <p>Drag & Drop here</p>
+        <p>- or -</p>
+        <label for="file-upload" class="upload-button">
+            Upload an Image
+        </label>
+    </div>
 
-                <div v-else class="preview-grid">
-                    <div v-for="archivo in archivosSubidos" :key="archivo.id" class="preview-item">
-                        <img :src="archivo.url" :alt="archivo.file.name">
-                        <button class="remove-btn" @click="eliminarArchivo(archivo.id)">X</button>
-                    </div>
-                </div>
+    <div v-else class="preview-container-wrapper">
+        
+        <div class="preview-grid-flex">
+            
+            <div v-for="archivo in archivosSubidos" :key="archivo.id" class="preview-item">
+                <img :src="archivo.url" :alt="archivo.file.name">
+                <button class="remove-btn" @click="eliminarArchivo(archivo.id)">X</button>
+            </div>
+            
+            <label 
+                for="file-upload" 
+                class="upload-placeholder-item"
+                v-if="archivosSubidos.length < MAX_ARCHIVOS">
+                <span class="add-icon">+</span>
+            </label>
+            
+        </div>
+        
+        
+    </div>
+
+    <input 
+        type="file" 
+        id="file-upload" 
+        @change="manejarSubidaArchivo" 
+        style="display: none;"
+        multiple
+    >
             </div>
         </div>
 
@@ -703,13 +718,14 @@ textarea {
 .upload-button:active {
     background-color: #ff9900;
      box-shadow: 0px 6px 10px -1px #757373; 
-    transform: scale(0.1);
+    
 }
 
 /* Contenedor principal que maneja el borde y el centrado de todo el contenido */
 .drag-drop-area {
     background: #fff8f1;
     display: flex;
+    flex-direction: column;
     width: 90%;
     height: 35%;
     border: 4px dashed #ff9900;
@@ -720,7 +736,9 @@ textarea {
     text-align: center;
     border-radius: 8px;
     overflow: auto; /* Permite scroll si hay muchas miniaturas */
+
 }
+
 
 /* Retroalimentación visual al arrastrar */
 .drag-drop-area.drag-activo {
@@ -746,10 +764,11 @@ textarea {
 /* --- Estilos de la Cuadrícula de Previsualización --- */
 
 .preview-grid {
-     /* ... (tu código grid aquí) ... */
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); 
+    grid-template-columns: repeat(auto-fit, minmax(200px, 120px)); 
     gap: 10px;
+    justify-content: center;
+    align-items: center;
     width: 100%;
 }
 
@@ -760,14 +779,31 @@ textarea {
     border-radius: 20px;
 }
 
-.preview-item img {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* Asegura que la imagen se vea bien */
+.remove-btn {
+    /* Esencial: superpone el botón sobre la imagen */
+    position: absolute; 
+    
+    /* Coloca el botón en la esquina superior derecha */
+    top: 10px; 
+    right: 10px; 
+    
+    /* Estilos para hacerlo visible y usable */
+    background-color: red; 
+    color: white;
+    border: none;
+    border-radius: 50%; /* Para hacerlo circular */
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    line-height: 20px; /* Centra la X */
+    text-align: center;
+    font-weight: 700;
+    cursor: pointer;
+    
+    /* Opcional pero útil: asegura que esté por encima de todo */
+    z-index: 10; 
 }
+
 
 
 /* Modal */
@@ -887,6 +923,83 @@ textarea {
     color: #4f4f4f;
    
 }
+
+/*
+ * ⭐️ IMPORTANTE: Asegúrate de que .drag-drop-area usa Flexbox para 
+ * alinear sus contenidos (el .upload-box o el .preview-container-wrapper)
+ * en el centro.
+ */
+ .drag-drop-area {
+    flex-direction: column; 
+}
+
+/* Nuevo Contenedor para la Cuadrícula y el Botón de Añadir */
+.preview-container-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px; 
+    width: 100%;
+}
+
+/* ⭐️ SOLUCIÓN CLAVE: Contenedor Flexbox para las miniaturas y el placeholder */
+.preview-grid-flex {
+    display: flex;
+    gap: 15px; 
+    justify-content: center; 
+    flex-wrap: wrap; 
+    width: 100%;
+}
+
+/* ⭐️⭐️ CORRECCIÓN CLAVE AQUÍ ⭐️⭐️ */
+.preview-item {
+    position: relative;
+    width: 170px; 
+    padding-top: 170px; 
+    
+    overflow: hidden;
+    border-radius: 20px;
+}
+
+/* ⭐️⭐️ CORRECCIÓN CLAVE PARA LA IMAGEN INTERNA ⭐️⭐️ */
+.preview-item img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Esto hace que la imagen rellene el espacio sin estirarse */
+    object-position: center; /* Centra la imagen dentro del recuadro */
+}
+
+
+/* Estilo para el placeholder de subida (el cuadro con el '+') */
+.upload-placeholder-item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 3px dashed #ff9900;
+    cursor: pointer;
+    background-color: #fff8f1;
+    transition: background-color 0.2s;
+    
+    /* Mantenemos el tamaño fijo aquí también para consistencia */
+    width: 170px; 
+    height: 170px; 
+    border-radius: 20px;
+}
+
+.upload-placeholder-item:hover {
+    background-color: #ffeadc;
+}
+
+.add-icon {
+    font-size: 3rem;
+    color: #ff9900;
+    font-weight: 300;
+}
+
+/* Opcional: Estilo para el botón de subir que está debajo de las miniaturas */
 
 
 </style>

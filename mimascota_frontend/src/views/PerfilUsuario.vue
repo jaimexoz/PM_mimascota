@@ -24,6 +24,9 @@
           <div class="perfil-col info">
             <h2>Información</h2>
             <div class="info-item"><span>Nombre</span><input type="text" :value="userName" readonly /></div>
+
+            <div class="info-item"><span>Apellido</span><input type="text" :value="userLastname" readonly /></div>
+
             <div class="info-item"><span>Correo electrónico</span><input type="text" :value="userEmail" readonly /></div>
 
            
@@ -162,6 +165,7 @@ const router = useRouter();
 const defaultAvatar = '/default-avatar.png';
 const userData = JSON.parse(localStorage.getItem('userData') || '{}');
 const userName = ref(userData.nombre || userData.name || '');
+const userLastname = ref(userData.apellido || userData.lastname || '');
 const userEmail = ref(userData.email || userData.emailx_usuari || '');
 const userPhone = ref(userData.celular || userData.celula_usuari || '');
 const userAge = ref(userData.edad_usuari || '');
@@ -170,6 +174,7 @@ const userImageUrl = ref(userData.imageUrl && userData.imageUrl.startsWith('http
 // Función para actualizar los datos del usuario
 const updateUserInfo = (newUserData) => {
   userName.value = newUserData.nombre || newUserData.name || '';
+  userLastname.value = newUserData.apellido || newUserData.lastname || '';
   userEmail.value = newUserData.email || newUserData.emailx_usuari || '';
   userPhone.value = newUserData.celular || newUserData.celula_usuari || '';
   userAge.value = newUserData.edad_usuari || '';

@@ -1,19 +1,30 @@
 <script setup>
-import { ref, defineEmits } from 'vue';
+import { ref, defineEmits, nextTick } from 'vue';
 import axios from 'axios';
 
 const emit = defineEmits(['toggle-form', 'registration-success']);
 
 const nombre = ref('');
+const apellido = ref(''); 
 const email = ref('');
 const password = ref('');
 const celular = ref('');
 const profileImage = ref(null);
 
-const errorMessage = ref('');
+const errorMessage = ref(''); 
+// Función para actualizar el nombre del archivo visible
+const updateFileNameDisplay = (file) => {
+    const fileNameElement = document.querySelector('.nombre-archivo');
+    if (fileNameElement) {
+        fileNameElement.textContent = file ? file.name : 'Ningún archivo seleccionado';
+    }
+};
 
 const handleFileChange = (event) => {
-    profileImage.value = event.target.files[0];
+    const file = event.target.files[0];
+    profileImage.value = file;
+    // LLAMADA: Actualizar el texto visible con el nombre del archivo
+    updateFileNameDisplay(file);
 };
 
 const register = async () => {
@@ -21,6 +32,7 @@ const register = async () => {
 
     const formData = new FormData();
     formData.append('nombre_usuari', nombre.value);
+    formData.append('apelli_usuari', apellido.value); 
     formData.append('emailx_usuari', email.value);
     formData.append('contra_usuari', password.value);
     formData.append('celula_usuari', celular.value);
@@ -41,10 +53,20 @@ const register = async () => {
         
         // Limpiar el formulario
         nombre.value = '';
+        apellido.value = '';
         email.value = '';
         password.value = '';
         celular.value = '';
         profileImage.value = null;
+
+        updateFileNameDisplay(null);
+        // Usa nextTick para asegurar que el DOM se haya actualizado antes de buscar el input
+        await nextTick(); 
+        const fileInput = document.getElementById('profileImage');
+        if (fileInput) {
+            fileInput.value = ''; // Limpiar el input nativo
+        }
+
 
     } catch (error) {
         console.error('Error al registrar el usuario:', error);
@@ -61,8 +83,12 @@ const register = async () => {
     </div>
     <form class="register-form" @submit.prevent="register">
       <div class="form-group">
-        <label for="nombre">Nombre Completo</label>
+        <label for="nombre">Nombre</label>
         <input type="text" id="nombre" v-model="nombre" required placeholder="Tu nombre">
+      </div>
+      <div class="form-group">
+        <label for="nombre">Apellido</label>
+        <input type="text" id="apellido" v-model="apellido" required placeholder="Tu apellido">
       </div>
       <div class="form-group">
         <label for="email">Email</label>
@@ -76,10 +102,19 @@ const register = async () => {
         <label for="celular">Teléfono (opcional)</label>
         <input type="tel" id="celular" v-model="celular" placeholder="Tu número de teléfono">
       </div>
+
       <div class="form-group">
-        <label for="profileImage">Imagen de perfil (opcional)</label>
-        <input type="file" id="profileImage" @change="handleFileChange" accept="image/*">
-      </div>
+          <label for="profileImage">Imagen de perfil (opcional)</label>
+          <div class="archivo">
+              <input type="file" class="file-input-oculto" id="profileImage" @change="handleFileChange" accept="image/*">
+              
+              <label for="profileImage" class="file-label-personalizado" style="margin-bottom: 0px;">
+                  <span class="icono">&#x2191;</span> Seleccionar Archivo
+              </label>
+              
+              <span class="nombre-archivo">Ningún archivo seleccionado</span>
+          </div>
+        </div>
       <button type="submit" class="register-button">Registrarse</button>
     </form>
     <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
@@ -228,5 +263,44 @@ const register = async () => {
   color: #721c24;
   background-color: #f8d7da;
   border: 1px solid #f5c6cb;
+}
+
+/* Oculta completamente el campo de archivo nativo */
+.file-input-oculto{
+  display: none; 
+}
+
+/* Estilo para tu botón visible (el label) */
+.file-label-personalizado {
+  /* Haz que parezca un botón */
+  background-color: #007bff; /* Color primario */
+  color: white;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  /* Alineación y espaciado */
+  display: inline-block;
+  font-size: 0.7rem;
+  margin-right: 10px;
+  font-family: sans-serif; 
+  width: 43%;
+}
+
+/* Opcional: Estilos al pasar el ratón */
+.file-label-personalizado:hover {
+  background-color: #0056b3;
+}
+
+.archivo{
+  display: flex;
+  align-items: center;
+}
+/* Estilo para el texto del archivo seleccionado */
+.nombre-archivo {
+  font-style: italic;
+  justify-content: center;
+  justify-items: center;
+  color: #6c757d;
+  font-size: 0.75rem;
 }
 </style>
