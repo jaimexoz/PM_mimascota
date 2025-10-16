@@ -3,6 +3,9 @@
 
   <Navbar /> 
   
+  <div v-if="isLoading" class="loading-message">
+        <span class="loader"></span>
+    </div>
   <!-- 1. ENCABEZADO Y FILTROS -->
   <div class="content-wrapper">
       <h1 class="main-title">
@@ -149,7 +152,11 @@ async function getMascotas() {
       // Fallback a datos simulados
       mascotas.value = createMockMascotas(8); 
   } finally {
-      isLoading.value = false;
+      const minimumLoadingTime = 500; // Define el tiempo mínimo en milisegundos (ej: 500ms o 1000ms)
+        
+        setTimeout(() => {
+          isLoading.value = false; // El spinner se oculta después de este tiempo
+        }, minimumLoadingTime);
   }
 }
 
@@ -335,6 +342,26 @@ const PetCard = ({ mascota }) => {
 
 
 <style scoped>
+
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 5px solid;
+  border-color: #FF3D00 transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+} 
 /* Colores y Variables */
 .paw-icon-color {
   color: #FF9933; /* Naranja principal */
@@ -348,6 +375,23 @@ const PetCard = ({ mascota }) => {
   background-color: #E0852A;
 }
 
+.loading-message {
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Centrado del contenido (spinner y texto) */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centrado vertical */
+    align-items: center;    /* Centrado horizontal */
+    background-color: white;
+    z-index: 999; 
+    color: #333;
+    font-size: 1.2em;
+
+}
 /* ==============================================
   1. LAYOUT Y ENCABEZADO
   ============================================== */

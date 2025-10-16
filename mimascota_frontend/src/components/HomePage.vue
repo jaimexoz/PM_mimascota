@@ -4,7 +4,7 @@
     <Navbar />
     
     <!-- Contenido Principal -->
-    <main class="main-content">
+    <main  class="main-content">
       <!-- Título de la Página -->
       <div class="page-header">
         <div class="title-section">
@@ -35,11 +35,10 @@
       <div class="content-wrapper feed-content">
         <div class="pet-card-grid"> 
             
-            <div v-if="isLoading">
-                <Loader />
-                <p>Cargando las mascotas...</p>
-            </div>
 
+            <span v-if="isNavigating" class="loader">
+                Cargando las mascotas...
+            </span>
             <div v-else-if="mascotas.length === 0">
                 <p>
                     Aún no hay mascotas disponibles. ¡Vuelve pronto!
@@ -47,15 +46,21 @@
             </div>
 
             <template v-else>
+            
+            <span v-if="isNavigating" class="loader">
+                Cargando las mascotas...
+            </span>
                 <component 
                     v-for="mascota in mascotas" 
                     :key="mascota.idxxxx_mascot"
                     :is="PetCard"
                     :mascota="mascota"
+                    :is-navigating="isNavigating"
                 />
             </template>
             
         </div>
+        
     </div>
 
     <div class="container-3">
@@ -123,6 +128,7 @@ const authStore = useAuthStore();
 const mascotas = ref([]); // Almacenará SÓLO las 4 mascotas más recientes
 const isLoading = ref(true);
 
+const isNavigating = ref(false); 
 // ==============================================
 // OBTENCIÓN DE DATOS DEL BACKEND
 // ==============================================
@@ -250,6 +256,7 @@ const PetCard = ({ mascota }) => {
 
     // NOTA: Se mantienen las clases genéricas 'pet-card-*' para que uses tu propio CSS/
     const navigateToProfile = () => {
+        isNavigating.value = true; 
         // Utilizamos el router del componente padre
         router.push(`/card/${mascota.id || mascota.idxxxx_mascot}`);
     };
@@ -281,16 +288,37 @@ const PetCard = ({ mascota }) => {
             
         // Botón
         h('div', { class: 'pet-card-content-button ' }, [
-            h('button', { 
+        h('button', { 
                 class: 'pet-card-button',
-                onClick: navigateToProfile 
-            }, 'Ver perfil')
+                onClick: navigateToProfile,
+                // AÑADIR: La propiedad 'disabled' usa el valor de isNavigating
+                disabled: isNavigating.value // <--- USA .value para acceder al valor
+            }, isNavigating.value ? 'Cargando...' : 'Ver perfil')
         ])
     ]);
 };
 </script>
 
 <style scoped>
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 5px solid;
+  border-color: #FF3D00 transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+} 
 
 .home-page {
   min-height: 100vh;

@@ -3,6 +3,9 @@
     <!-- Navbar -->
     <Navbar />
     
+    <div v-if="isLoading" class="loading-message">
+        <span class="loader"></span>
+    </div>
     <!-- Contenido Principal -->
     <main class="main-content">
       <!-- Título de la Página -->
@@ -27,6 +30,43 @@ import Navbar from '../components/Navbar.vue';
 </script>
 
 <style scoped>
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 5px solid;
+  border-color: #FF3D00 transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+} 
+
+.loading-message {
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Centrado del contenido (spinner y texto) */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centrado vertical */
+    align-items: center;    /* Centrado horizontal */
+    background-color: white;
+    z-index: 999; 
+    color: #333;
+    font-size: 1.2em;
+
+}
 .nosotros-page {
   min-height: 100vh;
   background-color: #f8f9fa;

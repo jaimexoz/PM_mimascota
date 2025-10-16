@@ -40,7 +40,7 @@
                             <th>Ficha de Información</th>
                             <th>Formulario de Adopción</th>
                             <th>Estado de Solicitud</th>
-                            <th>Estado de Mascota</th>
+                            <th>Adopción</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -71,14 +71,27 @@
                             </td>
                             
                             <td>
-                                <select 
-                                    :value="solicitud.status_mascot"  
-                                    @change="event => updateMascotStatus(solicitud.forane_mascot_id, event.target.value)"
-                                    :class="['status-select', getMascotStatusClass(solicitud.status_mascot)]">
-                                    
-                                    <option class="classDisponible" value="Disponible">Disponible</option>
-                                    <option class="classAdoptado" value="Adoptado">Adoptado</option>
-                                </select>
+                                <div v-if="solicitud.adosuc_solici === null || solicitud.adosuc_solici === undefined" class="adoption-button">
+                                    <button 
+                                        @click="confirmAdoption(solicitud.idxxxx_solici, true)" 
+                                        class="button-yes"
+                                    >
+                                        Sí
+                                    </button>
+                                    <button 
+                                        @click="confirmAdoption(solicitud.idxxxx_solici, false)" 
+                                        class="button-no"
+                                    >
+                                        No
+                                    </button>
+                                </div>
+
+                                <span 
+                                    v-else 
+                                    :class="{'adopted-label': solicitud.adosuc_solici, 'not-adopted-label': !solicitud.adosuc_solici}"
+                                >
+                                    {{ solicitud.adosuc_solici ? 'Adoptado' : 'No Adoptado' }}
+                                </span>
                             </td>
                             
                         </tr>
@@ -335,6 +348,62 @@ const formatDate = (dateString) => {
     }
 }
 
+/**
+ * Función para confirmar la adopción (Sí/No).
+ * @param {number} solicitudId - El ID de la solicitud (idxxxx_solici).
+ * @param {boolean} isAdopted - TRUE para Sí (Adoptado), FALSE para No (No Adoptado).
+ */
+ const confirmAdoption = async (solicitudId, isAdopted) => {
+    const userToken = authStore.token || localStorage.getItem('userToken');
+
+    if (!userToken) {
+        console.error("No hay token para confirmar la adopción.");
+        return;
+    }
+
+    // 1. Encuentra la solicitud localmente para actualización optimista/reversión
+    const solicitudIndex = solicitudes.value.findIndex(s => s.idxxxx_solici === solicitudId);
+    if (solicitudIndex === -1) return;
+    const oldAdoptionStatus = solicitudes.value[solicitudIndex].adosuc_solici;
+
+    // OPTIMISTA: Actualiza la interfaz inmediatamente (cambia el botón por texto)
+    solicitudes.value[solicitudIndex].adosuc_solici = isAdopted;
+
+    try {
+        // 2. Llama al nuevo endpoint del backend
+        const response = await fetch(`http://localhost:3000/api/adoptions/${solicitudId}/confirm-adoption`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${userToken}`,
+            },
+            body: JSON.stringify({ isAdopted: isAdopted }), 
+        });
+
+        if (response.status === 401) {
+            authStore.logout();
+            router.push({ name: 'auth' });
+            return;
+        }
+
+        if (!response.ok) {
+            // Revertir el estado local si el backend falla
+            solicitudes.value[solicitudIndex].adosuc_solici = oldAdoptionStatus; 
+            const errData = await response.json();
+            throw new Error(errData.message || `Error HTTP: ${response.status}`);
+        }
+
+        // Si es exitoso, el estado ya está actualizado en el frontend.
+        console.log(`Estado de adopción para solicitud ${solicitudId} confirmado como ${isAdopted}.`);
+
+    } catch (err) {
+        console.error('Error al confirmar adopción:', err);
+        error.value = `Fallo al confirmar adopción: ${err.message}`;
+        // Revertir el estado local en caso de fallo
+        solicitudes.value[solicitudIndex].adosuc_solici = oldAdoptionStatus;
+    }
+};
+
 const irAtras = () => {
     window.history.back();
 };
@@ -475,7 +544,7 @@ select{
 .status-pendiente{
     font-size: 1rem;
     background-color: #e7e7e7;
-    color: #6b6b6b;
+    color: #000000;
     font-weight: 700;
     padding-left: 20px;
     padding-right: 18px;
@@ -487,7 +556,7 @@ select{
 .status-aceptado{
     font-size: 1rem;
     background-color: #afff5f70;
-    color: #5c9920;
+    color: #000000;
     font-weight: 700;
     padding-left: 30px;
     padding-right: 18px;
@@ -498,8 +567,8 @@ select{
 
 .status-rechazado{
     font-size: 1rem;
-    background-color: #ff3d3d70;
-    color: #a82424;
+    background-color: #ff6272;
+    color: #000000;
     font-weight: 700;
     padding-left: 22px;
     padding-right: 18px;
@@ -572,6 +641,38 @@ select{
     padding: 30px;
     color: #6c757d;
     font-style: italic;
+}
+
+.adoption-button{
+    display: flex;
+}
+
+.button-yes{
+    border: none;
+    background-color: #beff7c;
+    color: #000000;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 0.9rem;
+    margin-right: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 50px;
+    height: 40px;
+}
+
+.button-no{
+    border: none;
+    background-color: #ff6272;
+    color: #000000;
+    border-radius: 10px;
+    font-weight: 800;
+    font-size: 0.9rem;
+    margin-left: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 50px;
+    height: 40px;
 }
 
 /* Estilos para mensajes de estado */

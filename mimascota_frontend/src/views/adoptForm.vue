@@ -7,6 +7,9 @@
                     </svg>
                     Volver
                 </button>
+    <div v-if="isLoadingMascota" class="loading-message">
+        <span class="loader"></span>
+    </div>
     <div class="content-wrapper">
       
       <h1 class="main-title">
@@ -304,7 +307,11 @@ async function getMascotaDetails() {
     console.error("Error al obtener detalles de la mascota:", error);
     alert('No se pudo cargar la información de la mascota.');
   } finally {
-    isLoadingMascota.value = false;
+    const minimumLoadingTime = 500; // Define el tiempo mínimo en milisegundos (ej: 500ms o 1000ms)
+    
+        setTimeout(() => {
+          isLoadingMascota.value = false; // El spinner se oculta después de este tiempo
+        }, minimumLoadingTime);
   }
 }
 
@@ -384,6 +391,26 @@ onMounted(() => {
 </script>
 
 <style scoped>
+
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 5px solid;
+  border-color: #FF3D00 transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+} 
 
 .back-button {
     width: 110px;
@@ -590,6 +617,26 @@ onMounted(() => {
   background-color: #ccc;
   cursor: not-allowed;
 }
+
+
+.loading-message {
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Centrado del contenido (spinner y texto) */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centrado vertical */
+    align-items: center;    /* Centrado horizontal */
+    background-color: white;
+    z-index: 999; 
+    color: #333;
+    font-size: 1.2em;
+
+}
+
 
 .loading-state, .error-state {
   text-align: center;

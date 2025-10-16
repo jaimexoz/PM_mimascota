@@ -1,8 +1,63 @@
 <template>
   <router-view />
 </template>
-
 <script setup>
+import { onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+// Esta función se ejecuta automáticamente cuando el componente App.vue se monta (al cargar la app)
+onMounted(async () => {
+    const token = localStorage.getItem('token');
+    
+    // Solo procedemos si existe un token guardado
+    if (token) {
+        console.log("Token encontrado. Verificando su validez...");
+        
+        // Usamos una ruta protegida simple para verificar el token
+        // Usaremos la ruta 'update-user-info' como endpoint de prueba
+        try {
+            const response = await fetch('http://localhost:3000/api/auth/update-user-info', {
+                method: 'PUT', // PUT requiere token y es un endpoint privado
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}` // Es crucial enviar el token
+                },
+                // Se envía un cuerpo mínimo. El backend solo necesita validar la autenticación.
+                body: JSON.stringify({ /* No es necesario enviar datos reales aquí */ }) 
+            });
+            
+            // Si la respuesta no es 200 OK (ej. es 401 Unauthorized o 400 Bad Request)
+            if (!response.ok) {
+                // Leemos el error para obtener detalles si es posible
+                const errorData = await response.json();
+                
+                // Si el backend responde con 401 (token fallido/expirado), lo tratamos como error grave.
+                if (response.status === 401) {
+                    // Lanzamos un error que será capturado por el bloque catch
+                    throw new Error(errorData.message || 'Token expirado o inválido.');
+                }
+            }
+            
+            // Si la petición es exitosa (response.ok es true), el token es válido.
+            console.log("Token verificado correctamente. Sesión activa.");
+
+        } catch (error) {
+            // Este bloque se ejecuta si hay un error de red, o si lanzamos el error 401 arriba
+            console.error('Fallo en la verificación del token. Forzando cierre de sesión.', error.message);
+
+            // 1. Limpia los datos de sesión expirados
+            localStorage.removeItem('token'); 
+            localStorage.removeItem('userData'); 
+            
+            // 2. Redirige al login, solo si el usuario no está ya en la ruta de login
+            if (router.currentRoute.value.path !== '/login') {
+                router.push('/login');
+            }
+        }
+    }
+});
 </script>
 
 <style>

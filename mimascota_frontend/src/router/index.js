@@ -19,6 +19,7 @@ import SolicitudesEnviadas from '@/components/SolicitudesEnviadas.vue';
 import SolicitudesRecibidas from '@/components/SolicitudesRecibidas.vue';
 import MyPost from '@/views/MyPost.vue';
 import MyPostsEdit from '@/views/MyPostsEdit.vue';
+import AdopcionesRealizadas from '@/components/AdopcionesRealizadas.vue';
 
 import { isAuthenticated } from '../utils/auth'; // Importa la función de autenticación
 
@@ -119,6 +120,14 @@ const router = createRouter({
             path: '/solicitudesrecibidas', 
             name: 'SolicitudesRecibidas',
             component: SolicitudesRecibidas,
+            meta: { requiresAuth: true }
+        },
+
+        {
+            // ⭐️ Esta es la ruta que 
+            path: '/adopcionesrealizadas', 
+            name: 'AdopcionesRealizadas',
+            component: AdopcionesRealizadas,
             meta: { requiresAuth: true }
         },
 

@@ -11,9 +11,7 @@
     <Navbar /> 
     <!-- Estado de Carga -->
     <div v-if="loading" class="loading-message">
-      <p class="loading-text">Cargando perfil de la mascota...</p>
-      <!-- Icono de spinner simple -->
-      <div class="spinner"></div>
+        <span class="loader"></span>
     </div>
     
     <!-- Estado de Error -->
@@ -116,14 +114,17 @@
             {{ pet.informacionAdicional }}
           </p>
 
+          
           <!-- 6. Botón de Acción -->
           <button @click="navigateToAdoptionForm" class="adopt-button">
             ADOPTAR
           </button>
+          
         </div>
       </div>
     </div>
   </div>
+  
 </template>
 
 <script setup>
@@ -144,7 +145,8 @@ const authStore = useAuthStore();
 
 const navigateToAdoptionForm = () => {
     // 1. Obtener el ID de la mascota actualmente cargada
-    const mascotId = pet.value.id; 
+    const mascotId = pet.value.id;
+     loading.value= false;
 
     if (!mascotId) {
         console.error("ID de mascota no disponible para iniciar adopción.");
@@ -394,7 +396,11 @@ const fetchPetData = async () => {
     console.error('Fetch error:', err);
     error.value = `No se pudo obtener el perfil: ${err.message}`;
   } finally {
-    loading.value = false;
+        const minimumLoadingTime = 500; // Define el tiempo mínimo en milisegundos (ej: 500ms o 1000ms)
+    
+        setTimeout(() => {
+            loading.value = false; // El spinner se oculta después de este tiempo
+        }, minimumLoadingTime);
   }
 };
 function irAtras() {
@@ -408,6 +414,25 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 5px solid;
+  border-color: #FF3D00 transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+} 
 
 .back-button {
     width: 110px;
@@ -853,9 +878,21 @@ onMounted(() => {
 /* ======================================= */
 
 .loading-message {
-    text-align: center;
-    padding-top: 4rem;
-    padding-bottom: 4rem;
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    
+    /* Centrado del contenido (spinner y texto) */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centrado vertical */
+    align-items: center;    /* Centrado horizontal */
+    
+    z-index: 9999; 
+    color: #333;
+    font-size: 1.2em;
 }
 
 .loading-text {

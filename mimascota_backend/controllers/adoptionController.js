@@ -153,6 +153,117 @@ exports.getUserAdoptionForms = async (req, res) => {
         res.status(500).json({ message: 'Error interno del servidor al obtener las solicitudes.', error: error.message });
     }
 };
+
+
+/**
+ * Función para obtener todos los formularios de adopción del usuario autenticado.
+ * RUTA: GET /api/adoptions/userSuccessAdoption
+ * Requiere autenticación (protect middleware)
+ */
+exports.getUserAdoptionSuccess = async (req, res) => {
+    const userId = req.user.id; // ID del usuario autenticado
+
+    try {
+        const query = `
+            SELECT
+            s.idxxxx_solici, 
+            s.fechax_solici, 
+            m.nombre_mascot, 
+            s.estado_solici,
+            s.adosuc_solici, -- <-- Mantenemos la columna original (TRUE)
+            'Adoptado' AS estado_adopcion,
+            s.forane_mascot_id,
+            d.* -- Todos los campos del formulario detallado
+        FROM 
+            "solicitudes_adopcion" s
+        -- 1. Unir a la tabla de mascotas para obtener el nombre
+        JOIN 
+            "mascotas" m ON s.forane_mascot_id = m.idxxxx_mascot
+        -- 2. Unir a la tabla de detalles del formulario para obtener las respuestas completas
+        JOIN
+            "formularioAdopcion" d ON s.forane_forado_id = d.idxxxx_forado
+        WHERE 
+            s.forane_solici_id = $1 AND                      
+            s.adosuc_solici=TRUE
+        ORDER BY 
+            s.fechax_solici DESC;
+        `;
+        const values = [userId];
+
+        const result = await pool.query(query, values);
+
+        res.status(200).json(result.rows);
+
+    } catch (error) {
+        console.error('Error al obtener formularios de adopción del usuario:', error);
+        res.status(500).json({ message: 'Error interno del servidor al obtener las solicitudes.', error: error.message });
+    }
+};
+
+exports.updateAdoptionStatusMas = async (req, res) => {
+    const { idSolicitud } = req.params;
+    let { isAdopted } = req.body; 
+    const userId = req.user.id; // Obtenemos el ID del usuario autenticado desde el token
+
+    // 1. VALIDACIÓN Y CONVERSIÓN ROBUSTA
+    if (isAdopted === undefined || isAdopted === null) {
+        return res.status(400).json({ message: 'Se requiere el campo "isAdopted" para la confirmación de adopción.' });
+    }
+    
+    // Forzar la conversión a booleano de forma segura
+    const finalStatus = (isAdopted === true || isAdopted === 'true'); 
+    
+    // 2. VALIDACIÓN DE PROPIEDAD (MANTENEMOS ESTO POR SEGURIDAD)
+    try {
+        // Primero, verificar que el usuario autenticado sea el dueño de la mascota
+        // (es decir, el que puede confirmar la adopción).
+        const verificationQuery = `
+            SELECT m.forane_usuari_id
+            FROM "solicitudes_adopcion" s
+            JOIN "mascotas" m ON s.forane_mascot_id = m.idxxxx_mascot
+            WHERE s.idxxxx_solici = $1;
+        `;
+        const verificationResult = await pool.query(verificationQuery, [idSolicitud]);
+
+        if (verificationResult.rows.length === 0) {
+            return res.status(404).json({ message: 'Solicitud no encontrada.' });
+        }
+
+        const duenoId = verificationResult.rows[0].forane_usuari_id;
+
+        // Si el usuario autenticado no es el dueño de la mascota asociada a esta solicitud,
+        // DENEGAMOS la acción (esto reemplaza la validación de roles/permisos).
+        if (duenoId !== userId) {
+            return res.status(403).json({ message: 'Acceso denegado: Solo el dueño de la mascota puede confirmar la adopción.' });
+        }
+        
+        // 3. ACTUALIZACIÓN (Solo si la verificación de propiedad es exitosa)
+        const query = `
+            UPDATE "solicitudes_adopcion"
+            SET adosuc_solici = $1
+            WHERE idxxxx_solici = $2
+            RETURNING adosuc_solici;
+        `;
+        
+        const result = await pool.query(query, [finalStatus, idSolicitud]); 
+
+        // Ya verificamos que existe, pero por si acaso
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Error al actualizar: Solicitud desapareció.' });
+        }
+
+        res.status(200).json({ 
+            message: `Estado de adopción actualizado a ${finalStatus ? 'Adoptado' : 'No Adoptado'}.`, 
+            newStatus: result.rows[0].adosuc_solici
+        });
+        
+    } catch (error) {
+        console.error('Error al actualizar adosuc_solici:', error);
+        res.status(500).json({ message: 'Error interno del servidor.' });
+    }
+};
+
+// ... (Asegúrese de que el resto del archivo exporte esta función)
 // Recuerda exportar esta función: exports.getUserAdoptionForms
 
 // --- NUEVA FUNCIÓN AÑADIDA ---
@@ -219,6 +330,7 @@ exports.getReceivedAdoptionForms = async (req, res) => {
                 m.status_mascot, 
                 s.estado_solici,
                 s.forane_mascot_id,
+                s.adosuc_solici,
                 d.* -- Todos los campos del formulario detallado
             FROM 
                 "solicitudes_adopcion" s

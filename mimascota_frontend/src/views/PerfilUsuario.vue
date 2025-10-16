@@ -2,12 +2,18 @@
   <div class="perfil-page">
     <!-- Componente de navegación (asumiendo que existe en la ruta) -->
     <Navbar /> 
-    <div class="perfil-fondo"> 
+    
+    <div v-if="isloading" class="loading-message">
+            <span class="loader"></span>
     </div>
+
+    <div v-else="!isloading" class="perfil-fondo"> 
+    
     <div class="perfil-contenido">
       
       <div class="perfil-card">
         <div class="perfil-foto-section">
+          
           <div class="perfil-foto-wrapper">
             <!-- La imagen de perfil -->
             <img :src="userImageUrl" :alt="userName" class="perfil-foto" @error="handleImageError" />
@@ -27,6 +33,7 @@
         </div>
 
         <div class="perfil-info-section">
+          
           <div class="perfil-col info">
             <h2>Información</h2>
             
@@ -143,7 +150,10 @@
                 <router-link to="/solicitudesrecibidas" class="func-btn">
                   Solicitudes recibidas
                 </router-link>
-                  <button class="func-btn">Adopciones Realizadas</button>
+
+                <router-link to="/adopcionesrealizadas" class="func-btn">
+                  Adopciones Realizadas
+                </router-link>
               </div>
             </div>
         </div>
@@ -152,6 +162,7 @@
       
       
     </div>
+  </div>
     
     <!-- Modal para cambiar contraseña -->
     <div v-if="showChangePasswordModal" class="modal-overlay" @click="closeChangePasswordModal">
@@ -236,7 +247,8 @@ const userAge = ref(userData.edad_usuari || '');
 const userImageUrl = ref(userData.imageUrl && userData.imageUrl.startsWith('http') ? userData.imageUrl : defaultAvatar);
 
 // Variables de control
-const loading = ref(false); // Para subir foto
+const loading = ref(false);
+const isloading = ref(false); // Para subir foto
 const error = ref('');
 const success = ref('');
 
@@ -255,6 +267,7 @@ const editableData = ref({
 
 // Función para sincronizar datos reactivos cuando userData cambia (externamente o internamente)
 const updateUserInfo = (newUserData) => {
+  
     // 1. Actualizar los datos de la "fuente de verdad"
     userName.value = newUserData.nombre || newUserData.name || '';
     userLastname.value = newUserData.apellido || newUserData.lastname || '';
@@ -341,6 +354,7 @@ const saveChanges = async () => {
     }
     
     loading.value = true;
+    isloading.value = false;
     error.value = '';
     success.value = '';
 
@@ -395,7 +409,12 @@ const saveChanges = async () => {
     } catch (err) {
         error.value = err.message;
     } finally {
-        loading.value = false;
+      const minimumLoadingTime = 500; // Define el tiempo mínimo en milisegundos (ej: 500ms o 1000ms)
+      
+      setTimeout(() => {
+        isloading.value = false;
+        loading.value = false; // El spinner se oculta después de este tiempo
+      }, minimumLoadingTime);
     }
 };
 
@@ -465,7 +484,11 @@ async function onFileChange(e) {
   } catch (err) {
     error.value = err.message;
   } finally {
-    loading.value = false;
+    const minimumLoadingTime = 500; // Define el tiempo mínimo en milisegundos (ej: 500ms o 1000ms)
+      
+      setTimeout(() => {
+        loading.value = false; // El spinner se oculta después de este tiempo
+      }, minimumLoadingTime);
   }
 }
 
@@ -552,7 +575,12 @@ const changePassword = async () => {
   } catch (err) {
     passwordError.value = err.message;
   } finally {
-    changingPassword.value = false;
+    const minimumLoadingTime = 500; // Define el tiempo mínimo en milisegundos (ej: 500ms o 1000ms)
+      
+      setTimeout(() => {
+        loading.value = false; 
+        isloading.value = false;// El spinner se oculta después de este tiempo
+      }, minimumLoadingTime);
   }
 }
 
@@ -575,6 +603,45 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 5px solid;
+  border-color: #FF3D00 transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+} 
+
+.loading-message {
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Centrado del contenido (spinner y texto) */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centrado vertical */
+    align-items: center;    /* Centrado horizontal */
+    background-color: white;
+    z-index: 9999; 
+    color: #333;
+    font-size: 1.2em;
+
+}
+
 /* Estilos para hacer visible el campo de entrada cuando es editable */
 .info-item input:not([readonly]),
 .info-item-2 input:not([readonly]),

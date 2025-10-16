@@ -311,7 +311,7 @@ th {
     font-size: 1rem;
     font-weight: 700;
     background-color: #e7e7e7;
-    color: #6b6b6b;
+    color: #000000;
 }
 
 .status-aceptado{
@@ -319,16 +319,19 @@ th {
     font-size: 1rem;
     font-weight: 700;
     background-color: #afff5f70;
-    color: #5c9920;
+    color: #000000;
 }
 
 .status-rechazado{
     width: 125px;
     font-size: 1rem;
     font-weight: 700;
-    background-color: #ff3d3d70;
-    color: #a82424;
+    background-color: #ff6272;
+    color: #000000;
 }
+
+
+
 /* Estilos para los botones de "Ver detalles" */
 .detail-button {
     padding: 5px;

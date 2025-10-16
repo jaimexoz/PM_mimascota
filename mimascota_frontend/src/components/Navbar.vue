@@ -25,6 +25,7 @@
           GATOS
         </router-link>
         <router-link 
+          
           to="/perros" 
           class="nav-link"
           :class="{ 'active': $route.path === '/perros' }"
@@ -143,6 +144,8 @@ const userImageUrl = ref('/default-avatar.png');
 const isDropdownOpen = ref(false);
 const userRole = ref('');
 const notificationCount = ref(0); // Contador de notificaciones
+
+
 
 // Manejar scroll para ocultar/mostrar navbar
 const handleScroll = () => {
