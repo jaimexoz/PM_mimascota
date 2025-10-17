@@ -124,6 +124,58 @@ router.get('/editar/:id', protect, async (req, res) => {
     }
 });
 
+// ⭐️ NUEVA RUTA: GET /api/mascotas/eliminar/:id
+// Objetivo: Obtener TODOS los datos de una mascota para la precarga del formulario de edición.
+router.delete('/eliminar/:id', protect, async (req, res) => {
+    const petId = req.params.id;
+    const userId = req.user.id; 
+
+    if (isNaN(petId)) {
+        return res.status(400).json({ mensaje: 'ID de mascota inválido.' });
+    }
+
+    const client = await pool.connect();
+    try {
+        // 1. Consulta para la eliminación lógica (UPDATE)
+        const updateQuery = `
+            UPDATE mascotas
+            SET 
+                eliminado_logico = TRUE,  -- 🚨 Establece el campo de eliminación lógica a TRUE
+                fecha_eliminacion = NOW() -- Opcional: Registra la fecha de "eliminación"
+            WHERE
+                idxxxx_mascot = $1         -- Busca por ID de mascota
+                AND forane_usuari_id = $2  -- 🚨 CRUCIAL: Solo el dueño puede "eliminar"
+                AND eliminado_logico = FALSE -- Asegúrate de que no esté ya eliminado
+            RETURNING idxxxx_mascot; 
+        `;
+        
+        const result = await client.query(updateQuery, [petId, userId]);
+
+        // 2. Manejo de la respuesta
+        if (result.rowCount === 0) {
+            // Esto ocurre si:
+            // a) La mascota no existe (404)
+            // b) La mascota existe pero el userId no coincide (403)
+            // c) La mascota ya estaba marcado como eliminado_logico=TRUE (404/409)
+            return res.status(404).json({ 
+                mensaje: 'Mascota no encontrada, ya eliminada o no tienes permiso para realizar esta acción.' 
+            });
+        }
+
+        // 3. Éxito
+        res.status(200).json({ 
+            mensaje: 'Publicación eliminada lógicamente con éxito.',
+            id: result.rows[0].idxxxx_mascot
+        });
+
+    } catch (dbError) {
+        console.error('Error al realizar la eliminación lógica:', dbError); 
+        res.status(500).json({ mensaje: 'Error interno del servidor al procesar la eliminación.' });
+    } finally {
+        client.release();
+    }
+});
+
 // ⭐️ FUNCIONES DE AYUDA NECESARIAS (Colócalas fuera del router.put)
 /**
  * Obtiene los IDs de las características (personalidades) a partir de sus nombres.

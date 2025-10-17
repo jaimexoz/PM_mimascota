@@ -20,6 +20,7 @@ import SolicitudesRecibidas from '@/components/SolicitudesRecibidas.vue';
 import MyPost from '@/views/MyPost.vue';
 import MyPostsEdit from '@/views/MyPostsEdit.vue';
 import AdopcionesRealizadas from '@/components/AdopcionesRealizadas.vue';
+import DeletePost from '@/views/DeletePost.vue';
 
 import { isAuthenticated } from '../utils/auth'; // Importa la función de autenticación
 
@@ -96,6 +97,13 @@ const router = createRouter({
             path: '/editarmascota', 
             name: 'EditarMascota',
             component: MyPostsEdit,
+            meta: { requiresAuth: true }
+        },
+        {
+            // ⭐️ Esta es la ruta que necesitas
+            path: '/eliminarmascota', 
+            name: 'EliminarMascota',
+            component: DeletePost,
             meta: { requiresAuth: true }
         },
 

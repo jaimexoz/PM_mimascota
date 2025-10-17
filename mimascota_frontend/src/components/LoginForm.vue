@@ -38,11 +38,12 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { login } from '../utils/auth'; // Importa la función de login
+import { login } from '../utils/auth'; 
 import { defineEmits } from 'vue';
-import { Loader } from 'lucide-vue-next';
+// 🔥 IMPORTANTE: Ahora usaremos estas dos importaciones
+import apiClient, { setAuthHeader } from '@/http'; 
 
-const emit = defineEmits(['toggle-form']); // Permite emitir eventos al componente padre
+const emit = defineEmits(['toggle-form']);
 
 const email = ref('');
 const password = ref('');
@@ -51,37 +52,46 @@ const loading = ref(false);
 const router = useRouter();
 
 const handleLogin = async () => {
-    error.value = ''; // Limpiar mensajes de error anteriores
+    error.value = ''; 
     loading.value = true;
     try {
-        const response = await fetch('http://localhost:3000/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            // 
-            body: JSON.stringify({ emailx_usuari: email.value, contra_usuari: password.value }), 
+        // 🔥 CAMBIO 1: Usar apiClient (Axios) en lugar de fetch
+        // Axios maneja headers y JSON automáticamente
+        const response = await apiClient.post('/auth/login', {
+            emailx_usuari: email.value, 
+            contra_usuari: password.value 
         });
 
-        const data = await response.json();
+        // Axios devuelve los datos directamente en response.data
+        const data = response.data; 
         
-        if (response.ok) {
-            // Lógica para guardar el token JWT en el Local Storage
-            login(data.token); // Asumiendo que tu función `login` maneja esto
-            
-            // Guardar datos del usuario en localStorage
-            if (data.user) {
-                localStorage.setItem('userData', JSON.stringify(data.user));
-            }
-            
-            // Redirige a la nueva ruta /home
-            router.push('/home');
-        } else {
-            // Manejo de errores del backend
-            // El backend envía `message` para errores (ej. "Credenciales inválidas", "Verifica tu correo")
-            error.value = data.message || 'Error al iniciar sesión. Verifica tus credenciales.'; 
+        // Con Axios, si no hay error de red, response.status ya es 2xx
+
+        // Lógica para guardar el token JWT
+        login(data.token); 
+        
+        // 🔥 CAMBIO 2: ACTUALIZAR la cabecera de autenticación de Axios
+        // Esto garantiza que el token se use inmediatamente en la siguiente petición (ej. al cargar /home)
+        setAuthHeader(data.token); 
+
+        // Guardar datos del usuario
+        if (data.user) {
+            localStorage.setItem('userData', JSON.stringify(data.user));
+            // Opcional: También podrías usar tu función updateUserData(data.user) si está disponible.
         }
+        
+        // Redirige a la nueva ruta /home. Ahora, la primera petición
+        // a cualquier ruta protegida usará el nuevo token.
+        router.push('/home');
+
     } catch (err) {
-        console.error('Error de red o del servidor:', err);
-        error.value = 'No se pudo conectar con el servidor. Inténtalo de nuevo más tarde.';
+        // Manejo de errores de Axios (incluyendo 401, 403, 404, etc.)
+        if (err.response && err.response.data) {
+             error.value = err.response.data.message || 'Error al iniciar sesión. Verifica tus credenciales.'; 
+        } else {
+             console.error('Error de red o del servidor:', err);
+             error.value = 'No se pudo conectar con el servidor. Inténtalo de nuevo más tarde.';
+        }
     } finally {
         loading.value = false;
     }

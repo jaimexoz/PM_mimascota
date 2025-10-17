@@ -125,7 +125,9 @@
                   Editar Mascotas
                 </router-link>
 
-                <button class="func-btn">Eliminar Mascotas</button>
+                <router-link to="/eliminarmascota" class="func-btn">
+                  Eliminar Mascotas
+                </router-link>
 
                 <router-link to="/mypost" class="func-btn">
                   Mis Publicaciones
@@ -167,9 +169,15 @@
     <!-- Modal para cambiar contraseña -->
     <div v-if="showChangePasswordModal" class="modal-overlay" @click="closeChangePasswordModal">
       <div class="modal-content" @click.stop>
+        <button class="close-button" @click="closeChangePasswordModal">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+        </button>
         <div class="modal-header">
+          
           <h3>Cambiar Contraseña</h3>
-          <button class="close-btn" @click="closeChangePasswordModal">&times;</button>
+          
         </div>
         
         <form @submit.prevent="changePassword" class="password-form">
@@ -1064,6 +1072,7 @@ onUnmounted(() => {
   width: 90%;
   max-width: 400px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  position: relative;
 }
 
 .modal-header {
@@ -1100,6 +1109,23 @@ onUnmounted(() => {
   background: #f0f0f0;
 }
 
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: #495057;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    transition: color 0.2s;
+}
+
+.close-button:hover {
+    color: #ff9900;
+}
 .password-form {
   display: flex;
   flex-direction: column;

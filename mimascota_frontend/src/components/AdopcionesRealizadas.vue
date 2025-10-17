@@ -312,6 +312,8 @@ th {
 }
 
 
+
+
 /* Estilos para los botones de "Ver detalles" */
 .detail-button {
     padding: 5px;

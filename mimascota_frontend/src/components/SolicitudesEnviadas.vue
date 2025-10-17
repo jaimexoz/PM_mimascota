@@ -319,15 +319,15 @@ th {
     font-size: 1rem;
     font-weight: 700;
     background-color: #afff5f70;
-    color: #000000;
+    color: #5c9920;
 }
 
 .status-rechazado{
     width: 125px;
     font-size: 1rem;
     font-weight: 700;
-    background-color: #ff6272;
-    color: #000000;
+    background-color: #ff96a0;
+    color: #a20000;
 }
 
 

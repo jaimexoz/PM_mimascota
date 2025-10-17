@@ -556,7 +556,7 @@ select{
 .status-aceptado{
     font-size: 1rem;
     background-color: #afff5f70;
-    color: #000000;
+    color: #5c9920;
     font-weight: 700;
     padding-left: 30px;
     padding-right: 18px;
@@ -565,10 +565,34 @@ select{
     appearance: base-select;
 }
 
+.adopted-label{
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 1rem;
+    width: 125px;
+    font-size: 1rem;
+    font-weight: 700;
+    background-color: #afff5f70;
+    color: #5c9920;
+}
+
+.not-adopted-label{
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 1rem;
+    width: 125px;
+    font-size: 1rem;
+    font-weight: 700;
+    background-color: #ff96a0;
+    color: #a20000;
+}
+
 .status-rechazado{
     font-size: 1rem;
-    background-color: #ff6272;
-    color: #000000;
+    background-color: #ff96a0;
+    color: #a20000;
     font-weight: 700;
     padding-left: 22px;
     padding-right: 18px;
@@ -645,12 +669,13 @@ select{
 
 .adoption-button{
     display: flex;
+    justify-content: center;
 }
 
 .button-yes{
     border: none;
-    background-color: #beff7c;
-    color: #000000;
+    background-color: #afff5f70;
+    color: #5c9920;
     border-radius: 10px;
     font-weight: 800;
     font-size: 0.9rem;
@@ -663,8 +688,8 @@ select{
 
 .button-no{
     border: none;
-    background-color: #ff6272;
-    color: #000000;
+    background-color: #ff96a0;
+    color: #a20000;
     border-radius: 10px;
     font-weight: 800;
     font-size: 0.9rem;
@@ -674,7 +699,15 @@ select{
     width: 50px;
     height: 40px;
 }
+.button-yes:hover{
+    background-color: #89df5e;
+    color: white;
+}
 
+.button-no:hover{
+    background-color: #df5e5e;
+    color: white;
+}
 /* Estilos para mensajes de estado */
 .message {
     padding: 15px;

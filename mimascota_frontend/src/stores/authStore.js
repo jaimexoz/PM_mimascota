@@ -57,6 +57,7 @@ export const useAuthStore = defineStore('auth', {
             // Opcional: Redirigir al login o página principal
             // router.push('/login'); 
             console.log("Sesión cerrada.");
+            alert("Tu sesión ha expirado. Por favor, vuelve a iniciar sesión.");
         }
     },
 });

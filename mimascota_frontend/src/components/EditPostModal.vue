@@ -36,16 +36,16 @@
                             <div class="container-col column-half"> 
                                 <label>Especie:</label>
                                 <div class="button-group">
-                                    <button :class="{ active: formData.especi_mascot === 'Perro' }" @click="formData.especi_mascot = 'Perro'">Perro</button>
-                                    <button :class="{ active: formData.especi_mascot === 'Gato' }" @click="formData.especi_mascot = 'Gato'">Gato</button>
+                                    <button type="button" :class="{ active: formData.especi_mascot === 'Perro' }" @click="formData.especi_mascot = 'Perro'">Perro</button>
+                                    <button type="button" :class="{ active: formData.especi_mascot === 'Gato' }" @click="formData.especi_mascot = 'Gato'">Gato</button>
                                 </div>
                             </div>
 
                             <div class="container-col column-half"> 
                                 <label>Sexo:</label>
                                 <div class="button-group">
-                                    <button :class="{ active: formData.sexoxx_mascot === 'Macho' }" @click="formData.sexoxx_mascot = 'Macho'">Macho</button>
-                                    <button :class="{ active: formData.sexoxx_mascot === 'Hembra' }" @click="formData.sexoxx_mascot = 'Hembra'">Hembra</button>
+                                    <button type="button" :class="{ active: formData.sexoxx_mascot === 'Macho' }" @click="formData.sexoxx_mascot = 'Macho'">Macho</button>
+                                    <button type="button" :class="{ active: formData.sexoxx_mascot === 'Hembra' }" @click="formData.sexoxx_mascot = 'Hembra'">Hembra</button>
                                 </div>
                             </div>
 
