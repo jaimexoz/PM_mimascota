@@ -510,7 +510,6 @@ module.exports = (io) => {
                         forane_usuari_id = $1
                     ORDER BY 
                         created_at DESC
-                    LIMIT 5; -- Limitar a las 10 más recientes para el dropdown
                 `;
                 const result = await pool.query(query, [userId]);
                 

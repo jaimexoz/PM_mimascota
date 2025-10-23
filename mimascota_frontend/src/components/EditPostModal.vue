@@ -132,6 +132,32 @@
                 </button>
             </form>
 
+            
+
+        </div>
+        <div v-if="modal.visible" class="confirmation-modal-wrapper">
+
+            <div class="confirmation-modal-overlay" @click.self="cerrarModal"></div>
+
+            <div class="modal-content-confirmacion" :class="modal.tipo">
+                <div class="modal-x">
+                    <button @click="cerrarModal" class="close-button-confirmacion">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-header-confirmacion">
+                    <h2 class="modal-title-confirmacion">Resultado de la Edición</h2>
+                    <p>{{ modal.mensaje }}</p> 
+                </div>
+                
+                <div class="button-actions-confirmacion">
+                    <button @click="cerrarModal" class="btn-primary-confirmacion">
+                        Aceptar
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -149,6 +175,11 @@ const props = defineProps({
     mascotaId: [Number, String] // Recibimos el ID
 });
 
+const modal = reactive({
+    visible: false,
+    mensaje: '',
+    tipo: 'success' // 'success' o 'error'
+});
 // ⭐️ AÑADIR LA CONSTANTE DE PERSONALIDADES AQUÍ
 const opcionesPersonalidad = [
     'Juguetón', 'Tranquilo', 'Tímido', 'Energético',
@@ -162,6 +193,32 @@ const localImages = ref([]);
 const newFilesMap = ref({});
 const isLoadingData = ref(false); 
 const isSaving = ref(false); 
+
+
+
+/**
+ * Muestra el modal con un mensaje y tipo específico.
+ * @param {string} msg - Mensaje a mostrar.
+ * @param {string} type - 'success' o 'error'.
+ */
+ function mostrarModal(msg, type) {
+    modal.mensaje = msg;
+    modal.tipo = type;
+    modal.visible = true;
+}
+
+/**
+ * Cierra el modal y redirige o resetea el formulario.
+ */
+function cerrarModal() {
+    modal.visible = false;
+    if (modal.tipo === 'success') {
+        // Redirigir al perfil o a la lista de mascotas después del éxito
+        router.push('/perfil');
+    }else{
+        window.location.reload();
+    }
+}
 
 // LÓGICA DE CARGA DE DATOS (Al abrir la modal)
 async function fetchMascotaData(id) {
@@ -194,7 +251,7 @@ async function fetchMascotaData(id) {
 
     } catch (error) {
         console.error("Error al obtener la mascota:", error);
-        alert("No se pudieron cargar los datos de la mascota.");
+        mostrarModal("No se pudieron cargar los datos de la mascota.");
         emit('close');
     } finally {
         isLoadingData.value = false;
@@ -295,7 +352,7 @@ async function saveChanges() {
                     isSaving.value = false;
                     
                     // 🚨 Muestra la alerta y DETIENE el proceso de guardado
-                    alert(`¡Error! La imagen excede el tamaño máximo permitido (${MAX_FILE_SIZE_BYTES / (1024 * 1024)} MB). Por favor, sube una imagen más pequeña.`);
+                    mostrarModal(`¡Error! La imagen excede el tamaño máximo permitido (${MAX_FILE_SIZE_BYTES / (1024 * 1024)} MB). Por favor, sube una imagen más pequeña.`);
                     
                     // Opcional: Liberar la URL blob para limpiar.
                     URL.revokeObjectURL(item);
@@ -342,16 +399,18 @@ async function saveChanges() {
             throw new Error('Error al guardar los cambios: ' + (errorData.mensaje || response.statusText));
         }
 
-        alert("¡Mascota actualizada con éxito!");
-        emit('close'); 
+        mostrarModal("¡Mascota actualizada con éxito!");
+        
         emit('post-updated'); 
     } catch (error) {
         console.error("Error al guardar:", error);
-        alert("Ocurrió un error al actualizar la mascota.");
+        mostrarModal("Ocurrió un error al actualizar la mascota.");
     } finally {
         isSaving.value = false;
     }
 }
+
+
 </script>
 
 <style scoped>
@@ -671,4 +730,118 @@ box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
     gap: 10px;
 }
 
+/* Modal */
+
+/* ESTILOS CSS PARA EL MODAL (Añadir en el bloque <style> o archivo CSS) */
+/* ------------------------------------------- */
+/* ⭐️ ESTILOS PARA LA MODAL DE CONFIRMACIÓN/ERROR ⭐️ */
+/* ------------------------------------------- */
+
+/* Contenedor del modal de confirmación */
+.confirmation-modal-wrapper {
+    position: fixed; /* 👈 Clave para que flote sobre todo */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000; /* 👈 MUCHO MAYOR que el z-index del modal principal */
+}
+
+/* Overlay de la modal de confirmación (el fondo oscuro) */
+.confirmation-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Oscurece el fondo */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Contenido del modal (la caja blanca) */
+.modal-content-confirmacion {
+    position: relative;
+    background-color: #ffffff; 
+    border-radius: 1rem; /* Borde ligeramente más suave */
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35); 
+    width: 100%; 
+    max-width: 500px; /* Tamaño típico para modales de confirmación */
+    padding: 2.5rem 1.5rem; /* Ajuste del padding */
+    text-align: center;
+}
+
+/* Estilo para el header de la confirmación */
+.modal-header-confirmacion {
+    margin-bottom: 20px;
+}
+
+.modal-header-confirmacion p{
+    font-size: 1.2rem;
+    color: #4b5563;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+    padding: 0 1.8rem;
+}
+
+.modal-header-confirmacion h2{
+    font-size: 1.4rem;
+    color: #333;
+    margin: 10px;
+    font-weight: 700;
+}
+
+.modal-title-confirmacion {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+
+
+/* Estilos de botones dentro del modal de confirmación */
+.button-actions-confirmacion {
+    margin-top: 20px;
+}
+
+.btn-primary-confirmacion {
+    width: 100%;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 25px; /* Bordes redondeados */
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    max-width: 150px;
+    background-color: #ff9900;
+    color: white;
+}
+
+.btn-primary-confirmacion:hover {
+    background: #f47004;
+}
+
+/* Botón de cerrar (X) */
+.close-button-confirmacion {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: #495057;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    transition: color 0.2s;
+}
+.close-button-confirmacion:hover {
+    color: #ff9900;
+}
 </style>

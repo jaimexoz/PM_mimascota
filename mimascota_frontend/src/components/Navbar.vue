@@ -43,18 +43,30 @@
 
             <div 
                 v-else
-                v-for="notif in notifications" 
+                v-for="notif in displayedNotifications" 
                 :key="notif.id" 
                 :class="['notification-item', { 'unread': !notif.is_read }]"
             >
+    
+            
+              <span class="notification-time">
+              {{ formatNotificationDate(notif.created_at) }}
+          </span>
               <div class="imagen-noti">
                 <img :src="notif.image_url || '/default-avatar.png'" class="notification-avatar" alt="Avatar">
               </div >
                 
-                <span v-html="notif.message"></span> 
+                <span class="message-noti" v-html="notif.message"></span> 
+                
             </div>
             
-            <button class="view-more-button" @click="goToNotifications">Ver más</button>
+            <button 
+                v-if="showViewMoreButton" 
+                class="view-more-button" 
+                @click.stop="loadMoreNotifications"
+            >
+                Ver más
+            </button>
           </div>
         </div>
 
@@ -141,20 +153,6 @@ let socket = null; // Instancia de Socket.io
  * 1. Conecta el cliente de Socket.io y configura los listeners.
  */
 
- const getUserToken = () => {
-    const userDataString = localStorage.getItem('authToken');
-    if (userDataString) {
-        try {
-            const userData = JSON.parse(userDataString);
-            // Asegúrate de usar la propiedad correcta, que según tu imagen es 'id'
-            return userData.id; 
-        } catch (e) {
-            console.error("Error al parsear userData:", e);
-            return null;
-        }
-    }
-    return null;
-};
 
  const getUserId = () => {
     const userDataString = localStorage.getItem('userData');
@@ -170,6 +168,23 @@ let socket = null; // Instancia de Socket.io
     }
     return null;
 };
+
+// ⭐️ NUEVOS ESTADOS ⭐️
+const NOTIFICATION_LIMIT = 3; // Constante para cuántas cargar cada vez
+const currentLimit = ref(NOTIFICATION_LIMIT); // Límite actual de notificaciones a cargar
+
+// ⭐️ PROPIEDAD COMPUTADA PARA MOSTRAR ⭐️
+const displayedNotifications = computed(() => {
+    // Muestra solo las primeras 'currentLimit' notificaciones
+    return notifications.value.slice(0, currentLimit.value);
+});
+
+// ⭐️ PROPIEDAD COMPUTADA PARA CONTROLAR EL BOTÓN ⭐️
+const showViewMoreButton = computed(() => {
+    // Muestra el botón si hay más notificaciones de las que se están mostrando actualmente
+    return notifications.value.length > currentLimit.value;
+});
+
  const connectSocket = () => {
     const userId = getUserId(); // Obtener el ID del usuario actual
 
@@ -210,6 +225,45 @@ let socket = null; // Instancia de Socket.io
  * 
  */
  
+ const formatNotificationDate = (isoDateString) => {
+    if (!isoDateString) return '';
+
+    try {
+        const date = new Date(isoDateString);
+
+        // Opciones de formato de fecha
+        const dateOptions = {
+            day: '2-digit',      // DD (17)
+            month: '2-digit',    // MM (10)
+            year: '2-digit',     // YY (25)
+            hour: '2-digit',     // HH (22)
+            minute: '2-digit',   // mm (01)
+            hour12: false,       // Usa formato de 24 horas
+        };
+
+        // Formato con guiones o barras, y espacios
+        const parts = date.toLocaleDateString('es-ES', dateOptions).split(', ');
+
+        if (parts.length === 2) {
+            // parts[0] será la fecha (e.g., "17/10/25")
+            // parts[1] será la hora (e.g., "22:01")
+            return `${parts[0]} ${parts[1]}`;
+        }
+        
+        // Si el formato es inconsistente (algunos navegadores), usamos un enfoque manual:
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear().toString().slice(-2);
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        
+        return `${day}/${month}/${year} ${hours}:${minutes}`;
+
+    } catch (e) {
+        console.error('Error al formatear fecha:', e);
+        return isoDateString; // Devuelve el original si falla
+    }
+};
 
  const fetchNotifications = async () => {
     const token = localStorage.getItem('authToken');
@@ -222,6 +276,7 @@ let socket = null; // Instancia de Socket.io
                 'Authorization': `Bearer ${token}`
             }
         });
+        
 
         if (response.ok) {
             const data = await response.json();
@@ -263,6 +318,14 @@ const markAllAsRead = async () => {
     } catch (error) {
         console.error('Error al marcar como leídas:', error);
     }
+};
+
+const loadMoreNotifications = () => {
+    // Incrementa el límite para mostrar 5 notificaciones más
+    currentLimit.value += NOTIFICATION_LIMIT;
+    
+    // Opcional: Si implementaste paginación en la API,
+    // aquí harías una nueva llamada a fetchNotifications(newLimit)
 };
 
 
@@ -513,21 +576,33 @@ onUnmounted(() => {
   justify-self: end;
 }
 
+span.notification-time {
+    position: absolute;
+    margin-bottom: 5rem;
+    font-size: 0.7rem;
+    color: #929292;
+    font-weight: 600;
+}
+
 img.notification-avatar {
     width: 60px;
     height: 60px;
-    margin-right: 10px;
     border-radius: 50%;
     object-fit: cover;
+    border: 3px solid #ff9900;
 }
 .notifications-container {
     position: relative; /* Clave para el posicionamiento absoluto del dropdown */
     display: flex;
     align-items: center;
-    cursor: pointer;
 }
 
 /* Notificaciones */
+.imagen-noti {
+  margin: 0.5rem;
+  margin-top: 1.5rem;
+}
+
 .notifications-icon {
   position: relative;
   cursor: pointer;
@@ -537,6 +612,24 @@ img.notification-avatar {
   color: #555;
 }
 
+.message-noti{
+  margin-left: 10px;
+  margin-top: 1.2rem;
+}
+
+button.view-more-button {
+    align-items: center;
+    justify-content: center;
+    background: white;
+    margin-left: 139px;
+    border: none;
+    border-radius: 24px;
+    padding: 0.5rem;
+    color: rgb(0, 0, 0);
+    font-weight: 700;
+    margin-top: 10px;
+    cursor: pointer;
+}
 .notifications-icon:hover {
   background-color: #f5f5f5;
 }
@@ -567,13 +660,15 @@ img.notification-avatar {
     z-index: 10; /* Asegura que flote sobre el contenido del navbar */
     margin-top: 10px;
     padding: 10px 0;
+    overflow-y: auto;
+    scrollbar-width: none;
+    max-height: 460px;
 }
 
 .dropdown-header {
     font-weight: bold;
     padding: 5px 15px 10px;
     border-bottom: 1px solid #eee;
-    margin-bottom: 5px;
 }
 
 /* 4. Estilo de los ítems (ajusta para que se parezcan a tu mockup) */
@@ -582,7 +677,6 @@ img.notification-avatar {
     align-items: flex-start;
     padding: 10px 15px;
     border-bottom: 1px solid #f0f0f0;
-    cursor: pointer;
     transition: background-color 0.2s;
 }
 
