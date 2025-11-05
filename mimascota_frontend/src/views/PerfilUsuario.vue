@@ -663,7 +663,6 @@ onUnmounted(() => {
 .perfil-page {
   min-height: 100vh;
   width: 100%;
-  background: #ffffff;
   display: flex;
   flex-direction: column;
   font-family: 'Inter', sans-serif;

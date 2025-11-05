@@ -15,7 +15,6 @@
                 </div>
                 
                 <div class="input-group" v-else>
-                    <p>Introduce tu nueva contraseña. El token se ha extraído de la URL.</p>
                     <label for="new-password">Nueva Contraseña</label>
                     <input type="password" id="new-password" v-model="newPassword" required>
                     <label for="confirm-password">Confirmar Contraseña</label>
