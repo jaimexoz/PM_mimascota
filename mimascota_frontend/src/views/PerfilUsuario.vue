@@ -220,11 +220,13 @@
           </div>
           
           <div class="form-actions">
-            <button type="button" class="cancel-btn" @click="closeChangePasswordModal" :disabled="changingPassword">Cancelar</button>
+            
             <button type="submit" class="submit-btn" :disabled="changingPassword">
               <span v-if="changingPassword" class="loading-spinner"></span>
-              {{ changingPassword ? 'Cambiando...' : 'Cambiar Contraseña' }}
+              {{ changingPassword ? 'Cambiando...' : 'Guardar' }}
             </button>
+            
+            <button type="button" class="cancel-btn" @click="closeChangePasswordModal" :disabled="changingPassword">Cancelar</button>
           </div>
         </form>
       </div>
@@ -1212,6 +1214,7 @@ onUnmounted(() => {
   border-radius: 25px;
   cursor: pointer;
   font-weight: 600;
+  font-size: 1rem;
   transition: all 0.2s;
 }
 
@@ -1229,7 +1232,7 @@ onUnmounted(() => {
   border-radius: 25px;
   cursor: pointer;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 1rem;
   transition: background-color 0.2s;
 }
 
