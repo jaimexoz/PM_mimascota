@@ -376,9 +376,9 @@ const handleLogout = () => {
 
 // Cerrar dropdown al hacer clic fuera
 const handleClickOutside = (event) => {
-    // Verificar si el clic NO fue dentro del contenedor de perfil O el contenedor de notificaciones
+    
     const isProfileClick = event.target.closest('.user-profile-container');
-    const isNotificationsClick = event.target.closest('.notifications-container'); // Usaremos esta clase
+    const isNotificationsClick = event.target.closest('.notifications-container'); 
 
     if (!isProfileClick && !isNotificationsClick) {
         closeDropdown();
@@ -665,10 +665,15 @@ button.view-more-button {
     max-height: 460px;
 }
 
+
 .dropdown-header {
     font-weight: bold;
     padding: 5px 15px 10px;
     border-bottom: 1px solid #eee;
+}
+.message-noti b{
+  font-weight: 800;
+  z-index: 2000;
 }
 
 /* 4. Estilo de los ítems (ajusta para que se parezcan a tu mockup) */
