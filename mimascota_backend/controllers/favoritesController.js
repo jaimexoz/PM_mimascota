@@ -1,28 +1,28 @@
-const pool = require('../config/db');
+const favoritesModel = require('../models/favoritesModel'); 
 
-/**
- * Endpoint para obtener el estado real de favorito de una mascota.
- * RUTA: GET /api/favorites/status/:mascotId
- */
+// /**
+//  * Endpoint para obtener el estado real de favorito de una mascota.
+//  * RUTA: GET /api/favorites/status/:mascotId
+//  */
 exports.checkFavoriteStatus = async (req, res) => {
+    // Nota: Asumimos que req.user.id está disponible gracias a un middleware de autenticación.
     const userId = req.user.id; 
     const mascotId = req.params.mascotId;
 
+    // 1. Validación
     if (!userId || !mascotId) {
         return res.status(400).json({ message: 'ID de usuario o mascota faltante.' });
     }
 
     try {
-        const query = `
-            SELECT status_favori
-            FROM favoritos
-            WHERE forane_usuari_id = $1 AND forane_mascot_id = $2;
-        `;
-        const result = await pool.query(query, [userId, mascotId]);
+        // 2. Llamada al Modelo
+        const result = await favoritesModel.findFavoriteStatusDB(userId, mascotId);
         
+        // 3. Lógica de Negocio (Determinar el estado)
         // Si no existe registro, es FALSE. Si existe, usa el valor de status_favori.
         const isFavorite = result.rows.length > 0 ? result.rows[0].status_favori : false;
 
+        // 4. Respuesta
         return res.json({ 
             isFavorite: isFavorite 
         });
@@ -33,84 +33,67 @@ exports.checkFavoriteStatus = async (req, res) => {
     }
 };
 
-
+// /**
+//  * Endpoint para obtener todas las mascotas favoritas de un usuario.
+//  * RUTA: GET /api/favorites/
+//  */
 exports.checkFavorites = async (req, res) => {
     const userId = req.user.id; 
 
+    // 1. Validación
     if (!userId) {
-        return res.status(400).json({ message: 'ID de usuario o mascota faltante.' });
+        return res.status(400).json({ message: 'ID de usuario faltante.' });
     }
 
     try {
-        const query = `
-            SELECT
-                m.* -- Selecciona todas las columnas de la tabla 'mascotas'
-            FROM
-                favoritos AS f
-            JOIN
-                mascotas AS m ON f.forane_mascot_id = m.idxxxx_mascot
-            WHERE
-                f.forane_usuari_id = $1
-                AND f.status_favori = TRUE 
-                AND m.eliminado_logico = FALSE 
-            ORDER BY
-                m.nombre_mascot;
-        `;
-        const result = await pool.query(query, [userId]); 
+        // 2. Llamada al Modelo
+        const result = await favoritesModel.getFavoritesByUserIdDB(userId); 
 
-        // Envía el array de mascotas al cliente
+        // 3. Respuesta
         res.status(200).json(result.rows);
 
     } catch (dbError) {
-        console.error('Error al obtener la lista de mascotas para el feed:', dbError);
-        res.status(500).json({ mensaje: 'Error interno del servidor al obtener mascotas para el feed.', error: dbError.message });
+        console.error('Error al obtener la lista de mascotas favoritas:', dbError);
+        res.status(500).json({ message: 'Error interno del servidor al obtener mascotas favoritas.', error: dbError.message });
     }
 };
 
-/**
- * Endpoint para alternar el estado de favorito (TRUE/FALSE).
- * RUTA: POST /api/favorites/:mascotId
- * ⚠️ Este endpoint asume que la petición SIEMPRE es para cambiar al estado contrario.
- * El frontend siempre enviará POST aquí.
- */
+// /**
+//  * Endpoint para alternar el estado de favorito (TRUE/FALSE).
+//  * RUTA: POST /api/favorites/:mascotId
+//  */
 exports.toggleFavorite = async (req, res) => {
     const userId = req.user.id;
     const mascotId = req.params.mascotId;
 
+    // 1. Validación
+    if (!userId || !mascotId) {
+        return res.status(400).json({ message: 'ID de usuario o mascota faltante.' });
+    }
+
     try {
-        // 1. Verificar si la relación (usuario-mascota) ya existe
-        const checkQuery = `
-            SELECT idxxxx_favori, status_favori FROM favoritos
-            WHERE forane_usuari_id = $1 AND forane_mascot_id = $2;
-        `;
-        const checkResult = await pool.query(checkQuery, [userId, mascotId]);
+        // 2. Verificar si la relación existe (Modelo)
+        const checkResult = await favoritesModel.checkExistingFavoriteDB(userId, mascotId);
 
         if (checkResult.rows.length === 0) {
-            // 2. Si NO existe: INSERTAR con estado TRUE
-            const insertQuery = `
-                INSERT INTO favoritos (forane_usuari_id, forane_mascot_id, status_favori)
-                VALUES ($1, $2, TRUE)
-                RETURNING status_favori;
-            `;
-            const insertResult = await pool.query(insertQuery, [userId, mascotId]);
+            // 3. Si NO existe: INSERTAR (Modelo)
+            const insertResult = await favoritesModel.insertNewFavoriteDB(userId, mascotId);
+            
+            // 4. Respuesta de Inserción
             return res.status(201).json({ 
                 message: 'Mascota añadida a favoritos (registro creado).', 
                 newStatus: insertResult.rows[0].status_favori 
             });
 
         } else {
-            // 3. Si SÍ existe: ACTUALIZAR el estado al opuesto
+            // 5. Si SÍ existe: ACTUALIZAR el estado al opuesto
             const currentStatus = checkResult.rows[0].status_favori;
-            const newStatus = !currentStatus; // Alternar el estado
+            const newStatus = !currentStatus; // Lógica de alternancia (Controlador)
 
-            const updateQuery = `
-                UPDATE favoritos
-                SET status_favori = $3
-                WHERE forane_usuari_id = $1 AND forane_mascot_id = $2
-                RETURNING status_favori;
-            `;
-            const updateResult = await pool.query(updateQuery, [userId, mascotId, newStatus]);
+            // 6. Actualizar en DB (Modelo)
+            const updateResult = await favoritesModel.updateFavoriteStatusDB(userId, mascotId, newStatus);
 
+            // 7. Respuesta de Actualización
             const action = newStatus ? 'activado' : 'desactivado';
             return res.status(200).json({ 
                 message: `Estado de favorito ${action}.`, 
@@ -123,15 +106,4 @@ exports.toggleFavorite = async (req, res) => {
         return res.status(500).json({ message: 'Error interno del servidor.' });
     }
 };
-
-// Se elimina exports.addFavorite y exports.removeFavorite
-
-// Ahora exportamos el toggle:
-// exports.addFavorite = async (req, res) => { /* ELIMINADO */ }
-// exports.removeFavorite = async (req, res) => { /* ELIMINADO */ }
-// Ya no se necesitan las funciones separadas
-// El resto de los exports se mantiene si los tienes
-
-// Reemplaza esto al final de tu archivo:
-// module.exports = { checkFavoriteStatus, addFavorite, removeFavorite };
 

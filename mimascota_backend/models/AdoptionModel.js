@@ -269,18 +269,30 @@ async function getUserAdoptionSuccess(userId) {
  * Obtiene los detalles de un formulario de adopción por su ID de formulario (idxxxx_forado).
  */
 async function getAdoptionFormById(formId) {
+    // 1. Usa comillas invertidas (backticks `) para definir la query
     const query = `
-        SELECT f.*, s.*  
+        SELECT f.*, s.*
         FROM "formularioAdopcion" f
-        JOIN solicitudes_adopcion s ON f.idxxxx_forado = s.forane_forado_id  
-        WHERE f.idxxxx_forado = $1; 
+        JOIN "solicitudes_adopcion" s ON f.idxxxx_forado = s.forane_forado_id
+        WHERE f.idxxxx_forado = $1;
     `;
-    const result = await pool.query(query, [formId]);
     
-    if (result.rows.length === 0) {
-        return null;
+    // 2. Asegúrate de pasar la conexión (client) y el ID
+    const client = await pool.connect();
+    try {
+        const result = await client.query(query, [formId]); 
+        
+        if (result.rows.length === 0) {
+            return null;
+        }
+        return result.rows[0]; // Debe devolver solo 1 fila (el formulario)
+
+    } catch (error) {
+        console.error('Error al obtener el formulario de adopción por ID (Modelo):', error);
+        throw error; // Propaga el error para que el controlador lo maneje
+    } finally {
+        client.release();
     }
-    return result.rows[0];
 }
 
 /**

@@ -490,8 +490,8 @@ const changeUserRole = async (req, res) => {
             return res.status(400).json({ message: 'ID de usuario y nuevo rol son requeridos.' });
         }
         // Asumiendo que 1 es admin y 2 es usuario normal (basado en tu código anterior)
-        if (![1, 2].includes(newRole)) {
-            return res.status(400).json({ message: 'Rol inválido. Solo se permiten roles 1 (admin) y 2 (usuario normal).' });
+        if (![1, 2, 3].includes(newRole)) {
+            return res.status(400).json({ message: 'Rol inválido. Solo se permiten roles 1 (admin), 2 (usuario normal) y 3 (empleado).' });
         }
 
         // 1. Verificar si el usuario existe (Modelo)

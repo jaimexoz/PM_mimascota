@@ -686,10 +686,8 @@ box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
 
 .is-selected {
     /* Estilo para un chip marcado */
-    border: 1px solid #ff9900;
     background-color: rgb(255, 170, 0);
     color: #ffffff;
-    font-size: 0.9em;
 }
 
 .button-group button {
