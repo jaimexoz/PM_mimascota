@@ -249,6 +249,7 @@ async function getUserAdoptionForms(userId) {
     return result.rows;
 }
 
+
 /**
  * Obtiene los formularios donde la adopción fue exitosa para un usuario.
  */

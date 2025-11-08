@@ -192,17 +192,32 @@ const updateUserInfo = async (req, res) => {
         const userId = req.user.id;
         const { nombre, apellido, celular, edad } = req.body; 
 
+        console.log('Datos recibidos para actualizar:', { userId, nombre, apellido, celular, edad });
+
         if (!nombre || nombre.trim() === '' || !apellido || apellido.trim() === '') {
             return res.status(400).json({ message: 'Nombre y Apellido son campos obligatorios.' });
         }
 
-        let edadValue = parseInt(edad, 10);
-        if (isNaN(edadValue) || edadValue < 1) {
-            edadValue = null; 
+        let edadValue = null;
+        if (edad !== undefined && edad !== null && edad !== '') {
+            edadValue = parseInt(edad, 10);
+            if (isNaN(edadValue) || edadValue < 1) {
+                edadValue = null; 
+            }
         }
 
+        // Normalizar celular (puede ser null o string vacío)
+        const celularValue = celular && celular.trim() !== '' ? celular.trim() : null;
+
         // 1. Actualizar en DB (Modelo)
-        await authModel.updateUserInfoDB(userId, { nombre, apellido, celular, edadValue });
+        const updateResult = await authModel.updateUserInfo(userId, { 
+            nombre: nombre.trim(), 
+            apellido: apellido.trim(), 
+            celular: celularValue, 
+            edadValue 
+        });
+
+        console.log('Resultado de actualización:', updateResult.rows.length > 0 ? 'Éxito' : 'Sin filas actualizadas');
 
         // 2. Obtener datos completos del usuario actualizado (Modelo)
         const updatedUserResult = await authModel.getUserWithRoleByIdDB(userId);
@@ -212,6 +227,8 @@ const updateUserInfo = async (req, res) => {
         }
         const updatedUser = updatedUserResult.rows[0];
 
+        console.log('Usuario actualizado:', updatedUser);
+
         // 3. Respuesta
         res.status(200).json({
             message: 'Información de perfil actualizada exitosamente.',
@@ -220,7 +237,11 @@ const updateUserInfo = async (req, res) => {
 
     } catch (error) {
         console.error('Error al actualizar la información del usuario:', error);
-        res.status(500).json({ message: 'Error interno del servidor al guardar los cambios.' });
+        console.error('Stack trace:', error.stack);
+        res.status(500).json({ 
+            message: 'Error interno del servidor al guardar los cambios.',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
     }
 };
 

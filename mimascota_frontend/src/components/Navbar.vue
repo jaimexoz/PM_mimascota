@@ -113,6 +113,14 @@
               </svg>
               Lista de Usuarios
             </router-link>
+
+            <router-link v-if="isAdminOrEmployee" to="/petManagement" class="dropdown-item" @click="closeDropdown">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                <path :d="petManagementIconPath"/> 
+              </svg>
+              Gestión de Mascotas
+            </router-link>
+
             <button class="dropdown-item logout-item" @click="handleLogout">
               <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
@@ -130,8 +138,14 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { logout, onUserDataChange } from '../utils/auth';
+import { mdiCat } from '@mdi/js';
 
 import { io } from 'socket.io-client';
+
+
+const petManagementIconPath = computed(() => {
+    return mdiCat;
+});
 
 const router = useRouter();
 const isScrolled = ref(false);
@@ -342,6 +356,12 @@ const handleImageError = (event) => {
 // Verificar si es admin
 const isAdmin = computed(() => {
   return userRole.value === 'admin' || userRole.value === 'Administrador';
+});
+
+const isAdminOrEmployee = computed(() => {
+  const role = userRole.value;
+  // Retorna true si el rol es 'admin', 'Administrador', 'employee' o 'Empleado'
+  return isAdmin.value || role === 'empleado' || role === 'Empleado';
 });
 
 // Toggle del menú desplegable

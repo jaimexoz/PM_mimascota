@@ -172,6 +172,39 @@ exports.getAllMascotas = async (req, res) => {
     }
 };
 
+/**
+ * [PUT] Actualiza el estado de aprobación (approv_mascot) de una mascota.
+ * Requiere rol de Administrador o Empleado.
+ */
+exports.updateMascotaApprovalStatus = async (req, res) => {
+    // La verificación de rol debe ir aquí también
+    const mascotaId = req.params.mascotId;
+    const { approv_mascot } = req.body;
+
+    // 1. Validar el estado
+    const validStatuses = ['Pendiente', 'Aprobada', 'Rechazada'];
+    if (!validStatuses.includes(approv_mascot)) {
+        return res.status(400).json({ message: "Estado de aprobación inválido." });
+    }
+
+    try {
+        const updatedMascota = await mascotaModel.updateMascotaApproval(mascotaId, approv_mascot);
+
+        if (!updatedMascota) {
+            return res.status(404).json({ message: "Mascota no encontrada para actualizar." });
+        }
+
+        res.status(200).json({ 
+            message: `Estado de aprobación actualizado a ${approv_mascot}`, 
+            mascota: updatedMascota 
+        });
+
+    } catch (error) {
+        console.error('Error al actualizar estado de aprobación:', error);
+        res.status(500).json({ message: "Error interno del servidor al actualizar el estado." });
+    }
+};
+
 // GET /api/mascotas/card/:id
 exports.getMascotaCardDetails = async (req, res) => { 
     const petId = req.params.id;

@@ -28,11 +28,18 @@ export const useAuthStore = defineStore('auth', {
         setToken(newToken) {
             this.token = newToken;
             if (newToken) {
+                // IMPORTANTE: Limpiar todos los tokens viejos antes de guardar el nuevo
+                // Esto evita que queden tokens expirados en localStorage con diferentes claves
+                localStorage.removeItem('token'); // Limpiar clave antigua
+                localStorage.removeItem('userToken'); // Limpiar clave antigua
+                
                 // Guarda en localStorage para mantener la sesión
                 localStorage.setItem(TOKEN_KEY, newToken);
             } else {
-                // Si el token es nulo (cierre de sesión), lo elimina
+                // Si el token es nulo (cierre de sesión), limpiar todas las claves posibles
                 localStorage.removeItem(TOKEN_KEY);
+                localStorage.removeItem('token'); // Limpiar clave antigua
+                localStorage.removeItem('userToken'); // Limpiar clave antigua
             }
         },
 

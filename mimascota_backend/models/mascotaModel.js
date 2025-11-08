@@ -171,7 +171,7 @@ const getMascotasForFeedDB = async (client, especieFilter) => {
         WHERE 
             m.eliminado_logico = FALSE
         AND
-            m.especi_mascot = $1
+            m.especi_mascot = $1 AND m.approv_mascot = 'Aprobada'
         ORDER BY 
             m.idxxxx_mascot DESC;
     `;
@@ -187,6 +187,7 @@ const getMascotasForHome2ndDB = async (client) => {
             mascotas m
         WHERE 
             m.eliminado_logico = FALSE
+        AND m.approv_mascot = 'Aprobada'
         ORDER BY 
             m.idxxxx_mascot DESC
         LIMIT 4;
@@ -221,43 +222,58 @@ const getAllMascotasDB = async (client) => {
             m.idxxxx_mascot, m.nombre_mascot, m.especi_mascot, m.sexoxx_mascot, 
             m.edadme_mascot, m.razaxx_mascot, m.pesokg_mascot, m.tamano_mascot, 
             m.infoad_mascot, m.image1_mascot, m.image2_mascot, m.image3_mascot, 
-            m.forane_usuari_id, 
-            u.nombre_usuari AS nombre_dueño, 
-            u.emailx_usuari AS email_dueño
+            m.forane_usuari_id, m.status_mascot, m.approv_mascot, m.fechap_mascot,
+            u.nombre_usuari AS nombre_dueno, 
+            u.emailx_usuari AS email_dueno
         FROM 
             mascotas m
             JOIN usuarios u ON m.forane_usuari_id = u.idxxxx_usuari
         WHERE 
-            m.eliminado_logico = FALSE
+            m.eliminado_logico = FALSE AND m.approv_mascot = 'Pendiente'
         ORDER BY 
             m.idxxxx_mascot DESC;
     `;
     return client.query(query);
 };
 
+async function updateMascotaApproval(mascotaId, newStatus) {
+    const query = `
+        UPDATE mascotas
+        SET approv_mascot = $1
+        WHERE idxxxx_mascot = $2
+        RETURNING *;
+    `;
+    
+    const result = await pool.query(query, [newStatus, mascotaId]);
+    return result.rows[0]; // Devuelve el registro actualizado
+}
+
 /**
  * Crea una nueva mascota y devuelve su ID (dentro de una transacción).
  */
 const insertNewMascotaDB = async (client, petData, cloudinaryUrls) => {
+
     const {
         nombre, especie, sexo, edad, raza, peso, tamano, informacionAdicional, forane_usuari_id
     } = petData;
     const [image1_mascot, image2_mascot, image3_mascot] = cloudinaryUrls;
     const infoad_mascot = informacionAdicional || 'N/A'; 
 
+    const currentTimestamp = new Date().toISOString();
+
     const insertQuery = `
         INSERT INTO mascotas (
             nombre_mascot, especi_mascot, sexoxx_mascot, edadme_mascot, 
             razaxx_mascot, pesokg_mascot, tamano_mascot, infoad_mascot, 
             image1_mascot, image2_mascot, image3_mascot, eliminado_logico, 
-            forane_usuari_id
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+            forane_usuari_id, approv_mascot, fechap_mascot
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
         RETURNING idxxxx_mascot;
     `;
 
     const insertValues = [
         nombre, especie, sexo, edad, raza, peso, tamano, infoad_mascot, 
-        image1_mascot, image2_mascot, image3_mascot, false, forane_usuari_id
+        image1_mascot, image2_mascot, image3_mascot, false, forane_usuari_id, false, currentTimestamp
     ];
 
     const result = await client.query(insertQuery, insertValues);
@@ -406,6 +422,7 @@ module.exports = {
     getMascotasForHome2ndDB,
     getMascotasForFeedDB,
     getAllMascotasDB,
+    updateMascotaApproval,
     insertNewMascotaDB,
     insertMascotaCaracteristicasDB,
     updateMascotaPrincipalDB,

@@ -44,6 +44,8 @@ router.get('/shortcard/:mascotId', mascotaController.getMascotaShortCard);
 
 
 // GET /api/mascotas/ -> LISTAR TODAS (Con datos del dueño)
-router.get('/', mascotaController.getAllMascotas);
+router.get('/AllPost', mascotaController.getAllMascotas);
+
+router.put('/approval/:mascotId',protect, mascotaController.updateMascotaApprovalStatus);
 
 module.exports = router;

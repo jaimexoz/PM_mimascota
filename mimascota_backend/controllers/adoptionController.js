@@ -216,6 +216,7 @@ module.exports = (io) => {
             }
         },
 
+        
         /**
          * Obtiene los formularios de adopción del usuario marcados como exitosos.
          */

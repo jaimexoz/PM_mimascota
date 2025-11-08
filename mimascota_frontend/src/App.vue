@@ -9,7 +9,8 @@ const router = useRouter();
 
 // Esta función se ejecuta automáticamente cuando el componente App.vue se monta (al cargar la app)
 onMounted(async () => {
-    const token = localStorage.getItem('token');
+    // Usar la clave correcta 'authToken' en lugar de 'token'
+    const token = localStorage.getItem('authToken');
     
     // Solo procedemos si existe un token guardado
     if (token) {
@@ -47,8 +48,10 @@ onMounted(async () => {
             // Este bloque se ejecuta si hay un error de red, o si lanzamos el error 401 arriba
             console.error('Fallo en la verificación del token. Forzando cierre de sesión.', error.message);
 
-            // 1. Limpia los datos de sesión expirados
-            localStorage.removeItem('token'); 
+            // 1. Limpia los datos de sesión expirados (limpiar todas las claves posibles de token)
+            localStorage.removeItem('authToken'); 
+            localStorage.removeItem('token'); // Limpiar clave antigua por compatibilidad
+            localStorage.removeItem('userToken'); // Limpiar clave antigua por compatibilidad
             localStorage.removeItem('userData'); 
             
             // 2. Redirige al login, solo si el usuario no está ya en la ruta de login

@@ -1,6 +1,5 @@
 <template>
   <div class="login-page-wrapper">
-      
       <div v-if="!loading" class="login-container">
           <div class="login-header">
               <h2>Inicio de Sesión</h2>
@@ -55,42 +54,31 @@ const handleLogin = async () => {
     error.value = ''; 
     loading.value = true;
     try {
-        // 🔥 CAMBIO 1: Usar apiClient (Axios) en lugar de fetch
+        
         // Axios maneja headers y JSON automáticamente
         const response = await apiClient.post('/auth/login', {
             emailx_usuari: email.value, 
             contra_usuari: password.value 
         });
-
-        // Axios devuelve los datos directamente en response.data
         const data = response.data; 
-        
-        // Con Axios, si no hay error de red, response.status ya es 2xx
-
-        // Lógica para guardar el token JWT
         login(data.token); 
         
-        // 🔥 CAMBIO 2: ACTUALIZAR la cabecera de autenticación de Axios
-        // Esto garantiza que el token se use inmediatamente en la siguiente petición (ej. al cargar /home)
         setAuthHeader(data.token); 
 
         // Guardar datos del usuario
         if (data.user) {
             localStorage.setItem('userData', JSON.stringify(data.user));
-            // Opcional: También podrías usar tu función updateUserData(data.user) si está disponible.
         }
         
-        // Redirige a la nueva ruta /home. Ahora, la primera petición
-        // a cualquier ruta protegida usará el nuevo token.
+        
         router.push('/home');
 
     } catch (err) {
-        // Manejo de errores de Axios (incluyendo 401, 403, 404, etc.)
         if (err.response && err.response.data) {
-             error.value = err.response.data.message || 'Error al iniciar sesión. Verifica tus credenciales.'; 
+            error.value = err.response.data.message || 'Error al iniciar sesión. Verifica tus credenciales.'; 
         } else {
-             console.error('Error de red o del servidor:', err);
-             error.value = 'No se pudo conectar con el servidor. Inténtalo de nuevo más tarde.';
+            console.error('Error de red o del servidor:', err);
+            error.value = 'No se pudo conectar con el servidor. Inténtalo de nuevo más tarde.';
         }
     } finally {
         loading.value = false;

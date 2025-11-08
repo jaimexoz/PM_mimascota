@@ -109,7 +109,7 @@ const setPasswordAndClearResetTokenDB = async (hashedPassword, userId) => {
  * @param {object} data - Datos a actualizar.
  * @returns {Promise<object>} El resultado de la actualización.
  */
-const updateUserInfoDB = async (userId, data) => {
+const updateUserInfo = async (userId, data) => {
     const { nombre, apellido, celular, edadValue } = data;
     return pool.query(
         `UPDATE usuarios SET 
@@ -232,7 +232,7 @@ module.exports = {
     findUserByResetTokenDB,
     updateResetTokenDB,
     setPasswordAndClearResetTokenDB,
-    updateUserInfoDB,
+    updateUserInfo,
     getUserWithRoleByIdDB,
     updateProfileImageDB,
     getCurrentProfileImageDB,

@@ -9,6 +9,11 @@ const TOKEN_KEY = 'authToken';
  */
 export function login(token) {
     if (typeof window !== 'undefined') {
+        // IMPORTANTE: Limpiar todos los tokens viejos antes de guardar el nuevo
+        // Esto evita que queden tokens expirados en localStorage con diferentes claves
+        localStorage.removeItem('token'); // Limpiar clave antigua
+        localStorage.removeItem('userToken'); // Limpiar clave antigua
+        
         localStorage.setItem(TOKEN_KEY, token);
     }
 }
@@ -18,7 +23,10 @@ export function login(token) {
  */
 export function logout() {
     if (typeof window !== 'undefined') {
+        // Limpiar todas las claves posibles de token
         localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem('token'); // Limpiar clave antigua
+        localStorage.removeItem('userToken'); // Limpiar clave antigua
         localStorage.removeItem('userData'); // Limpiar también los datos del usuario
     }
 }

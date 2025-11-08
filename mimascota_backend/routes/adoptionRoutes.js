@@ -16,6 +16,7 @@ module.exports = (io) => {
     // 1. RUTA ESPECÍFICA: Obtener solicitudes del usuario autenticado (Debe ir primero)
     router.get('/user', protect, adoptionController.getUserAdoptionForms); 
 
+
     router.get('/userSuccessAdoption', protect, adoptionController.getUserAdoptionSuccess); 
     // 2. RUTA DINÁMICA: Obtener un formulario específico por ID (Debe ir después)
     // Ahora, el :formId solo interceptará números, no la palabra 'user'

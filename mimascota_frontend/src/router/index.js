@@ -21,8 +21,10 @@ import MyPost from '@/views/MyPost.vue';
 import MyPostsEdit from '@/views/MyPostsEdit.vue';
 import AdopcionesRealizadas from '@/components/AdopcionesRealizadas.vue';
 import DeletePost from '@/views/DeletePost.vue';
+import petManagement from '@/views/petManagement.vue';
 
 import { isAuthenticated } from '../utils/auth'; // Importa la función de autenticación
+
 
 
 const router = createRouter({
@@ -154,6 +156,14 @@ const router = createRouter({
             component: favoritesPage,
             meta: { requiresAuth: true }
         },
+        {
+            path: '/petManagement',
+            name: 'PetManagement',
+            component: petManagement,
+            meta: { requiresAuth: true}
+        },
+
+
         {
             path: '/adoptForm/:mascotId', 
             name: 'NewAdoptionForm', // Nombre único

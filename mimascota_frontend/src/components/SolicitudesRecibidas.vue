@@ -146,7 +146,7 @@ const verFormularioAdopcion = (formId) => {
  * @param {string} newStatus - El nuevo estado ('Aceptado', 'Rechazado').
  */
  const updateStatus = async (formId, newStatus) => {
-    const userToken = authStore.token || localStorage.getItem('userToken');
+    const userToken = authStore.token || localStorage.getItem('authToken');
 
     if (!userToken) {
         console.error("No hay token para actualizar estado.");
@@ -196,7 +196,7 @@ const verFormularioAdopcion = (formId) => {
 
 
 const updateMascotStatus = async (mascotId, newStatus) => {
-    const userToken = authStore.token || localStorage.getItem('userToken');
+    const userToken = authStore.token || localStorage.getItem('authToken');
 
     if (!userToken) {
         console.error("No hay token para actualizar estado de mascota.");
@@ -252,7 +252,7 @@ const fetchUserSolicitudes = async () => {
     // ⭐️ VERIFICACIÓN ROBUSTA DEL TOKEN ⭐️
     if (!userToken) {
         // Si no está en la tienda (aún no cargado), búscalo en localStorage
-        const storedToken = localStorage.getItem('userToken'); // Usa la clave real de tu token
+        const storedToken = localStorage.getItem('authToken'); // Usa la clave correcta del token
         
         if (storedToken) {
             userToken = storedToken; // Usa el token almacenado para el fetch
@@ -354,7 +354,7 @@ const formatDate = (dateString) => {
  * @param {boolean} isAdopted - TRUE para Sí (Adoptado), FALSE para No (No Adoptado).
  */
  const confirmAdoption = async (solicitudId, isAdopted) => {
-    const userToken = authStore.token || localStorage.getItem('userToken');
+    const userToken = authStore.token || localStorage.getItem('authToken');
 
     if (!userToken) {
         console.error("No hay token para confirmar la adopción.");

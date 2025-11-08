@@ -378,7 +378,7 @@ const saveChanges = async () => {
             nombre: editableData.value.name,
             apellido: editableData.value.lastname,
             celular: editableData.value.phone,
-            edad_usuari: editableData.value.age
+            edad: editableData.value.age
         };
 
         // Simulación de llamada a API para guardar la información
@@ -405,7 +405,7 @@ const saveChanges = async () => {
             nombre: dataToSave.nombre,
             apellido: dataToSave.apellido,
             celular: dataToSave.celular,
-            edad_usuari: dataToSave.edad_usuari,
+            edad_usuari: dataToSave.edad || data.user?.edad,
         };
         updateUserData(updatedUserData); // Actualiza localStorage y notifica a los suscriptores
 
