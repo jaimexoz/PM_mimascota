@@ -141,6 +141,17 @@ const loginUser = async (req, res) => {
         if (!user) {
             return res.status(401).json({ message: 'Credenciales inválidas (correo no encontrado).' });
         }
+
+        // ----------------------------------------------------
+        // 💡 VERIFICACIÓN DE ELIMINACIÓN LÓGICA
+        // ----------------------------------------------------
+        if (user.eliminado_logico === true) {
+            return res.status(401).json({ 
+                message: 'Su cuenta ha sido eliminada. Por favor crea una nueva cuenta.',
+                accountDeleted: true 
+            });
+        }
+
         if (!user.mailve_usuari) {
             return res.status(401).json({ message: 'Por favor, verifica tu correo electrónico para iniciar sesión.' });
         }
@@ -170,7 +181,8 @@ const loginUser = async (req, res) => {
                 role: user.nombre_rolesx,
                 imageUrl: user.imagep_usuari,
                 mailVerified: user.mailve_usuari,
-                apellido: user.apelli_usuari
+                apellido: user.apelli_usuari,
+                edad: user.edadxx_usuari
             },
         });
 
@@ -541,6 +553,28 @@ const changeUserRole = async (req, res) => {
     }
 };
 
+const deleteAccountLogic = async (req, res) => {
+    // El ID del usuario se obtiene del token inyectado por el middleware 'protect'
+    const userId = req.user.id; 
+
+    console.log(userId);
+    try {
+        const success = await authModel.softDeleteUser(userId);
+
+        if (!success) {
+            // Esto podría suceder si el ID no existe o ya está eliminado
+            return res.status(404).json({ message: "Usuario no encontrado o ya eliminado." });
+        }
+
+        // 200 OK - Eliminación Lógica Exitosa
+        res.status(200).json({ message: "Cuenta eliminada lógicamente con éxito." });
+
+    } catch (error) {
+        console.error('Error al realizar la eliminación lógica del usuario:', error);
+        res.status(500).json({ message: "Error interno del servidor al procesar la eliminación." });
+    }
+};
+
 module.exports = {
     registerUser,
     loginUser,
@@ -552,4 +586,5 @@ module.exports = {
     updateProfileImage,
     changePassword,
     changeUserRole,
+    deleteAccountLogic
 };

@@ -355,7 +355,7 @@ const authStore = useAuthStore();
   <style scoped>
   /* Colores y Variables */
   .paw-icon-color {
-    color: #FF9933; /* Naranja principal */
+    color: #ff9595; /* Naranja principal */
   }
   .button-orange {
     background-color: #FF9933;
@@ -402,7 +402,7 @@ const authStore = useAuthStore();
     width: 2rem;
     height: 2rem;
     display: inline-block;
-    color: #FF9933; /* Naranja principal */
+    color: #ff9595; /* Naranja principal */
     margin-right: 0.5rem;
     margin-left: 0.5rem;
     margin-top: -0.25rem;
@@ -463,8 +463,8 @@ const authStore = useAuthStore();
   
   
   .filter-select:focus {
-    border-color: #FF9933; /* focus:border-[#FF9933] */
-    box-shadow: 0 0 0 1px #FF9933; /* focus:ring-[#FF9933] */
+    border-color: #ff9595; /* focus:border-[#FF9933] */
+    box-shadow: 0 0 0 1px #ff9595; /* focus:ring-[#FF9933] */
     outline: none;
   }
   
@@ -485,8 +485,8 @@ const authStore = useAuthStore();
   }
   
   .search-input:focus {
-    border-color: #6366f1; /* focus:border-indigo-500 */
-    box-shadow: 0 0 0 1px #6366f1; /* focus:ring-indigo-500 */
+    border-color: #ff9595;  /* focus:border-indigo-500 */
+    box-shadow: 0 0 0 1px #ff9595; /* focus:ring-indigo-500 */
     outline: none;
   }
   
@@ -668,7 +668,7 @@ const authStore = useAuthStore();
   
   :deep(.chip-grey) {
     background-color: #c8c7c7;
-    color: #565656; 
+    color: #ffffff; 
   }
   
   :deep(.pet-card-content-button){
@@ -696,11 +696,11 @@ const authStore = useAuthStore();
   }
   /* Usamos la regla de color definida arriba */
   :deep(.pet-card-button) {
-    background-color: #FF9933; 
+    background-color: #ff9595;
     transition: background-color 300ms ease;
   }
   :deep(.pet-card-button:hover) {
-    background-color: #f47004; 
+    background-color: #ff6060; 
   }
   
   

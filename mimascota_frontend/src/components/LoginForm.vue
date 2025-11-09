@@ -3,7 +3,7 @@
       <div v-if="!loading" class="login-container">
           <div class="login-header">
               <h2>Inicio de Sesión</h2>
-              <p>Inicia sesión para gestionar tus mascotas</p>
+              <p>Descubre a las mascotas en adopción</p>
           </div>
           <form class="login-form" @submit.prevent="handleLogin">
               <div class="form-group">
@@ -19,7 +19,9 @@
                   Iniciar Sesión
               </button>
               
-              <div v-if="error" class="error-message">{{ error }}</div>
+              <Transition name="fade-message">
+                  <div v-if="error" class="error-message">{{ error }}</div>
+              </Transition>
           </form>
           <div class="login-footer">
               <p><router-link to="/reset-password">¿Olvidaste tu contraseña?</router-link></p>
@@ -49,6 +51,8 @@ const password = ref('');
 const error = ref('');
 const loading = ref(false);
 const router = useRouter();
+
+const DURATION = 3000;
 
 const handleLogin = async () => {
     error.value = ''; 
@@ -80,6 +84,14 @@ const handleLogin = async () => {
             console.error('Error de red o del servidor:', err);
             error.value = 'No se pudo conectar con el servidor. Inténtalo de nuevo más tarde.';
         }
+
+        
+        // 💡 LÓGICA PARA EL DESVANECIMIENTO AUTOMÁTICO
+        if (error.value) {
+            setTimeout(() => {
+              error.value = ''; // Limpia la variable, iniciando la transición de salida
+            }, DURATION);
+        }
     } finally {
         loading.value = false;
     }
@@ -88,6 +100,9 @@ const handleLogin = async () => {
 
 <style scoped>
 /* Mantén todos los estilos del formulario de login aquí. */
+.login-page-wrapper{
+  width: 100%;
+}
 
 .full-page-spinner-overlay {
     /* Posiciona el overlay para que cubra toda la página (o el contenedor principal) */
@@ -149,13 +164,15 @@ const handleLogin = async () => {
 
 .login-header h2 {
   font-size: 2em;
+  font-weight: 700;
   margin-bottom: 10px;
   color: black;
 }
 
 .login-header p {
   font-size: 1.1em;
-  color: #555;
+  color: #747474;
+  font-weight: 600;
 }
 
 .login-form {
@@ -176,7 +193,7 @@ const handleLogin = async () => {
 .form-group input {
   width: 100%;
   padding: 12px;
-  border: 1px solid #ccc;
+  border: none;
   border-radius: 5px;
   background-color: #f5f5f5;
   color: black;
@@ -197,6 +214,7 @@ const handleLogin = async () => {
   display: flex;
     justify-content: center; /* Centra horizontalmente el contenido */
     align-items: center;
+    font-weight: 700;
 }
 
 .login-button:hover {
@@ -224,6 +242,20 @@ const handleLogin = async () => {
 }
 
 /* Mensajes de feedback (con recuadro) - Estos también podrían ser globales en style.css si se usan mucho */
+
+/* Estado activo: Aplica la animación durante la entrada y la salida */
+.fade-message-enter-active, 
+.fade-message-leave-active {
+  /* La duración del desvanecimiento es de 0.5s */
+  transition: opacity 0.5s ease; 
+}
+
+/* Estado inicial (antes de entrar) y estado final (después de salir) */
+.fade-message-enter-from,
+.fade-message-leave-to {
+  opacity: 0; /* Totalmente transparente */
+}
+
 .success-message,
 .error-message {
   margin-top: 15px;

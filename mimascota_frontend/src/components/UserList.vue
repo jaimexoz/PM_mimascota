@@ -294,9 +294,9 @@ h2 {
   transition: all 200ms ease;
 }
 
-.search-input:focus {
-  border-color: #6366f1; /* focus:border-indigo-500 */
-  box-shadow: 0 0 0 1px #6366f1; /* focus:ring-indigo-500 */
+.search-bar input:focus {
+  border-color: #ff9595;  /* focus:border-indigo-500 */
+  box-shadow: 0 0 0 1px #ff9595; /* focus:ring-indigo-500 */
   outline: none;
 }
 
@@ -344,7 +344,7 @@ h2 {
 }
 
 .user-table th {
-  background-color: #495057; /* Fondo oscuro para el encabezado */
+  background-color: #ff6060;  /* Fondo oscuro para el encabezado */
   color: #fff;
   font-weight: bold;
   text-transform: uppercase;

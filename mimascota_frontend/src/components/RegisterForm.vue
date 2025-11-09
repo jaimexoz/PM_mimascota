@@ -12,6 +12,8 @@ const celular = ref('');
 const profileImage = ref(null);
 
 const errorMessage = ref(''); 
+
+const DURATION = 3000;
 // Función para actualizar el nombre del archivo visible
 const updateFileNameDisplay = (file) => {
     const fileNameElement = document.querySelector('.nombre-archivo');
@@ -71,6 +73,13 @@ const register = async () => {
     } catch (error) {
         console.error('Error al registrar el usuario:', error);
         errorMessage.value = error.response?.data?.message || 'Error al registrar el usuario.';
+        
+        // 💡 LÓGICA PARA EL DESVANECIMIENTO AUTOMÁTICO
+        if (errorMessage.value) {
+            setTimeout(() => {
+                errorMessage.value = ''; // Limpia la variable, iniciando la transición de salida
+            }, DURATION);
+        }
     }
 };
 </script>
@@ -79,7 +88,7 @@ const register = async () => {
   <div class="register-container">
     <div class="register-header">
       <h2>Regístrate</h2>
-      <p>Crea tu cuenta para empezar a usar la aplicación</p>
+      <p>Crea una cuenta para usar la aplicación</p>
     </div>
     <form class="register-form" @submit.prevent="register">
       <div class="form-group">
@@ -117,7 +126,9 @@ const register = async () => {
         </div>
       <button type="submit" class="register-button">Registrarse</button>
     </form>
-    <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
+    <Transition name="fade-message">
+        <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
+    </Transition>
     <div class="register-footer">
       <p>¿Ya tienes cuenta? <a href="#" @click.prevent="$emit('toggle-form')">Inicia sesión</a></p>
     </div>
@@ -146,11 +157,13 @@ const register = async () => {
 .register-header h2 {
   font-size: 2em;
   margin-bottom: 10px;
+  font-weight: 700;
 }
 
 .register-header p {
   font-size: 1.1em;
-  color: #555;
+  color: #747474;
+  font-weight: 600;
   
 }
 
@@ -172,10 +185,22 @@ const register = async () => {
 .form-group input {
   width: 100%;
   padding: 10px;
-  border: 1px solid #ccc;
+  border: none;
   border-radius: 5px;
   background-color: #f5f5f5;
   color: black;
+}
+
+.fade-message-enter-active, 
+.fade-message-leave-active {
+  /* La duración del desvanecimiento es de 0.5s */
+  transition: opacity 0.5s ease; 
+}
+
+/* Estado inicial (antes de entrar) y estado final (después de salir) */
+.fade-message-enter-from,
+.fade-message-leave-to {
+  opacity: 0; /* Totalmente transparente */
 }
 
 /* Estilo para inputs inválidos */
@@ -195,6 +220,7 @@ const register = async () => {
   font-size: 1.1em;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  font-weight: 700;
 }
 
 .register-button:hover {

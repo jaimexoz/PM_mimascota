@@ -39,7 +39,17 @@ apiClient.interceptors.response.use(
         
         // Verifica si el error es 401 (No Autorizado, que incluye Token Expirado)
         if (error.response && error.response.status === 401) {
+            // Obtener la URL de la petición para determinar si es un error de login
+            const requestUrl = error.config?.url || '';
+            const isLoginRequest = requestUrl.includes('/auth/login');
             
+            // Si es un error de login, NO mostrar el alert de sesión expirada
+            // Dejar que el componente LoginForm maneje el mensaje de error
+            if (isLoginRequest) {
+                return Promise.reject(error);
+            }
+            
+            // Para otros errores 401 (token expirado en peticiones autenticadas)
             console.warn("Token expirado o no autorizado. Forzando cierre de sesión.");
 
             // 1. Ejecuta el logout (borra localStorage, Pinia y llama a setAuthHeader(null))

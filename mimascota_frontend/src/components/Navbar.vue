@@ -121,6 +121,13 @@
               Gestión de Mascotas
             </router-link>
 
+            <button class="dropdown-item" @click="handleDeleteAccount">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                <path :d="deleteCountIconPath"/>
+              </svg>
+              Eliminar cuenta
+            </button>
+
             <button class="dropdown-item logout-item" @click="handleLogout">
               <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
@@ -139,12 +146,20 @@ import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { logout, onUserDataChange } from '../utils/auth';
 import { mdiCat } from '@mdi/js';
-
+import { mdiTrashCanOutline } from '@mdi/js';
 import { io } from 'socket.io-client';
+
+
+
+
 
 
 const petManagementIconPath = computed(() => {
     return mdiCat;
+});
+
+const deleteCountIconPath = computed(() => {
+    return mdiTrashCanOutline;
 });
 
 const router = useRouter();
@@ -450,6 +465,43 @@ const updateUserData = (newUserData) => {
   }
 };
 
+const handleDeleteAccount = async () => {
+    // 1. Confirmación del usuario
+    const confirmation = confirm("ADVERTENCIA: ¿Estás seguro de que deseas eliminar tu cuenta? Esta acción es irreversible.");
+    if (!confirmation) {
+        return; // Cancelar si el usuario no confirma
+    }
+
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+        alert("Sesión no válida. Por favor, inicia sesión de nuevo.");
+        handleLogout(); // Forzar cierre de sesión
+        return;
+    }
+
+    try {
+        // ⚠️ AJUSTA ESTA RUTA a tu backend
+        const response = await fetch('http://localhost:3000/api/auth/delete-account', {
+            method: 'PUT', // Usamos PATCH para una actualización parcial (cambiar un campo)
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (response.ok) {
+            alert("Tu cuenta ha sido eliminada lógicamente. ¡Gracias por usar nuestros servicios!");
+            handleLogout(); // Cerrar sesión después de la eliminación exitosa
+        } else {
+            const errorData = await response.json();
+            alert(`Fallo al eliminar la cuenta: ${errorData.message || 'Error del servidor.'}`);
+        }
+
+    } catch (error) {
+        console.error('Error de red al intentar eliminar la cuenta:', error);
+        alert("Ocurrió un error de red. Intenta de nuevo.");
+    }
+};
+
 // Variable para almacenar la función de desuscripción
 let unsubscribe = null;
 
@@ -572,7 +624,7 @@ onUnmounted(() => {
 }
 
 .nav-link.active {
-  color: #333;
+  color: #ff9595; 
   font-weight: 600;
 }
 
@@ -583,7 +635,7 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   height: 2px;
-  background: #333;
+  background: #ff9595; 
   border-radius: 1px;
 }
 
@@ -609,7 +661,7 @@ img.notification-avatar {
     height: 60px;
     border-radius: 50%;
     object-fit: cover;
-    border: 3px solid #ff9900;
+    border: 3px solid #ff9595; 
 }
 .notifications-container {
     position: relative; /* Clave para el posicionamiento absoluto del dropdown */

@@ -79,7 +79,7 @@
               <input type="number" 
                      :value="isEditing ? editableData.age : userAge" 
                      :readonly="!isEditing"
-                     @input="isEditing ? editableData.age = $event.target.value : null"
+                     @input="isEditing ? editableData.age = Number($event.target.value) || '' : null"
                      :class="{ 'editable-input': isEditing }" />
             </div>
             
@@ -253,7 +253,7 @@ const userName = ref(userData.nombre || userData.name || '');
 const userLastname = ref(userData.apellido || userData.lastname || '');
 const userEmail = ref(userData.email || userData.emailx_usuari || '');
 const userPhone = ref(userData.celular || userData.celula_usuari || '');
-const userAge = ref(userData.edad_usuari || '');
+const userAge = ref(userData.edad || userData.edadxx_usuari || '');
 const userImageUrl = ref(userData.imageUrl && userData.imageUrl.startsWith('http') ? userData.imageUrl : defaultAvatar);
 
 // Variables de control
@@ -283,7 +283,7 @@ const updateUserInfo = (newUserData) => {
     userLastname.value = newUserData.apellido || newUserData.lastname || '';
     userEmail.value = newUserData.email || newUserData.emailx_usuari || '';
     userPhone.value = newUserData.celular || newUserData.celula_usuari || '';
-    userAge.value = newUserData.edad || newUserData.edad_usuari  || '';
+    userAge.value = newUserData.edad || newUserData.edadxx_usuari  || '';
     userImageUrl.value = newUserData.imageUrl && newUserData.imageUrl.startsWith('http') ? newUserData.imageUrl : defaultAvatar;
     
     // 2. Asegurarse de que los datos editables reflejen los datos actuales si no estamos editando
@@ -656,8 +656,8 @@ onUnmounted(() => {
 .info-item input:not([readonly]),
 .info-item-2 input:not([readonly]),
 .info-item-21 input:not([readonly]) {
-    border: 2px solid #ff9100; /* Borde más visible al editar */
-    box-shadow: 0px 0px 8px rgba(255, 145, 0, 0.5); /* Sombra suave para indicar edición */
+    border: 2px solid #ff9595;  /* Borde más visible al editar */
+    box-shadow: 0px 0px 8px rgba(255, 0, 0, 0.393); /* Sombra suave para indicar edición */
     color: #000000;
 }
 /* Estilos existentes */
@@ -668,7 +668,6 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   font-family: 'Inter', sans-serif;
-  background-image: url('../assets/huellas.jpg');
   background-size: contain;
   
 }
@@ -678,7 +677,6 @@ onUnmounted(() => {
 .perfil-fondo {
   width: 100%;
   height: 100;
-  background: #ffffff;
   position: relative;
 }
 
@@ -691,8 +689,8 @@ onUnmounted(() => {
 }
 
 .perfil-card {
-  background: #ffffff4d;
-  box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.332);
+  background: #fff8f8;
+  box-shadow: 0px 0px 20px 0px #ffd3d3;
   border-radius: 24px;
   padding: 1rem;
   margin: 20px;
@@ -701,7 +699,7 @@ onUnmounted(() => {
   max-width: 500px;
   width: 100%;
   backdrop-filter: blur(8px);
-  height: 85.3vh;
+  height: 86.9vh;
 }
 
 .perfil-card-fun {
@@ -745,18 +743,16 @@ onUnmounted(() => {
 }
 
 .subir-foto-btn {
-  background: #f6f6f6;
+  background: #ff9595;
   border: white;
-  box-shadow: 0px 6px 10px -1px #d0cfcf;
   border-radius: 24px;
   padding: 0.4rem 1rem;
   font-weight: 600;
   font-size: 1.1rem;
-  color: #000000;
+  color: #ffffff;
   cursor: pointer;
   transition: all 0.2s;
-  box-shadow: 0px 2px 5px hsl(0, 0%, 50%);
-  margin-top: 0.5rem;
+  box-shadow: 0px 2px 5px #ff9595;
   text-align: center;
 }
 .subir-foto-btn:hover {
@@ -814,7 +810,7 @@ onUnmounted(() => {
   font-weight: 700;
   margin-top: 1rem;
   margin-bottom: 0.8rem;
-  color: #000000;
+  color: #bf5151;
 }
 
 .info-item {
@@ -828,12 +824,12 @@ onUnmounted(() => {
   width: 10%;
   font-weight: 700;
   font-size: 18px;
-  color: #000000;
+  color: #bf5151;
 }
 .info-item input {
   flex: 1;
   padding: 0.5rem 0.8rem;
-  border: 1px solid #bdbdbd;
+  border: none;
   box-shadow: 0px 6px 10px -1px #d0cfcf;
   border-radius: 8px;
   font-size: 1rem;
@@ -856,7 +852,8 @@ onUnmounted(() => {
   width: 10%;
   font-weight: 700;
   font-size: 18px;
-  color: #000000;
+  color: #bf5151;
+
 }
 
 .info-item-21 span {
@@ -864,7 +861,7 @@ onUnmounted(() => {
   width: 10%;
   font-weight: 700;
   font-size: 18px;
-  color: #000000;
+  color: #bf5151;
 }
 
 
@@ -873,7 +870,7 @@ onUnmounted(() => {
   width: 90%;
   padding: 0.5rem 0.8rem;
   margin-left: -1px;
-  border: 1px solid #bdbdbd;
+  border: none;
   box-shadow: 0px 6px 10px -1px #d0cfcf;
   border-radius: 8px;
   font-size: 1rem;
@@ -887,7 +884,7 @@ onUnmounted(() => {
   width: 100%;
   padding: 0.5rem 0.8rem;
   margin-left: -1px;
-  border: 1px solid #bdbdbd;
+  border: none;
   box-shadow: 0px 6px 10px -1px #d0cfcf;
   border-radius: 8px;
   font-size: 1rem;
@@ -913,7 +910,7 @@ onUnmounted(() => {
 }
 .info-btn {
   padding: 0.7rem 1.2rem;
-  background: #ff9100;
+  background: #ff9595; 
   border: none;
   border-radius: 25px;
   font-weight: 600;
@@ -926,7 +923,7 @@ onUnmounted(() => {
 
 .info-btnG {
   flex: 1;
-  background: #ff9100;
+  background: #ff9595; 
   border: none;
   border-radius: 25px;
   font-weight: 600;
@@ -939,7 +936,7 @@ onUnmounted(() => {
 
 .info-btnC {
   flex: 1;
-  background: #ff9100;
+  background: #ff9595; 
   border: none;
   border-radius: 25px;
   font-weight: 600;
@@ -949,9 +946,15 @@ onUnmounted(() => {
   transition: all 0.2s;
 }
 .info-btn:hover:not(:disabled) {
-  background: #ff7700;
+  background: #ff6060;
   border-color: #ffffff;
 }
+
+.info-btnG:hover:not(:disabled) {
+  background: #ff6060;
+  border-color: #ffffff;
+}
+
 .info-btn:disabled {
     background: #ccc;
     cursor: not-allowed;
@@ -971,7 +974,8 @@ onUnmounted(() => {
 
 
 .funcionalidades {
-  background: #ffffffa0;
+  background: #fff8f8;
+    box-shadow: 0px 0px 20px 0px #ffd3d3;
   margin-top: -40px;
   margin-bottom: 1px;
   align-items: flex-start;
@@ -980,7 +984,6 @@ onUnmounted(() => {
   max-width: 600px;
   width: 100%;
   backdrop-filter: blur(8px);
-  box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.332);
 }
 
 .fun-top{
@@ -988,21 +991,20 @@ onUnmounted(() => {
   justify-items: center;
   height: 49px;
   margin-bottom: 20px;
-  border-bottom: 2px solid #ebebeb; 
-  box-shadow: 0 2px 0px rgba(77, 68, 68, 0.12);
-
+  border-bottom: 2px solid #ffcece; 
+  box-shadow: 0 2px 0px rgba(255, 199, 199, 0.603);
 }
 
 .solicitud{
   align-items: flex-start;
-  background: #ffffffb1;
+  background: #fff8f8;
+  box-shadow: 0px 0px 20px 0px #ffd3d3;
   border-radius: 24px;
   margin-top: 1px;
   min-width: 500px;
   max-width: 600px;
   width: 100%;
   backdrop-filter: blur(8px);
-  box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.332);
 
 }
 .func-grid {
@@ -1020,24 +1022,23 @@ onUnmounted(() => {
   flex: 1;
 }
 .func-btn {
-  padding: 0.7rem 1.2rem;
-  background: #f6f6f6;
+  padding: 0.7rem 1rem;
+  background: #ff9595; 
   border: white;
-  box-shadow: 0px 6px 10px -1px #d0cfcf;
-  border-radius: 25px;
+  border-radius: 10px;
   font-weight: 600;
-  color: #000000;
+  color: #ffffff;
   font-size: 18px;
   cursor: pointer;
   transition: all 0.2s;
   width: 70%;
   text-align: center;
-  box-shadow: 0px 2px 5px hsl(0, 0%, 50%);
 }
 .func-btn:hover {
-  background: #d1d1d1;
-  border-color: #d2d2d2;
+  background: #ff6060;
 }
+
+
 
 .footer-bar {
   width: 100%;

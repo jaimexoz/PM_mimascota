@@ -43,6 +43,7 @@ const createNewUserDB = async (userData) => {
 
 /**
  * Obtiene el usuario completo y su rol por email para el login.
+ * NO filtra por eliminado_logico para poder verificar si el usuario está eliminado.
  * @param {string} email - Correo electrónico del usuario.
  * @returns {Promise<object>} El resultado de la consulta con el rol.
  */
@@ -224,6 +225,14 @@ const changeRoleDB = async (userId, newRole) => {
     );
 };
 
+const softDeleteUser = async (userId) => {
+
+    return pool.query(
+        'UPDATE usuarios SET eliminado_logico = TRUE WHERE idxxxx_usuari = $1',
+        [userId]
+    );
+}
+
 module.exports = {
     findUserByEmailDB,
     createNewUserDB,
@@ -240,4 +249,5 @@ module.exports = {
     changeUserPasswordDB,
     getCurrentHashDB,
     changeRoleDB,
+    softDeleteUser
 };

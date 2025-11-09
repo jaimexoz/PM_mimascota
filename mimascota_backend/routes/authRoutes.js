@@ -12,7 +12,8 @@ const {
     getAllUsers,
     updateProfileImage,
     changePassword,
-    changeUserRole
+    changeUserRole,
+    deleteAccountLogic
 } = require('../controllers/authController'); 
 
 const multer = require('multer'); // <-- Importar multer
@@ -77,5 +78,7 @@ router.put('/change-password', protect, changePassword);
 
 // Ruta para cambiar rol de usuario (solo admin)
 router.put('/change-user-role', protect, changeUserRole);
+
+router.put('/delete-account', protect, deleteAccountLogic);
 
 module.exports = router;

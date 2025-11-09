@@ -58,13 +58,16 @@ export const useAuthStore = defineStore('auth', {
 
         /**
          * Cierra la sesión del usuario.
+         * @param {boolean} showAlert - Si debe mostrar un alert (por defecto false, el interceptor maneja los alerts)
          */
-        logout() {
+        logout(showAlert = false) {
             this.setToken(null);
             // Opcional: Redirigir al login o página principal
             // router.push('/login'); 
             console.log("Sesión cerrada.");
-            alert("Tu sesión ha expirado. Por favor, vuelve a iniciar sesión.");
+            if (showAlert) {
+                alert("Tu sesión ha expirado. Por favor, vuelve a iniciar sesión.");
+            }
         }
     },
 });

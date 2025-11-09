@@ -332,15 +332,7 @@ const PetCard = ({ mascota }) => {
 }
 
 .page-header {
-
-  background-image: linear-gradient(
-                135deg, 
-                #ffe3be 0%, /* Naranja intermedio */
-                #ffecd4 24%,
-                #ffffff 100% /* Dorado (final) */
-            );
   padding: 2.5rem 0;
-  border-bottom: 1px solid #e9ecef;
   margin-bottom: 2rem;
   display: flex;
 }
@@ -368,7 +360,7 @@ const PetCard = ({ mascota }) => {
   text-align: left;
   font-size: 4.5rem;
   font-weight: 800;
-  color: #ff9100;
+  color: #ffbdbd;
   margin: 0;
   letter-spacing: 2px;
 }
@@ -380,7 +372,7 @@ const PetCard = ({ mascota }) => {
 
 .explore-button{
   /* Fondo y color del texto */
-  background-color: #FFA500; 
+  background-color: #ff9595; 
   color: white; 
   border: none; 
   border-radius: 50px; 
@@ -399,7 +391,7 @@ const PetCard = ({ mascota }) => {
 }
 
 .explore-button:hover {
-  background-color: #f47004; /* Un naranja ligeramente más oscuro al pasar el ratón */
+  background-color: #ff6060; /* Un naranja ligeramente más oscuro al pasar el ratón */
 }
 
 .image-section{
@@ -450,12 +442,12 @@ const PetCard = ({ mascota }) => {
     color: #FF9933; /* Naranja principal */
 }
 .button-orange {
-    background-color: #FF9933;
+    background-color: #ff9595;
     transition-property: background-color;
     transition-duration: 300ms;
 }
 .button-orange:hover {
-    background-color: #E0852A;
+    background-color: #ff6060;
 }
 
 /* ==============================================
@@ -494,7 +486,7 @@ const PetCard = ({ mascota }) => {
     width: 2rem;
     height: 2rem;
     display: inline-block;
-    color: #FF9933; /* Naranja principal */
+    color: #ff9595; /* Naranja principal */
     margin-right: 0.5rem;
     margin-left: 0.5rem;
     margin-top: -0.25rem;
@@ -756,7 +748,7 @@ const PetCard = ({ mascota }) => {
 
 :deep(.chip-grey) {
     background-color: #c8c7c7;
-    color: #565656; 
+    color: #ffffff; 
 }
 
 :deep(.pet-card-content-button){
@@ -784,11 +776,11 @@ const PetCard = ({ mascota }) => {
 }
 /* Usamos la regla de color definida arriba */
 :deep(.pet-card-button) {
-    background-color: #FF9933; 
+    background-color: #ff9595;
     transition: background-color 300ms ease;
 }
 :deep(.pet-card-button:hover) {
-    background-color: #f47004; 
+    background-color: #ff6060;
 }
 
 
@@ -933,7 +925,6 @@ const PetCard = ({ mascota }) => {
     display: flex;
     align-items: flex-start;
     font-size: 1.3rem;
-    font-weight: 800;
 }
 
 .paso-numero {
@@ -967,7 +958,7 @@ const PetCard = ({ mascota }) => {
     font-size: 1.125rem; /* text-lg */
     font-weight: 700; /* font-bold */
     color: #ffffff; /* text-orange-600 */
-    background-color: #FF9933; /* bg-white */
+    background-color: #ff9595; /* bg-white */
     border-radius: 25px; /* rounded-full */
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
     transition: background-color 0.3s; /* transition duration-300 */
@@ -975,7 +966,7 @@ const PetCard = ({ mascota }) => {
 }
 
 .adopcion-boton:hover {
-    background-color: #f47004; /* hover:bg-gray-100 */
+    background-color: #ff6060; /* hover:bg-gray-100 */
 }
 
 .boton-icono {
