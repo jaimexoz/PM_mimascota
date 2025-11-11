@@ -21,8 +21,29 @@ export function setAuthHeader(token) {
 // Configura el header inicial al cargar la app
 const initialToken = getToken();
 if (initialToken) {
-  setAuthHeader(initialToken);
+  setAuthHeader(initialToken);
 }
+
+// ----------------------------------------------------
+// 🚨 INTERCEPTOR DE REQUEST 🚨
+// Asegura que siempre se use el token más reciente de localStorage
+// ----------------------------------------------------
+apiClient.interceptors.request.use(
+    (config) => {
+        // Siempre obtener el token más reciente de localStorage antes de cada petición
+        const token = getToken();
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        } else {
+            // Si no hay token, eliminar el header de autorización
+            delete config.headers.Authorization;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
 
 // ----------------------------------------------------
 // 🚨 INTERCEPTOR DE RESPUESTA 🚨
@@ -52,7 +73,10 @@ apiClient.interceptors.response.use(
             // Para otros errores 401 (token expirado en peticiones autenticadas)
             console.warn("Token expirado o no autorizado. Forzando cierre de sesión.");
 
-            // 1. Ejecuta el logout (borra localStorage, Pinia y llama a setAuthHeader(null))
+            // 1. Limpiar el header de autorización de axios
+            setAuthHeader(null);
+            
+            // 2. Ejecuta el logout (borra localStorage, Pinia)
             authStore.logout(); 
 
             // 2. Redirige al usuario a la página de inicio de sesión

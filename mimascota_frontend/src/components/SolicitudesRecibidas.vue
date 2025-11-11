@@ -99,13 +99,16 @@
                 </table>
             </div>
         </div>
+        
     </div>
+    <Footer/>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router'; 
-import Navbar from '@/components/Navbar.vue'; // Asumo la ruta del Navbar
+import Navbar from '@/components/Navbar.vue'; 
+import Footer from './Footer.vue';
 import { useAuthStore } from "@/stores/authStore";
 import { PawPrint, Loader } from 'lucide-vue-next';
 
@@ -416,9 +419,12 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Estilos para el contenedor principal */
 
 
+.solicitudes-page{
+    min-height: 92.3vh;
+    padding-top: 1rem;
+}
 .content-wrapper {
   max-width: 80rem; /* max-w-7xl */
   margin-left: auto;
@@ -448,7 +454,7 @@ onMounted(() => {
     width: 2rem;
     height: 2rem;
     display: inline-block;
-    color: #FF9933; /* Naranja principal */
+    color: #ff9595;  
     margin-right: 0.5rem;
     margin-left: 0.5rem;
     margin-top: -0.25rem;
@@ -471,7 +477,7 @@ onMounted(() => {
     transition: all 0.3s ease;
     gap: 0.5rem;
     margin-left: 30px;
-    margin-top: 10px;
+    margin-top: 94px;
     position: absolute;
 }
 
@@ -502,10 +508,11 @@ th, td {
     border-bottom: 1px solid #dee2e6;
     text-align: center;
     font-size: 1rem;
+    font-weight: 500;
 }
 
 th {
-    background-color: #495057; /* Fondo oscuro para el encabezado */
+    background-color: #ff6060; 
     color: #fff;
     font-weight: bold;
     text-transform: uppercase;
@@ -543,8 +550,8 @@ select{
 
 .status-pendiente{
     font-size: 1rem;
-    background-color: #e7e7e7;
-    color: #000000;
+    background-color: #adadad;
+    color: #ffffff;
     font-weight: 700;
     padding-left: 20px;
     padding-right: 18px;
@@ -555,8 +562,8 @@ select{
 
 .status-aceptado{
     font-size: 1rem;
-    background-color: #afff5f70;
-    color: #5c9920;
+    background-color: #77c926;
+    color: #ffffff;
     font-weight: 700;
     padding-left: 30px;
     padding-right: 18px;
@@ -573,8 +580,8 @@ select{
     width: 125px;
     font-size: 1rem;
     font-weight: 700;
-    background-color: #afff5f70;
-    color: #5c9920;
+    background-color: #77c926;
+    color: #ffffff;
 }
 
 .not-adopted-label{
@@ -591,8 +598,8 @@ select{
 
 .status-rechazado{
     font-size: 1rem;
-    background-color: #ff96a0;
-    color: #a20000;
+    background-color: #ff3e51;
+    color: #ffffff;
     font-weight: 700;
     padding-left: 22px;
     padding-right: 18px;
@@ -605,7 +612,7 @@ select{
     font-size: 1rem;
     background-color: #ffffff;
     color: #6b6b6b;
-    font-weight: 700;
+    font-weight: 500;
     padding-left: 20px;
     padding-right: 18px;
     border: none;
@@ -619,18 +626,19 @@ select{
     padding-right: 10px;
     border: none;
     border-radius: 25px;
-    background-color: #e7e7e7;
-    color: #000000; /* Color naranja distintivo */
+    background-color: #b9b9b9;
+    color: #ffffff; 
     text-decoration: none;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     font-size: 1rem;
+    font-weight: 700;
 }
 
 
 .detail-button:hover {
-    background-color: #FF9933;
+    background-color: #ff9595; 
     transition: 0.5s;
 }
 
@@ -674,8 +682,8 @@ select{
 
 .button-yes{
     border: none;
-    background-color: #afff5f70;
-    color: #5c9920;
+    background-color: #77c926;
+    color: #ffffff;
     border-radius: 10px;
     font-weight: 800;
     font-size: 0.9rem;
@@ -688,8 +696,8 @@ select{
 
 .button-no{
     border: none;
-    background-color: #ff96a0;
-    color: #a20000;
+    background-color: #ff3e51;
+    color: #ffffff;
     border-radius: 10px;
     font-weight: 800;
     font-size: 0.9rem;

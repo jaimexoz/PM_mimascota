@@ -49,7 +49,7 @@
                 <p class="no-results-text">Crea una nueva publicación para que aparezca aquí.</p>
             </div>
         </div>
-
+        <Footer/>
     </div>
 
     <EditPostModal 
@@ -62,6 +62,7 @@
 
 <script setup>
 import Navbar from '../components/Navbar.vue';
+import Footer from '@/components/Footer.vue';
 import EditPostModal from '../components/EditPostModal.vue'; // Mantenemos la modal
 import { ref, onMounted, computed, reactive, h } from 'vue'; // Importamos 'h'
 import { PawPrint, Search, Loader } from 'lucide-vue-next';
@@ -276,7 +277,7 @@ funcionen con el componente funcional PetCard creado con h().
     width: 2rem; 
     height: 2rem; 
     display: inline-block; 
-    color: #FF9933; 
+    color: #ff9595; 
     margin-right: 0.5rem; 
     margin-left: 0.5rem; 
     margin-top: -0.25rem; }
@@ -313,8 +314,8 @@ funcionen con el componente funcional PetCard creado con h().
     transition: all 200ms ease; }
 
 .search-input:focus { 
-    border-color: #6366f1; 
-    box-shadow: 0 0 0 1px #6366f1; 
+    border-color: #ff9595; 
+    box-shadow: 0 0 0 1px #ff9595; 
     outline: none; }
 
 .search-icon { 
@@ -445,7 +446,7 @@ funcionen con el componente funcional PetCard creado con h().
 
 :deep(.chip-grey) { 
     background-color: #c8c7c7; 
-    color: #565656; }
+    color: #ffffff; }
 
 :deep(.pet-card-content-button) { 
     padding-right: 1rem; 
@@ -468,8 +469,9 @@ funcionen con el componente funcional PetCard creado con h().
     color: #ffffff; 
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); 
     cursor: pointer; 
-    background-color: #FF9933; 
+    background-color: #ff9595; 
     transition: background-color 300ms ease; }
 
-:deep(.pet-card-button:hover) { background-color: #f47004; }
+:deep(.pet-card-button:hover) { background-color: #ff6060; }
+
 </style>

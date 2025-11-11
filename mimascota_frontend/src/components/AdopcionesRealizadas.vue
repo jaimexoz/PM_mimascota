@@ -1,5 +1,5 @@
 <template>
-    <div class="solicitudes-page">
+    <div class="adopciones-recibidas">
         <Navbar />
         <button @click="irAtras" class="back-button">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
@@ -69,12 +69,14 @@
             </div>
         </div>
     </div>
+    <Footer/>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router'; 
-import Navbar from '@/components/Navbar.vue'; // Asumo la ruta del Navbar
+import Navbar from '@/components/Navbar.vue'; 
+import Footer from './Footer.vue';
 import { useAuthStore } from "@/stores/authStore";
 import { PawPrint, Loader } from 'lucide-vue-next';
 
@@ -202,10 +204,9 @@ onMounted(() => {
 
 <style scoped>
 /* Estilos para el contenedor principal */
-.solicitudes-enviadas {
-    padding: 20px;
-    background-color: #f8f9fa; /* Color de fondo ligero */
-    min-height: 100vh;
+.adopciones-recibidas {
+    min-height: 92.3vh;
+    padding-top: 1rem;
 }
 
 .content-wrapper {
@@ -237,7 +238,7 @@ onMounted(() => {
     width: 2rem;
     height: 2rem;
     display: inline-block;
-    color: #FF9933; /* Naranja principal */
+    color: #ff9595; 
     margin-right: 0.5rem;
     margin-left: 0.5rem;
     margin-top: -0.25rem;
@@ -260,7 +261,7 @@ onMounted(() => {
     transition: all 0.3s ease;
     gap: 0.5rem;
     margin-left: 30px;
-    margin-top: 10px;
+    margin-top: 94px;
     position: absolute;
 }
 
@@ -293,10 +294,11 @@ th, td {
     border-bottom: 1px solid #dee2e6;
     text-align: center;
     font-size: 1rem;
+    font-weight: 500;
 }
 
 th {
-    background-color: #495057; /* Fondo oscuro para el encabezado */
+    background-color: #ff6060; /* Fondo oscuro para el encabezado */
     color: #fff;
     font-weight: bold;
     text-transform: uppercase;
@@ -307,8 +309,8 @@ th {
     width: 125px;
     font-size: 1rem;
     font-weight: 700;
-    background-color: #afff5f70;
-    color: #5c9920;
+    background-color: #77c926;
+    color: #ffffff;
 }
 
 
@@ -321,8 +323,9 @@ th {
     padding-right: 10px;
     border: none;
     border-radius: 25px;
-    background-color: #e7e7e7;
-    color: #000000; /* Color naranja distintivo */
+    background-color: #b9b9b9;
+    color: #ffffff; 
+    font-weight: 700;
     text-decoration: none;
     cursor: pointer;
     display: inline-flex;
@@ -332,7 +335,7 @@ th {
 
 
 .detail-button:hover {
-    background-color: #FF9933;
+    background-color: #ff9595; 
     transition: 0.5s;
 }
 
@@ -348,18 +351,6 @@ th {
     display: inline-block;
 }
 
-.status-pending {
-    background-color: #ffc107; /* Amarillo */
-    color: #333;
-}
-
-.status-approved {
-    background-color: #28a745; /* Verde */
-}
-
-.status-rejected {
-    background-color: #dc3545; /* Rojo */
-}
 
 .no-data {
     text-align: center;

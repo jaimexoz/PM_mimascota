@@ -26,9 +26,13 @@
                 <p class="text-red-600 font-semibold">{{ error }}</p>
             </div>
 
+            
+
             <div v-else-if="posts.length === 0" class="empty-state">
-                <p>No hay publicaciones de mascotas pendientes de revisión o gestión.</p>
-            </div>
+            <h2 class="no-results-title">¡Vaya! No se han encontrado publicaciones pendientes por el momento.</h2>
+            <p class="no-results-text">Vuelve ha ingresar más tarde.</p>
+            
+        </div>
 
             <div v-else class="table-container">
                 <table class="solicitudes-table">
@@ -52,7 +56,7 @@
                             <td>{{ formatDate(post.fechap_mascot || new Date()) }}</td> 
                             <td>
                                 <button @click="verFichaInformacion(post.idxxxx_mascot)" class="detail-button">
-                                    Ver Ficha
+                                    Ver Detalles 
                                     <span class="detail-icon">➤</span>
                                 </button>
                             </td>
@@ -72,13 +76,16 @@
                 </table>
             </div>
         </div>
+        
     </div>
+    <Footer/>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router'; 
 import Navbar from '@/components/Navbar.vue'; 
+import Footer from '@/components/Footer.vue';
 import { useAuthStore } from "@/stores/authStore";
 import { PawPrint, Loader } from 'lucide-vue-next';
 
@@ -104,14 +111,23 @@ const verFichaInformacion = (mascotId) => {
 const fetchAllMascotaPosts = async () => {
     loading.value = true;
     error.value = null;
-    const userToken = authStore.token;
+    let userToken = authStore.token; // Intenta obtener el token de la tienda
 
+    // ⭐️ VERIFICACIÓN ROBUSTA DEL TOKEN ⭐️
     if (!userToken) {
-        // Asumiendo que esta página es solo para Admin/Empleado
-        error.value = "Permiso denegado. Debes ser administrador o empleado.";
-        loading.value = false;
-        router.push('/login'); 
-        return;
+        // Si no está en la tienda (aún no cargado), búscalo en localStorage
+        const storedToken = localStorage.getItem('authToken'); // Usa la clave correcta del token
+        
+        if (storedToken) {
+            userToken = storedToken; // Usa el token almacenado para el fetch
+        } else {
+            // Si no hay token en la tienda ni en localStorage, forzamos la redirección
+            // Asumiendo que esta página es solo para Admin/Empleado
+            error.value = "Permiso denegado. Debes ser administrador o empleado.";
+            loading.value = false;
+            router.push({ name: 'auth' }); 
+            return;
+        }
     }
 
     try {
@@ -125,8 +141,11 @@ const fetchAllMascotaPosts = async () => {
         });
 
         if (response.status === 401) {
+            // ERROR ESPECÍFICO DE TOKEN: CERRAR SESIÓN Y REDIRIGIR
+            // Esto solo debe ocurrir si el token es inválido o expirado.
+            console.error('ERROR 401: Token expirado o inválido. Cerrando sesión.');
             authStore.logout();
-            router.push('/login');
+            router.push({ name: 'auth' }); // Redirigir al login por nombre
             return;
         }
 
@@ -148,14 +167,20 @@ const fetchAllMascotaPosts = async () => {
 };
 
 const updateApprovalStatus = async (mascotId, newStatus) => {
-    // Usamos authStore.token directamente, ya que el componente lo tiene disponible.
-    const userToken = authStore.token;
+    // ⭐️ VERIFICACIÓN ROBUSTA DEL TOKEN ⭐️
+    let userToken = authStore.token; // Intenta obtener el token de la tienda
 
     if (!userToken) {
-        console.error("No hay token para actualizar estado de aprobación.");
-        // Opcional: Redirigir al login si no hay token
-        // router.push('/login');
-        return;
+        // Si no está en la tienda (aún no cargado), búscalo en localStorage
+        const storedToken = localStorage.getItem('authToken');
+        
+        if (storedToken) {
+            userToken = storedToken; // Usa el token almacenado para el fetch
+        } else {
+            console.error("No hay token para actualizar estado de aprobación.");
+            router.push({ name: 'auth' });
+            return;
+        }
     }
 
     // Encuentra la mascota localmente y guarda su estado anterior
@@ -183,8 +208,9 @@ const updateApprovalStatus = async (mascotId, newStatus) => {
         });
 
         if (response.status === 401) {
+            // ERROR ESPECÍFICO DE TOKEN: CERRAR SESIÓN Y REDIRIGIR
+            console.error('ERROR 401: Token expirado o inválido. Cerrando sesión.');
             authStore.logout();
-            // Asumiendo que 'auth' es la ruta de login
             router.push({ name: 'auth' }); 
             return;
         }
@@ -249,10 +275,8 @@ onMounted(() => {
 
 <style scoped>
 /* Estilos para el contenedor principal */
-.solicitudes-enviadas {
-    padding: 20px;
-    background-color: #f8f9fa; /* Color de fondo ligero */
-    min-height: 100vh;
+.gestion-posts-page{
+    min-height: 80.1vh;
 }
 
 .content-wrapper {
@@ -284,7 +308,7 @@ onMounted(() => {
     width: 2rem;
     height: 2rem;
     display: inline-block;
-    color: #FF9933; /* Naranja principal */
+    color: #ff9595; 
     margin-right: 0.5rem;
     margin-left: 0.5rem;
     margin-top: -0.25rem;
@@ -338,12 +362,13 @@ th, td {
     padding: 15px;
     text-align: left;
     border-bottom: 1px solid #dee2e6;
+    font-weight: 500;
     text-align: center;
     font-size: 1rem;
 }
 
 th {
-    background-color: #495057; /* Fondo oscuro para el encabezado */
+    background-color: #ff6060; /* Fondo oscuro para el encabezado */
     color: #fff;
     font-weight: bold;
     text-transform: uppercase;
@@ -351,8 +376,8 @@ th {
 
 .status-pendiente{
     font-size: 1rem;
-    background-color: #e7e7e7;
-    color: #000000;
+    background-color: #adadad;
+    color: #ffffff;
     font-weight: 700;
     padding-left: 20px;
     padding-right: 18px;
@@ -363,8 +388,8 @@ th {
 
 .status-aceptado{
     font-size: 1rem;
-    background-color: #afff5f70;
-    color: #5c9920;
+    background-color: #77c926;
+    color: #ffffff;
     font-weight: 700;
     padding-left: 30px;
     padding-right: 18px;
@@ -375,8 +400,8 @@ th {
 
 .status-rechazado{
     font-size: 1rem;
-    background-color: #ff96a0;
-    color: #a20000;
+    background-color: #ff3e51;
+    color: #ffffff;
     font-weight: 700;
     padding-left: 22px;
     padding-right: 18px;
@@ -385,6 +410,17 @@ th {
     appearance: base-select;
 }
 
+.classPendiente, .classRechazada,  .classAprobada{
+    font-size: 1rem;
+    background-color: #ffffff;
+    color: #6b6b6b;
+    font-weight: 500;
+    padding-left: 20px;
+    padding-right: 18px;
+    border: none;
+    border-radius: 25px;
+    appearance: base-select;
+}
 
 /* Estilos para los botones de "Ver detalles" */
 .detail-button {
@@ -393,8 +429,9 @@ th {
     padding-right: 10px;
     border: none;
     border-radius: 25px;
-    background-color: #e7e7e7;
-    color: #000000; /* Color naranja distintivo */
+    background-color: #b9b9b9;
+    color: #ffffff; 
+    font-weight: 700;
     text-decoration: none;
     cursor: pointer;
     display: inline-flex;
@@ -404,13 +441,33 @@ th {
 
 
 .detail-button:hover {
-    background-color: #FF9933;
+    background-color: #ff9595; 
     transition: 0.5s;
 }
 
 .detail-icon {
     padding-left: 5px;
 }
+
+.empty-state {
+    text-align: center;
+    padding: 5rem 1.5rem;
+    background-color: #ffffff; /* bg-white */
+    border-radius: 0.75rem; /* rounded-xl */
+    box-shadow: 0 4px 6px 3px rgba(0, 0, 0, 0.1); /* shadow-md */
+    margin-top: 1rem;
+  }
+  
+  .no-results-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #374151; /* gray-700 */
+  }
+  
+  .no-results-text {
+    color: #6b7280; /* gray-500 */
+    margin-top: 0.5rem;
+  }
 
 /* Estilos para el badge de estado */
 .status-badge {
@@ -420,24 +477,16 @@ th {
     display: inline-block;
 }
 
-.status-pending {
-    background-color: #ffc107; /* Amarillo */
-    color: #333;
-}
-
-.status-approved {
-    background-color: #28a745; /* Verde */
-}
-
-.status-rejected {
-    background-color: #dc3545; /* Rojo */
-}
 
 .no-data {
     text-align: center;
     padding: 30px;
     color: #6c757d;
     font-style: italic;
+}
+
+.no-posts{
+    text-align: center;
 }
 
 /* Estilos para mensajes de estado */
@@ -460,4 +509,5 @@ th {
     color: #721c24;
     border: 1px solid #f5c6cb;
 }
+
 </style>

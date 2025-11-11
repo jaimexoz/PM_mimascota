@@ -689,7 +689,6 @@ onUnmounted(() => {
 }
 
 .perfil-card {
-  background: #fff8f8;
   box-shadow: 0px 0px 20px 0px #ffd3d3;
   border-radius: 24px;
   padding: 1rem;
@@ -739,7 +738,7 @@ onUnmounted(() => {
   object-fit: cover;
   border: 4px solid #fff;
   background: #f0f0f0;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 12px #ff6060;
 }
 
 .subir-foto-btn {
@@ -756,8 +755,9 @@ onUnmounted(() => {
   text-align: center;
 }
 .subir-foto-btn:hover {
-  background: #d1d1d1;
-  border-color: #333;
+  background: #ff6060;
+  border-color: #ff6060;
+  transform: translateY(-2px);
 }
 
 .error-message {
@@ -899,6 +899,7 @@ onUnmounted(() => {
 }
 .cancel-btn-edit:hover {
     background: #aaa !important;
+    transform: translateY(-2px);
     border-color: #aaa !important;
 }
 /* FIN ESTILO NUEVO */
@@ -947,12 +948,12 @@ onUnmounted(() => {
 }
 .info-btn:hover:not(:disabled) {
   background: #ff6060;
-  border-color: #ffffff;
+  transform: translateY(-2px);
 }
 
 .info-btnG:hover:not(:disabled) {
   background: #ff6060;
-  border-color: #ffffff;
+  transform: translateY(-2px);
 }
 
 .info-btn:disabled {
@@ -974,7 +975,6 @@ onUnmounted(() => {
 
 
 .funcionalidades {
-  background: #fff8f8;
     box-shadow: 0px 0px 20px 0px #ffd3d3;
   margin-top: -40px;
   margin-bottom: 1px;
@@ -997,7 +997,6 @@ onUnmounted(() => {
 
 .solicitud{
   align-items: flex-start;
-  background: #fff8f8;
   box-shadow: 0px 0px 20px 0px #ffd3d3;
   border-radius: 24px;
   margin-top: 1px;
@@ -1025,17 +1024,18 @@ onUnmounted(() => {
   padding: 0.7rem 1rem;
   background: #ff9595; 
   border: white;
-  border-radius: 10px;
+  border-radius: 30px;
   font-weight: 600;
   color: #ffffff;
   font-size: 18px;
   cursor: pointer;
   transition: all 0.2s;
-  width: 70%;
+  width: 50%;
   text-align: center;
 }
 .func-btn:hover {
   background: #ff6060;
+  transform: translateY(-2px);
 }
 
 
@@ -1109,6 +1109,7 @@ onUnmounted(() => {
 
 .close-btn:hover {
   background: #f0f0f0;
+  
 }
 
 .close-button {
@@ -1127,6 +1128,7 @@ onUnmounted(() => {
 
 .close-button:hover {
     color: #ff9900;
+    
 }
 .password-form {
   display: flex;
@@ -1203,7 +1205,7 @@ onUnmounted(() => {
 .form-actions {
   display: flex;
   gap: 1rem;
-  margin-top: 1rem;
+  margin-top: 0.9rem;
 }
 
 .cancel-btn {
@@ -1222,13 +1224,14 @@ onUnmounted(() => {
 .cancel-btn:hover {
   background: #f8f8f8;
   border-color: #ccc;
+  transform: translateY(-2px);
 }
 
 .submit-btn {
   flex: 1;
   padding: 0.8rem;
   border: none;
-  background: #ff9100;
+  background: #ff9595;
   color: white;
   border-radius: 25px;
   cursor: pointer;
@@ -1238,7 +1241,8 @@ onUnmounted(() => {
 }
 
 .submit-btn:hover:not(:disabled) {
-  background: #ff7700;
+  background: #ff6060;
+  transform: translateY(-2px);
 }
 
 .submit-btn:disabled {

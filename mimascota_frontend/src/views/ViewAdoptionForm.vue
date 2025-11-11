@@ -333,9 +333,9 @@ como .adoption-page, .content-wrapper, .main-title, .form-section, etc. */
 }
 
 .view-mode-alert {
-    background-color: #ffe0b2; /* Tono naranja suave para alerta */
-    border: 1px solid #ff9800;
-    color: #e65100;
+    background-color: #ff959556; 
+    border: 1px solid #ff6060;
+    color: #ff6060;
     padding: 10px 15px;
     border-radius: 8px;
     margin-bottom: 20px;
@@ -381,12 +381,12 @@ input[disabled], textarea[disabled] {
 .paw-icon-main {
   width: 30px;
   height: 30px;
-  color: #ff9933; /* Color naranja */
+  color: #ff9595; 
 }
 
 /* Sección de la Mascota */
 .mascot-profile-section {
-  background-color: #ffe6cc; /* Fondo naranja claro */
+  background-color: #ff959556; 
   border-radius: 10px;
   padding: 1.5rem;
   margin-bottom: 2rem;
@@ -403,7 +403,7 @@ input[disabled], textarea[disabled] {
   height: 150px;
   border-radius: 50%;
   object-fit: cover;
-  border: 4px solid #ff9933; /* Borde naranja */
+  border: 4px solid #ff6060;
 }
 
 .mascot-details h2 {
@@ -438,7 +438,7 @@ input[disabled], textarea[disabled] {
   color: #333;
   margin-bottom: 1.5rem;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid #ff9933;
+  border-bottom: 2px solid #ff6060;
 }
 
 .form-grid {

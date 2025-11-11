@@ -42,7 +42,8 @@ import { useRouter } from 'vue-router';
 import { login } from '../utils/auth'; 
 import { defineEmits } from 'vue';
 // 🔥 IMPORTANTE: Ahora usaremos estas dos importaciones
-import apiClient, { setAuthHeader } from '@/http'; 
+import apiClient, { setAuthHeader } from '@/http';
+import { useAuthStore } from '@/stores/authStore'; 
 
 const emit = defineEmits(['toggle-form']);
 
@@ -51,6 +52,7 @@ const password = ref('');
 const error = ref('');
 const loading = ref(false);
 const router = useRouter();
+const authStore = useAuthStore();
 
 const DURATION = 3000;
 
@@ -65,16 +67,22 @@ const handleLogin = async () => {
             contra_usuari: password.value 
         });
         const data = response.data; 
+        
+        // 1. Guardar token en localStorage
         login(data.token); 
         
-        setAuthHeader(data.token); 
+        // 2. Actualizar el store de Pinia con el nuevo token
+        authStore.setToken(data.token);
+        
+        // 3. Configurar el header de axios con el nuevo token
+        setAuthHeader(data.token);
 
-        // Guardar datos del usuario
+        // 4. Guardar datos del usuario
         if (data.user) {
             localStorage.setItem('userData', JSON.stringify(data.user));
         }
         
-        
+        // 5. Redirigir después de que todo esté configurado
         router.push('/home');
 
     } catch (err) {

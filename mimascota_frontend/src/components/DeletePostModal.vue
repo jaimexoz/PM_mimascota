@@ -101,7 +101,7 @@ const confirmDelete = () => {
 }
 
 .close-button:hover {
-    color: #ff9900;
+    color: #ff6060;
 }
 
 /* Título */
@@ -145,21 +145,21 @@ const confirmDelete = () => {
 /* Botón Cancelar (Naranja claro sin fondo) */
 .cancel-button {
     background-color: #ffffff;
-    color: #ff9900;
-    border: 2px solid #ff9900;
+    color: #ff9595; 
+    border: 2px solid #ff9595; 
 }
 
 .cancel-button:hover {
-    background-color: #fffbeb;
+    background-color: #ff959527; 
 }
 
 /* Botón Aceptar (Naranja sólido) */
 .accept-button {
-    background-color: #ff9900;
+    background-color: #ff9595; 
     color: white;
 }
 
 .accept-button:hover {
-    background-color: #f47004; /* Naranja más oscuro al pasar el ratón */
+    background-color: #ff6060; /* Naranja más oscuro al pasar el ratón */
 }
 </style>

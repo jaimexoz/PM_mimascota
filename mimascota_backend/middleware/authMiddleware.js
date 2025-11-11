@@ -12,7 +12,9 @@ const protect = (req, res, next) => {
 
 
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            // El token ya contiene id, email, id_rol, roleName, permissions (cargados durante el login)
+            // El token contiene: id, role
+            // Nota: Si necesitas más información (como permissions, roleName, etc.), 
+            // deberías cargarla desde la base de datos aquí o incluirla en el token durante el login
             req.user = decoded; // Adjunta la información decodificada del token a la solicitud
             next();
         } catch (error) {
@@ -53,14 +55,18 @@ const authorizeOwnerOrAdmin = (permission) => async (req, res, next) => {
     }
 
     // Primero, verifica si el usuario es administrador
-    if (req.user.roleName === 'Administrador') {
+    // Nota: El token contiene 'role', no 'roleName'. Ajustamos la verificación.
+    if (req.user.role === 'Administrador' || req.user.role === 'admin') {
         return next(); // Un administrador siempre tiene acceso completo
     }
 
     // Si no es administrador, verifica si tiene el permiso Y es el dueño
-    if (!req.user.permissions.includes(permission)) {
+    // Nota: Si el token no contiene permissions, puedes omitir esta verificación
+    // o cargar los permisos desde la base de datos aquí
+    if (req.user.permissions && !req.user.permissions.includes(permission)) {
         return res.status(403).json({ message: 'Acceso denegado: Permisos insuficientes.' });
     }
+    // Si no hay permissions en el token, continuamos con la verificación de propiedad
 
     try {
         // **IMPORTANTE**: Aquí necesitarás adaptar la tabla y el campo que relaciona al dueño

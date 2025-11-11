@@ -48,13 +48,13 @@
                             <td>{{ formatDate(solicitud.fechax_solici) }}</td>
                             <td>{{ solicitud.nombre_mascot || 'Cargando...' }}</td> <td>
                                 <button @click="verFichaInformacion(solicitud.forane_mascot_id)" class="detail-button">
-                                    Ver detalles 
+                                    Ver Detalles 
                                     <span class="detail-icon">➤</span>
                                 </button>
                             </td>
                             <td>
                                 <button @click="verFormularioAdopcion(solicitud.idxxxx_forado)" class="detail-button">
-                                    Ver detalles 
+                                    Ver Detalles 
                                     <span class="detail-icon"> ➤</span>
                                 </button>
                             </td>
@@ -68,15 +68,19 @@
                 </table>
             </div>
         </div>
+      
     </div>
+     <Footer/> 
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router'; 
-import Navbar from '@/components/Navbar.vue'; // Asumo la ruta del Navbar
+import Navbar from '@/components/Navbar.vue'; 
+import Footer from './Footer.vue';
 import { useAuthStore } from "@/stores/authStore";
 import { PawPrint, Loader } from 'lucide-vue-next';
+
 
 
 const router = useRouter();
@@ -116,13 +120,24 @@ const verFormularioAdopcion = (formId) => {
 const fetchUserSolicitudes = async () => {
     loading.value = true;
     error.value = null;
-    const userToken = authStore.token;
+    let userToken = authStore.token; // Intenta obtener el token de la tienda
 
+    // ⭐️ VERIFICACIÓN ROBUSTA DEL TOKEN ⭐️
     if (!userToken) {
-        error.value = "Debes iniciar sesión para ver tus solicitudes.";
-        loading.value = false;
-        router.push('/login'); // Redirigir al login si no hay token
-        return;
+        // Si no está en la tienda (aún no cargado), búscalo en localStorage
+        const storedToken = localStorage.getItem('authToken'); // Usa la clave correcta del token
+        
+        if (storedToken) {
+            userToken = storedToken; // Usa el token almacenado para el fetch
+        } else {
+            // Si no hay token en la tienda ni en localStorage, forzamos la redirección
+            error.value = "Debes iniciar sesión para ver tus solicitudes.";
+            loading.value = false;
+            
+            // Usamos router.push({ name: 'auth' }) si tienes la ruta 'auth' en index.js
+            router.push({ name: 'auth' }); 
+            return;
+        }
     }
 
     try {
@@ -136,9 +151,11 @@ const fetchUserSolicitudes = async () => {
         });
 
         if (response.status === 401) {
-            // Token inválido/expirado
+            // ERROR ESPECÍFICO DE TOKEN: CERRAR SESIÓN Y REDIRIGIR
+            // Esto solo debe ocurrir si el token es inválido o expirado.
+            console.error('ERROR 401: Token expirado o inválido. Cerrando sesión.');
             authStore.logout();
-            router.push('/login');
+            router.push({ name: 'auth' }); // Redirigir al login por nombre
             return;
         }
 
@@ -206,10 +223,9 @@ onMounted(() => {
 
 <style scoped>
 /* Estilos para el contenedor principal */
-.solicitudes-enviadas {
-    padding: 20px;
-    background-color: #f8f9fa; /* Color de fondo ligero */
-    min-height: 100vh;
+.solicitudes-page{
+    min-height: 92.3vh;
+    padding-top: 1rem;
 }
 
 .content-wrapper {
@@ -241,7 +257,7 @@ onMounted(() => {
     width: 2rem;
     height: 2rem;
     display: inline-block;
-    color: #FF9933; /* Naranja principal */
+    color: #ff9595; 
     margin-right: 0.5rem;
     margin-left: 0.5rem;
     margin-top: -0.25rem;
@@ -264,7 +280,7 @@ onMounted(() => {
     transition: all 0.3s ease;
     gap: 0.5rem;
     margin-left: 30px;
-    margin-top: 10px;
+    margin-top: 94px;
     position: absolute;
 }
 
@@ -297,10 +313,11 @@ th, td {
     border-bottom: 1px solid #dee2e6;
     text-align: center;
     font-size: 1rem;
+    font-weight: 500;
 }
 
 th {
-    background-color: #495057; /* Fondo oscuro para el encabezado */
+    background-color: #ff6060;/* Fondo oscuro para el encabezado */
     color: #fff;
     font-weight: bold;
     text-transform: uppercase;
@@ -310,24 +327,24 @@ th {
     width: 125px;
     font-size: 1rem;
     font-weight: 700;
-    background-color: #e7e7e7;
-    color: #000000;
+    background-color: #adadad;
+    color: #ffffff;
 }
 
 .status-aceptado{
     width: 125px;
     font-size: 1rem;
     font-weight: 700;
-    background-color: #afff5f70;
-    color: #5c9920;
+    background-color: #77c926;
+    color: #ffffff;
 }
 
 .status-rechazado{
     width: 125px;
     font-size: 1rem;
     font-weight: 700;
-    background-color: #ff96a0;
-    color: #a20000;
+    background-color: #ff3e51;
+    color: #ffffff;
 }
 
 
@@ -339,8 +356,9 @@ th {
     padding-right: 10px;
     border: none;
     border-radius: 25px;
-    background-color: #e7e7e7;
-    color: #000000; /* Color naranja distintivo */
+    background-color: #b9b9b9;
+    color: #ffffff; 
+    font-weight: 700;
     text-decoration: none;
     cursor: pointer;
     display: inline-flex;
@@ -350,7 +368,7 @@ th {
 
 
 .detail-button:hover {
-    background-color: #FF9933;
+    background-color: #ff9595; 
     transition: 0.5s;
 }
 

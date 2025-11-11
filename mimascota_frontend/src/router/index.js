@@ -22,7 +22,7 @@ import MyPostsEdit from '@/views/MyPostsEdit.vue';
 import AdopcionesRealizadas from '@/components/AdopcionesRealizadas.vue';
 import DeletePost from '@/views/DeletePost.vue';
 import petManagement from '@/views/petManagement.vue';
-
+import matchPage from '@/views/matchPage.vue';
 import { isAuthenticated } from '../utils/auth'; // Importa la función de autenticación
 
 
@@ -72,6 +72,12 @@ const router = createRouter({
             path: '/perros',
             name: 'perros',
             component: () => import('../views/PerrosPage.vue'),
+            meta: { requiresAuth: true }
+        },
+        {
+            path: '/match',
+            name: 'match',
+            component: () => import('../views/matchPage.vue'),
             meta: { requiresAuth: true }
         },
         {

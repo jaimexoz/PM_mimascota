@@ -71,19 +71,19 @@
   
         <!-- Sin Resultados -->
         <div v-else class="no-results-state">
-            <h2 class="no-results-title">¡Vaya! No encontramos mascotas con esos filtros.</h2>
-            <p class="no-results-text">Intenta ajustar tus criterios de búsqueda o limpiar los filtros.</p>
-            <button @click="clearFilters" class="show-all-button">
-                Mostrar todas las mascotas
-            </button>
+            <h2 class="no-results-title">¡Vaya! No hemos encontrado mascotas en favoritos.</h2>
+            <p class="no-results-text">Comienza a guardar tus mascotas favoritas para visualizarlas aquí.</p>
+            
         </div>
     </div>
-  
-  </div>
+    
+   
+  </div> <Footer/>
   </template>
   
   <script setup>
   import Navbar from '../components/Navbar.vue';
+  import Footer from '@/components/Footer.vue';
   import { ref, onMounted, computed, reactive, h } from 'vue';
   import { PawPrint, Search, Loader } from 'lucide-vue-next';
   import { useRouter } from 'vue-router'; 
@@ -371,8 +371,7 @@ const authStore = useAuthStore();
     ============================================== */
   
   .adoption-feed-container {
-    min-height: 100vh;
-    background-color: #f9fafb; /* gray-50 */
+    min-height: 92.3vh;
     padding-top: 1rem;
   }
   
@@ -738,4 +737,5 @@ const authStore = useAuthStore();
   .show-all-button:hover {
     background-color: #4338ca; /* hover:bg-indigo-700 */
   }
+
   </style>

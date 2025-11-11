@@ -208,6 +208,7 @@ const getMyPostsByUserIdDB = async (client, userId) => {
         WHERE
             m.forane_usuari_id = $1
             AND m.eliminado_logico = FALSE
+            AND m.approv_mascot = 'Aprobada'
         ORDER BY m.idxxxx_mascot DESC;
     `;
     return client.query(query, [userId]);
@@ -273,7 +274,7 @@ const insertNewMascotaDB = async (client, petData, cloudinaryUrls) => {
 
     const insertValues = [
         nombre, especie, sexo, edad, raza, peso, tamano, infoad_mascot, 
-        image1_mascot, image2_mascot, image3_mascot, false, forane_usuari_id, false, currentTimestamp
+        image1_mascot, image2_mascot, image3_mascot, false, forane_usuari_id, 'Pendiente', currentTimestamp
     ];
 
     const result = await client.query(insertQuery, insertValues);

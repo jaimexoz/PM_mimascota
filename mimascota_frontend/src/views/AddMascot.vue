@@ -200,7 +200,7 @@
     </div>
 </div>
     
-    
+<Footer/>
 </div>
 
 </template>
@@ -208,6 +208,7 @@
 <script setup>
 import { reactive, ref } from 'vue'; // Importamos 'ref' para dragActivo y 'reactive' para mascota
 import Navbar from '../components/Navbar.vue';
+import Footer from '@/components/Footer.vue';
 import { useRouter } from 'vue-router';
 
 // =================================================================
@@ -591,7 +592,7 @@ function irAtras() {
 /* Estilos de botones Toggle (Especie/Sexo) */
 .toggle-group button {
     padding: 8px 15px;
-    border: 2px solid #ff9900;
+    border: 2px solid #ff9595; 
     border-radius: 25px;
     font-weight: 500;
     font-size: 0.9rem;
@@ -603,9 +604,9 @@ function irAtras() {
 }
 
 .toggle-group .active {
-    background-color: #ff9900; /* Color naranja de la imagen */
+    background-color: #ff9595;  /* Color naranja de la imagen */
     color: white;
-    border-color: #ff9900;
+    border-color: #ff9595; 
 }
 
 /* Estilos para la sección Personalidad (botones pequeños) */
@@ -621,7 +622,7 @@ function irAtras() {
     padding: 5px 9px;
     width: 90px;
     border-radius: 20px;
-    border: 2px solid #ff9900;
+    border: 2px solid #ff9595; 
     background-color: white;
     font-size: 0.9rem;
     font-weight: 500;
@@ -632,8 +633,8 @@ function irAtras() {
     padding: 5px 10px;
     width: 90px;
     border-radius: 20px;
-    border: 1px solid #ff9900;
-    background-color: rgb(255, 170, 0);
+    border: 1px solid #ff9595; 
+    background-color: #ff9595; 
     color: #ffffff;
     font-size: 0.9em;
     /* Usa la misma clase active o define un estilo de borde para el no seleccionado */
@@ -645,17 +646,18 @@ function irAtras() {
     width: 250px;
     margin: 30px auto 0;
     padding: 15px;
-    background-color: #ffad31;
+    background-color: #ff9595; 
     color: white;
     border: none;
     border-radius: 25px;
     font-size: 1.2em;
     cursor: pointer;
-    transition: all 0.3s 
+    transition: all 0.3s;
+    font-weight: 700;
 }
 
 .btn-publicar:hover{
-    background-color: #ff9900;
+    background-color: #ff6060;
     box-shadow: 0px 6px 10px -1px #757373;
     animation: pulse 1.5s infinite;
 }
@@ -679,7 +681,7 @@ function irAtras() {
 input[type="text"], input[type="number"], textarea, select {
     padding: 8px;
     margin: 5px;
-    border: 2px solid #ff9d00;
+    border: 2px solid #ff9595; 
     border-radius: 12px;
     width: 100%;
 }
@@ -687,7 +689,7 @@ input[type="text"], input[type="number"], textarea, select {
 
 .form-info input[type="text"], input[type="number"], textarea, select:focus{
     
-    outline: 0px solid #ff9d00; /* O un contorno de tu color */
+    outline: 0px solid #ff9595;  /* O un contorno de tu color */
     
 }
 
@@ -704,7 +706,7 @@ textarea {
 
 .upload-button {
     appearance: none; 
-    background-color: #ff9900;
+    background-color: #ff9595; 
     color: white;
     padding: 10px 20px;
     border-radius: 25px;
@@ -712,43 +714,45 @@ textarea {
     display: inline-block;
     margin-top: 10px;
     transition: transform 1s ease;
+    font-weight: 700;
 }
 
 .upload-button:hover {
-    background-color: #f47004;
+    background-color: #ff6060;
      box-shadow: 0px 6px 10px -1px #757373; 
    
 }
 
 .upload-button:active {
-    background-color: #ff9900;
+    background-color: #ff6060;
      box-shadow: 0px 6px 10px -1px #757373; 
     
 }
 
 /* Contenedor principal que maneja el borde y el centrado de todo el contenido */
 .drag-drop-area {
-    background: #fff8f1;
+    background: #ff959513; 
     display: flex;
     flex-direction: column;
     width: 90%;
     height: 35%;
-    border: 4px dashed #ff9900;
+    border: 4px dashed #ff9595; 
     padding: 30px;
     justify-content: center;
     align-items: center;
     justify-items: center;
     text-align: center;
+    font-weight: 1000;
     border-radius: 8px;
-    overflow: auto; /* Permite scroll si hay muchas miniaturas */
-
+    overflow: auto; 
+    margin-top: 30px;
 }
 
 
 /* Retroalimentación visual al arrastrar */
 .drag-drop-area.drag-activo {
-    border: 4px dashed #ff9900;border-color: #ffa600;
-    background-color: #ffe5c7;
+    border: 4px dashed #ff9595; border-color: #ff9595; 
+    background-color: #ff959576; 
 }
 
 /* Estilos del contenido inicial (Tu .upload-box) */
@@ -759,6 +763,11 @@ textarea {
     align-items: center;
     gap: 15px; /* Espacio entre los elementos internos */
 }
+
+.upload-box p{
+    font-weight: 500;
+}
+
 
 /* Estilos de la imagen de ilustración */
 .upload-illustration {
@@ -891,6 +900,7 @@ textarea {
 }
 
 .btn-primary {
+    color: #ffffff;
     width: 100%;
     padding: 0.75rem 1.5rem;
     border: none;
@@ -901,12 +911,12 @@ textarea {
     transition: all 0.3s ease;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     max-width: 150px;
-    background-color: #ff9900;
-    color: white;
+    background-color: #ff9595; 
+    font-weight: 700;
 }
 
 .btn-primary:hover{
-    background: #f47004;
+    background: #ff6060;
 }
 
 .button-actions {
@@ -932,7 +942,7 @@ textarea {
 }
 
 .close-button:hover {
-    color: #ff9900;
+    color: #ff6060;
 }
 /*
  * ⭐️ IMPORTANTE: Asegúrate de que .drag-drop-area usa Flexbox para 
@@ -1008,9 +1018,6 @@ textarea {
     color: #ff9900;
     font-weight: 300;
 }
-
-/* Opcional: Estilo para el botón de subir que está debajo de las miniaturas */
-
 
 </style>
 

@@ -124,7 +124,7 @@
       </div>
     </div>
   </div>
-  
+  <Footer/>
 </template>
 
 <script setup>
@@ -132,6 +132,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useRouter } from 'vue-router'; 
 import Navbar from '../components/Navbar.vue';
+import Footer from './Footer.vue';
 import { useAuthStore } from "@/stores/authStore";
 
 // NO es necesario importar FontAwesomeIcon aquí si ya está registrado GLOBALMENTE en main.js
@@ -418,7 +419,7 @@ onMounted(() => {
   width: 48px;
   height: 48px;
   border: 5px solid;
-  border-color: #FF3D00 transparent;
+  border-color: #ff6060 transparent;
   border-radius: 50%;
   display: inline-block;
   box-sizing: border-box;
@@ -535,12 +536,7 @@ onMounted(() => {
     display: flex;
     align-items: center;
     justify-content: center;
-    background-image: linear-gradient(
-                135deg, 
-                #404040 0%, /* Rojo oscuro (inicio) */
-                #a8a8a8 50%, /* Naranja intermedio */
-                #eeeeee 100% /* Dorado (final) */
-            );
+    background-image: linear-gradient(#ffe6e6c1 100%);
 }
 
 .info-column {
@@ -693,8 +689,8 @@ onMounted(() => {
     text-transform: uppercase;
     
     /* Estilo por defecto (si no está disponible, ejemplo: gris o amarillo) */
-    background-color: #fef3c7; /* yellow-100 */
-    color: #f59e0b;           /* yellow-600 */
+    background-color: #ff959558; 
+    color: #ff6060;
 }
 
 
@@ -850,7 +846,7 @@ onMounted(() => {
 .adopt-button {
     width: 100%;
     padding: 0.75rem 2rem;
-    background-color: #ff9933;
+    background-color: #ff9595; 
     color: white;
     font-size: 1.25rem;
     font-weight: 700;
@@ -864,7 +860,7 @@ onMounted(() => {
 }
 
 .adopt-button:hover {
-    background-color: #f47004; /* Color más oscuro para hover */
+    background-color: #ff6060;
 }
 
 @media (min-width: 768px) {

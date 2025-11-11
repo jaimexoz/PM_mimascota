@@ -107,8 +107,8 @@
         </div>
     
       </div>
-
     </main>
+    <footer class="footer-bar">MI MASCOTA</footer>
   </div>
 </template>
 
@@ -974,6 +974,19 @@ const PetCard = ({ mascota }) => {
     margin-left: 0.5rem; /* ml-2 */
     width: 1.25rem; /* w-5 */
     height: 1.25rem; /* h-5 */
+}
+
+.footer-bar {
+  width: 100%;
+  background: #111;
+  color: #fff;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding: 1.2rem 0 1rem 0;
+  margin-top: 3rem;
+  letter-spacing: 2px;
+  z-index: 2;
 }
 
 </style>

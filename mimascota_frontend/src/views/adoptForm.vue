@@ -396,7 +396,7 @@ onMounted(() => {
   width: 48px;
   height: 48px;
   border: 5px solid;
-  border-color: #FF3D00 transparent;
+  border-color: #ff6060 transparent;
   border-radius: 50%;
   display: inline-block;
   box-sizing: border-box;
@@ -471,12 +471,12 @@ onMounted(() => {
 .paw-icon-main {
   width: 30px;
   height: 30px;
-  color: #ff9933; /* Color naranja */
+  color: #ff9595; 
 }
 
 /* Sección de la Mascota */
 .mascot-profile-section {
-  background-color: #ffe6cc; /* Fondo naranja claro */
+  background-color: #ff959556; 
   border-radius: 10px;
   padding: 1.5rem;
   margin-bottom: 2rem;
@@ -493,7 +493,7 @@ onMounted(() => {
   height: 150px;
   border-radius: 50%;
   object-fit: cover;
-  border: 4px solid #ff9933; /* Borde naranja */
+  border: 4px solid #ff6060;
 }
 
 .mascot-details h2 {
@@ -528,7 +528,7 @@ onMounted(() => {
   color: #333;
   margin-bottom: 1.5rem;
   padding-bottom: 0.5rem;
-  border-bottom: 2px solid #ff9933;
+  border-bottom: 2px solid #ff6060;
 }
 
 .form-grid {
@@ -591,7 +591,7 @@ onMounted(() => {
 }
 
 .submit-button {
-  background-color: #ff9933; /* Naranja */
+  background-color: #ff9595; 
   color: white;
   padding: 14px 25px;
   border: none;
@@ -609,7 +609,7 @@ onMounted(() => {
 }
 
 .submit-button:hover {
-  background-color: #f47004; /* Naranja más oscuro */
+  background-color: #ff6060;
   transform: translateY(-2px);
 }
 

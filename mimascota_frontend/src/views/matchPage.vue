@@ -2,23 +2,44 @@
     <div class="adoption-feed-container">
   
     <Navbar /> 
-    <button @click="irAtras" class="back-button">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
-                    </svg>
-                    Volver
-                </button>
+    
+    <div v-if="isLoading" class="loading-message">
+        <span class="loader"></span>
+    </div>
     <!-- 1. ENCABEZADO Y FILTROS -->
     <div class="content-wrapper">
         <h1 class="main-title">
             <PawPrint class="paw-icon-main" />
-            Los Favoritos que esperan un Hogar
+            ¡Adopta con Amor!
             <PawPrint class="paw-icon-main" />
         </h1>
-        
+        <p class="subtitle">Encuentra a tu nuevo mejor amigo entre miles de mascotas.</p>
   
         <!-- BARRA DE FILTROS -->
         <div class="filter-bar"> 
+            <span class="filter-label">Filtrar por:</span>
+  
+            <!-- Filtros Select -->
+            <select v-model="filters.edad" class="filter-select">
+                <option value="">Edad</option>
+                <option v-for="option in filterOptions.edad" :key="option" :value="option">{{ option }}</option>
+            </select>
+  
+            <select v-model="filters.sexo" class="filter-select">
+                <option value="">Sexo</option>
+                <option v-for="option in filterOptions.sexo" :key="option" :value="option">{{ option }}</option>
+            </select>
+  
+            <select v-model="filters.tamano" class="filter-select">
+                <option value="">Tamaño</option>
+                <option v-for="option in filterOptions.tamano" :key="option" :value="option">{{ option }}</option>
+            </select>
+            
+            <select v-model="filters.orden" class="filter-select">
+                <option v-for="option in filterOptions.orden" :key="option.value" :value="option.value">{{ option.label }}</option>
+            </select>
+  
+  
             <!-- Barra de Búsqueda -->
             <div class="search-input-container">
                 <input type="text" v-model="filters.busqueda"
@@ -60,22 +81,15 @@
             </button>
         </div>
     </div>
-    <Footer/>
+    <footer class="footer-bar">MI MASCOTA</footer>
   </div>
-
-  
   </template>
   
   <script setup>
   import Navbar from '../components/Navbar.vue';
-  import Footer from '@/components/Footer.vue';
   import { ref, onMounted, computed, reactive, h } from 'vue';
   import { PawPrint, Search, Loader } from 'lucide-vue-next';
   import { useRouter } from 'vue-router'; 
-
-  import { useAuthStore } from "@/stores/authStore";
-
-const authStore = useAuthStore();
   
   // Inicialización
   const router = useRouter(); 
@@ -91,52 +105,60 @@ const authStore = useAuthStore();
     busqueda: ''
   });
   
-
+  // Opciones de filtro
+  const filterOptions = {
+    edad: ['Cachorro (0-12m)', 'Joven (1-3a)', 'Adulto (+3a)'],
+    sexo: ['Macho', 'Hembra'],
+    tamano: ['Pequeño', 'Mediano', 'Grande'],
+    orden: [
+        { value: 'mas_recientes', label: 'Más recientes' },
+        { value: 'mas_antiguos', label: 'Más antiguos' },
+        { value: 'alfabetico', label: 'A-Z' }
+    ]
+  };
+  
+  // ==============================================
+  // 1. OBTENCIÓN DE DATOS DEL BACKEND (Simulación)
+  // ==============================================
+  
+  /**
+  * Función para obtener TODAS las mascotas de la base de datos.
+  */
   async function getMascotas() {
     isLoading.value = true;
-    const userToken = authStore.token;
-    
-    if (!userToken) {
-        // Manejar el caso de que no haya token (usuario no autenticado)
-        console.error("Usuario no autenticado. No se puede cargar la lista de favoritos.");
-        // Opcional: Redirigir al login
-        // router.push('/login'); 
-        isLoading.value = false;
-        return;
-    }
-
     try {
-        // ✅ CORRECCIÓN: Llama a la ruta que devuelve la lista de favoritos del usuario.
-        // No necesitas pasar un ID de mascota.
-        const response = await fetch(`http://localhost:3000/api/mascotas/MypostUser`, { 
+        // NOTA: Asegúrate de que tu backend tenga un endpoint que devuelva todas las mascotas
+        const response = await fetch('http://localhost:3000/api/mascotas/match', { 
+            method: 'GET',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${userToken}`,
-            }
+                'Content-Type': 'application/json'
+            },
         });
-
+  
         if (!response.ok) {
-            throw new Error('Error al cargar los favoritos: ' + response.statusText);
+            throw new Error('Error al cargar las mascotas: ' + response.statusText);
         }
-
+  
         const data = await response.json();
         
-        // Asignar los datos recibidos a 'mascotas.value'
         if (data.length === 0) {
-            // Mostrar estado vacío o usar mocks
-            mascotas.value = []; 
+            mascotas.value = createMockMascotas(8); // Usar mocks si no hay datos
         } else {
             mascotas.value = data;
         }
         
     } catch (error) {
-        console.error("Error al obtener las mascotas favoritas:", error);
-        // Fallback a datos simulados o mostrar error
-        mascotas.value = createMockMascotas(0); // Pasa 0 para mostrar "no results"
+        console.error("Error al obtener las mascotas:", error);
+        // Fallback a datos simulados
+        mascotas.value = createMockMascotas(8); 
     } finally {
-        isLoading.value = false;
+        const minimumLoadingTime = 500; // Define el tiempo mínimo en milisegundos (ej: 500ms o 1000ms)
+      
+      setTimeout(() => {
+        isLoading.value = false; // El spinner se oculta después de este tiempo
+      }, minimumLoadingTime);
     }
-}
+  }
   
   /**
   * Función de filtrado y ordenamiento principal.
@@ -177,7 +199,24 @@ const authStore = useAuthStore();
         });
     }
   
-
+    // 5. ORDENAMIENTO
+    switch (filters.orden) {
+          case 'alfabetico':
+              results.sort((a, b) => (a.nombre_mascot || '').localeCompare(b.nombre_mascot || ''));
+              break;
+              
+          case 'mas_antiguos':
+              // Orden Ascendente (ID más bajo = más antiguo)
+              results.sort((a, b) => (a.idxxxx_mascot || 0) - (b.idxxxx_mascot || 0)); 
+              break;
+              
+          case 'mas_recientes':
+          default:
+              // Orden Descendente (ID más alto = más reciente) - El valor por defecto
+              results.sort((a, b) => (b.idxxxx_mascot|| 0) - (a.idxxxx_mascot || 0)); 
+              break;
+      }
+  
     return results;
     });
   
@@ -193,10 +232,6 @@ const authStore = useAuthStore();
         busqueda: ''
     });
   }
-
-  function irAtras() {
-    window.history.back();
-}
   
   // Llama a la función al cargar el componente
   onMounted(() => {
@@ -308,31 +343,25 @@ const authStore = useAuthStore();
   
   <style scoped>
 
-.back-button {
-    width: 110px;
-    height: 40px;
-    background: #f8f9fa;
-    border-radius: 6px;
-    border: 1px solid #dee2e6;
-    color: #6c757d;
-    box-shadow: 0px 6px 10px -1px #757373; 
-    font-size: 0.9rem;
-    font-weight: 700;
-    cursor: pointer;
-    padding: 0.5rem 1rem;
-    display: flex;
-    align-items: center;
-    transition: all 0.3s ease;
-    gap: 0.5rem;
-    margin-left: 30px;
-    margin-top: 94px;
-    position: absolute;
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 5px solid;
+  border-color: #FF3D00 transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
 }
 
-.back-button:hover {
-  background: #e9ecef;
-  color: #495057;
-}
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+} 
   /* Colores y Variables */
   .paw-icon-color {
     color: #FF9933; /* Naranja principal */
@@ -346,6 +375,23 @@ const authStore = useAuthStore();
     background-color: #E0852A;
   }
   
+  .loading-message {
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Centrado del contenido (spinner y texto) */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centrado vertical */
+    align-items: center;    /* Centrado horizontal */
+    background-color: white;
+    z-index: 999; 
+    color: #333;
+    font-size: 1.2em;
+
+}
   /* ==============================================
     1. LAYOUT Y ENCABEZADO
     ============================================== */
@@ -375,7 +421,7 @@ const authStore = useAuthStore();
     font-weight: 800; /* font-extrabold */
     color: #111827; /* gray-900 */
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
   }
   
   .paw-icon-main {
@@ -440,6 +486,14 @@ const authStore = useAuthStore();
     
   }
   
+  
+  
+  .filter-select:focus {
+    border-color: #ff9595; 
+    box-shadow: 0 0 0 1px #ff9595; 
+    outline: none;
+  }
+  
   .search-input-container {
     position: relative;
     flex-grow: 1;
@@ -488,6 +542,9 @@ const authStore = useAuthStore();
     background-color: #f3f4f6; /* hover:bg-gray-100 */
   }
   
+  /* ==============================================
+    3. FEED Y TARJETAS (Pet Card)
+    ============================================== */
   
   .loading-state {
     display: flex;
@@ -579,6 +636,15 @@ const authStore = useAuthStore();
     transform: scale(1.05); /* hover:scale-105 */
   }
   
+  
+  /* ----------------------------------------------------- */
+  /* RESTO DE ESTILOS DE LA TARJETA (También se les aplica :deep()
+   si están dentro de la PetCard, aunque algunos funcionan
+   sin él si ya estaban aplicados al elemento raíz de la Card.
+   Es mejor usarlos para asegurar el alcance.)
+  */
+  /* ----------------------------------------------------- */
+  
   :deep(.pet-card-content) {
     padding-right: 1rem;
     padding-left: 1rem;
@@ -628,7 +694,7 @@ const authStore = useAuthStore();
   
   :deep(.chip-grey) {
     background-color: #c8c7c7;
-    color: #ffffff; 
+  color: #ffffff; 
   }
   
   :deep(.pet-card-content-button){
@@ -657,6 +723,7 @@ const authStore = useAuthStore();
   /* Usamos la regla de color definida arriba */
   :deep(.pet-card-button) {
     background-color: #ff9595; 
+
     transition: background-color 300ms ease;
   }
   :deep(.pet-card-button:hover) {
@@ -699,6 +766,16 @@ const authStore = useAuthStore();
     background-color: #4338ca; /* hover:bg-indigo-700 */
   }
 
-
-
+  .footer-bar {
+  width: 100%;
+  background: #111;
+  color: #fff;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding: 1.2rem 0 1rem 0;
+  margin-top: 3rem;
+  letter-spacing: 2px;
+  z-index: 2;
+}
   </style>

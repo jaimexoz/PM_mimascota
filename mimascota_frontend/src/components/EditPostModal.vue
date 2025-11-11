@@ -481,7 +481,7 @@ width: 100%; }
 .paw-icon { 
 width: 1.5rem; 
 height: 1.5rem; 
-color: #FF9933; 
+color: #ff9595; 
 display: inline-block; 
 margin: 0 0.5rem; 
 vertical-align: middle; }
@@ -523,7 +523,7 @@ flex-direction: column;
 .info-section h3 { 
 font-size: 1.25rem; 
 font-weight: 600; 
-color: #FF9933; 
+color: #bf5151;
 margin-bottom: 1rem; 
 padding-bottom: 0.5rem; 
 border-bottom: 1px solid #eee; }
@@ -557,7 +557,7 @@ font-weight: normal; }
 
 .radio-group input[type="radio"] { 
 margin-right: 0.5rem; 
-accent-color: #FF9933; }
+accent-color: #ff9595;  }
 
 /* Gestión de Imágenes */
 .image-upload-container { 
@@ -612,24 +612,24 @@ justify-content: center;
 align-items: center; 
 width: 100%; 
 height: 100%; 
-border: 2px dashed #FF9933; 
+border: 2px dashed #ff9595; 
 border-radius: 0.5rem; 
 font-size: 3rem; 
-color: #FF9933; 
+color: #ff9595; 
 cursor: pointer; 
 transition: background-color 0.2s; 
 align-content: center;
 text-align: center; }
 
 .add-image-btn:hover { 
-background-color: #fffbeb; }
+background-color: #ff95951f; }
 
 /* Botón de Guardar */
 .save-button { 
 margin-top: 2rem; 
 width: 200px; 
 align-self: center; 
-background-color: #FF9933; 
+background-color: #ff9595; 
 color: white; 
 padding: 0.75rem 1.5rem; 
 border: none; 
@@ -641,10 +641,10 @@ transition: background-color 0.3s;
 box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
 
 .save-button:hover:not(:disabled) { 
-    background-color: #f47004; }
+    background-color: #ff6060;}
 
 .save-button:disabled { 
-    background-color: #ffc999; 
+    background-color: #ff9595; 
     cursor: not-allowed; }
 
 /*********************/
@@ -664,7 +664,7 @@ box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
 
 .selectable-chip {
     padding: 3px 15px;
-    border: 2px solid #ff9900;
+    border: 2px solid #ff9595; 
     border-radius: 25px;
     font-weight: 500;
     font-size: 0.9rem;
@@ -679,9 +679,9 @@ box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
 }
 
 .selectable-chip:hover {
-    background-color: #ff9900; /* Color naranja de la imagen */
+    background-color: #ff9595;  /* Color naranja de la imagen */
     color: white;
-    border-color: #ff9900;
+    border-color: #ff9595; 
 }
 
 .is-selected {
@@ -692,7 +692,7 @@ box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
 
 .button-group button {
     padding: 8px 15px;
-    border: 2px solid #ff9900;
+    border: 2px solid #ff9595; 
     border-radius: 25px;
     font-weight: 500;
     font-size: 0.9rem;
@@ -704,9 +704,9 @@ box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
 }
 
 .button-group button.active {
-    background-color: #ff9900; /* Color naranja de la imagen */
+    background-color: #ff9595;  /* Color naranja de la imagen */
     color: white;
-    border-color: #ff9900;
+    border-color: #ff9595; 
 }
 
 /* 1. Define el comportamiento de Fila */
@@ -817,12 +817,12 @@ box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
     transition: all 0.3s ease;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     max-width: 150px;
-    background-color: #ff9900;
+    background-color: #ff9595; 
     color: white;
 }
 
 .btn-primary-confirmacion:hover {
-    background: #f47004;
+    background: #ff6060;
 }
 
 /* Botón de cerrar (X) */
@@ -840,6 +840,6 @@ box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
     transition: color 0.2s;
 }
 .close-button-confirmacion:hover {
-    color: #ff9900;
+    color: #ff6060;
 }
 </style>
