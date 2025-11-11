@@ -35,6 +35,9 @@ router.get('/feed', mascotaController.getMascotasForGatoFeed);
 // GET /api/mascotas/perros -> Listar solo perros (Función separada)
 router.get('/perros', mascotaController.getMascotasForPerroFeed);
 
+// GET /api/mascotas/match-> Listar solo perros (Función separada)
+router.get('/match', mascotaController.getAllMascotas);
+
 // GET /api/mascotas/card/:id -> Obtener todos los detalles (Feed o página de detalle)
 router.get('/card/:id', mascotaController.getMascotaCardDetails);
 
