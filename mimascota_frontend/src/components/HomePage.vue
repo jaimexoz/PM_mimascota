@@ -24,7 +24,7 @@
       <!-- Contenido de la Página -->
       <div class="page-content" id="loq">
         <div class="title-adopt-section" >
-          <h2>MASCOTAS DISPONIBLES PARA ADOPTAR</h2>
+          <h2>Mascotas Disponibles para Adoptar</h2>
         </div>
 
       </div>
@@ -104,9 +104,36 @@
                     <svg class="boton-icono" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                 </a>
             </div>
+
+            
         </div>
     
       </div>
+
+      
+    <div class="container-4">
+        <h2>Cuéntanos tu Experiencia </h2>
+        <div class="experience-primary">
+            <div class="experience-tittle">
+                <h1>Tu opinión es importante</h1>
+                <p> ¿Disfrutaste tu experiencia? <br> Déjanos un comentario  y <br> mejora nuestro servicio. 
+                </p>
+                <div class="experience-button">
+                    <a href="/reviews" class="adopcion-boton">
+                        Ingresa aquí
+                        <svg class="boton-icono" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                    </a>
+                </div> 
+            </div> 
+
+            <div class="experience-cont">
+                <div class="experience-img">
+                    
+                </div>
+            </div>
+        </div>
+      </div>
+
     </main>
     <footer class="footer-bar">MI MASCOTA</footer>
   </div>
@@ -293,7 +320,7 @@ const PetCard = ({ mascota }) => {
                 onClick: navigateToProfile,
                 // AÑADIR: La propiedad 'disabled' usa el valor de isNavigating
                 disabled: isNavigating.value // <--- USA .value para acceder al valor
-            }, isNavigating.value ? 'Cargando...' : 'Ver perfil')
+            }, isNavigating.value ? 'Cargando...' : 'Ver más')
         ])
     ]);
 };
@@ -836,6 +863,43 @@ const PetCard = ({ mascota }) => {
     
 }
 
+.experience-cont {
+    /* Clases equivalentes a: grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-0 rounded-xl shadow-2xl overflow-hidden max-w-6xl mx-auto */
+    display: grid;
+    grid-template-columns: 1fr; /* Una columna por defecto */
+    gap: 2rem; /* gap-8 */
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 0.75rem; /* rounded-xl */
+    box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.332);
+    overflow: hidden;
+    
+}
+
+
+
+.experience-img{
+    display: flex;
+    position: relative;
+    min-height: 350px;
+    background-image: url('../assets/cat-and-dog-exp.jpg');
+    background-size: cover;
+    align-items: end;
+}
+
+.experience-tittle{
+    flex: 1;
+    align-items: center;
+    margin-left: 25px;
+    align-content: center;
+}
+
+.experience-button{  
+    flex: 1;
+    text-align: center;
+}
+
 /* Solo en pantallas grandes (lg) */
 @media (min-width: 1024px) {
     .adopcion-grid {
@@ -856,12 +920,15 @@ const PetCard = ({ mascota }) => {
     max-height: 350px;
 }
 
+
+
 .adopcion-imagen {
     /* Clases equivalentes a: w-full h-full object-cover */
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
+
 
 /* ----------------------------------------
  * 3. Estilos del Bloque de Pasos (Naranja)
@@ -878,6 +945,8 @@ const PetCard = ({ mascota }) => {
     min-height: 100px;
     max-height: 350px;
 }
+
+
 
 /* Ajustes de padding para tablets (sm y lg) */
 @media (min-width: 640px) {
@@ -900,7 +969,6 @@ const PetCard = ({ mascota }) => {
   justify-items: center;
   height: auto;
   margin-bottom: 50px;
-  padding-top: 3.5rem;
 }
 
  .container-3 h2{
@@ -909,6 +977,42 @@ const PetCard = ({ mascota }) => {
   font-weight: 800;
   margin-bottom: 50px;
  }
+
+ .container-4{
+    align-items: center;
+    justify-items: center;
+    height: auto;
+    margin-bottom: 50px;
+}
+
+.experience-primary{
+    display: flex;
+    width: 70%;
+}
+
+ .container-4 h2{
+color: black;
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+  text-align: center;
+
+ }
+ .container-4 h1{
+  color: #ff9595;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  text-align: center;
+ }
+
+ .container-4 p{
+  color: #000000;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  text-align: center;
+ }
+
 
 .adopcion-lista {
     /* Clases equivalentes a: space-y-6 text-xl sm:text-2xl font-semibold list-none */

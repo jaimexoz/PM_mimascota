@@ -13,7 +13,7 @@ const uploadRoutes = require('./routes/uploadRoutes');
 const mascotaRoutes = require('./routes/mascotaRoutes'); 
 const favoritesRoutes = require('./routes/favoritesRoutes');
 const createAdoptionRouter = require('./routes/adoptionRoutes'); // 👈 CAMBIO: Importamos la función
-
+const reviewRoutes = require('./routes/reviewRoutes');
 const app = express();
 // 1. Crear el servidor HTTP a partir de la aplicación Express
 const server = http.createServer(app); 
@@ -54,6 +54,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/mascotas', mascotaRoutes); 
 app.use('/api/favorites', favoritesRoutes); 
+app.use('/api/reviews', reviewRoutes);
+
 
 // ⭐️ CAMBIO CLAVE: Usa la función importada para crear las rutas de adopción
 // y le inyecta la instancia 'io' para que esté disponible en el controlador.

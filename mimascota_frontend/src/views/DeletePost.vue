@@ -12,7 +12,7 @@
             
             <h1 class="main-title">
                 <PawPrint class="paw-icon-main" />
-                Mis Publicaciones Activas
+                Elimina la publicación de tu mascota
                 <PawPrint class="paw-icon-main" />
             </h1>
             

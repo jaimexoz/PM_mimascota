@@ -344,7 +344,7 @@ const authStore = useAuthStore();
               class: 'pet-card-button',
               // ⚠️ CORRECCIÓN CLAVE: Pasamos la referencia a la función, no la LLAMAMOS inmediatamente.
               onClick: navigateToProfile 
-            }, 'Ver perfil')
+            }, 'Ver más')
           ])
   
     ]);

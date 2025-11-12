@@ -24,7 +24,7 @@ import DeletePost from '@/views/DeletePost.vue';
 import petManagement from '@/views/petManagement.vue';
 import matchPage from '@/views/matchPage.vue';
 import { isAuthenticated } from '../utils/auth'; // Importa la función de autenticación
-
+import UserReviews from '@/views/UserReviews.vue';
 
 
 const router = createRouter({
@@ -90,6 +90,14 @@ const router = createRouter({
             path: '/perfil',
             name: 'perfil',
             component: () => import('../views/PerfilUsuario.vue'),
+            meta: { requiresAuth: true }
+        },
+
+        {
+            // ⭐️ Esta es la ruta que necesitas
+            path: '/reviews', 
+            name: 'reviews',
+            component: UserReviews,
             meta: { requiresAuth: true }
         },
 

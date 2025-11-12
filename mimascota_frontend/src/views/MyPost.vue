@@ -12,7 +12,7 @@
     <div class="content-wrapper">
         <h1 class="main-title">
             <PawPrint class="paw-icon-main" />
-            Los Favoritos que esperan un Hogar
+            Encuentra a todas tus mascotas aquí
             <PawPrint class="paw-icon-main" />
         </h1>
         
@@ -298,7 +298,7 @@ const authStore = useAuthStore();
               class: 'pet-card-button',
               // ⚠️ CORRECCIÓN CLAVE: Pasamos la referencia a la función, no la LLAMAMOS inmediatamente.
               onClick: navigateToProfile 
-            }, 'Ver perfil')
+            }, 'Ver más')
           ])
   
     ]);
@@ -371,7 +371,6 @@ const authStore = useAuthStore();
   
   .main-title {
     font-size: 2.25rem; /* text-4xl */
-    line-height: 2.5rem; /* leading-10 */
     font-weight: 800; /* font-extrabold */
     color: #111827; /* gray-900 */
     text-align: center;

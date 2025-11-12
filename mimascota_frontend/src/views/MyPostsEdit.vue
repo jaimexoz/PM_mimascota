@@ -12,7 +12,7 @@
             
             <h1 class="main-title">
                 <PawPrint class="paw-icon-main" />
-                Mis Publicaciones Activas
+                Edita la información de tus mascotas
                 <PawPrint class="paw-icon-main" />
             </h1>
             
