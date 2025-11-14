@@ -81,7 +81,6 @@ const confirmDelete = () => {
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35); 
     width: 100%; 
     max-width: 500px; /* Tamaño típico para modales de confirmación */
-    
     text-align: center;
 }
 

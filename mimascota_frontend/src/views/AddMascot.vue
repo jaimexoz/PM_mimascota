@@ -388,21 +388,17 @@ function eliminarArchivo(id) {
  async function publicarMascota() {
     const formData = new FormData();
     
-    // ⭐️ 1. Obtener el token de autenticación
-    // CORRECCIÓN CLAVE: Usamos 'authToken' ya que así se guarda en localStorage.
+    // 1. Obtener el token de autenticación
     const token = localStorage.getItem('authToken'); 
 
     if (!token) {
         alert('Debes iniciar sesión para publicar una mascota.');
-        // ⭐️ Importante: Redirigir al login si no hay token (asumiendo que tienes una ruta '/login')
         useRouter().push('/login'); 
         return;
     }
 
     // 2. Añadir los MÚLTIPLES archivos de imagen
     archivosSubidos.forEach((item, index) => {
-        // ⭐️ CORRECCIÓN CRÍTICA: Multer espera el campo 'fotos' (sin el índice en la clave)
-        // La clave debe ser 'fotos' para cada archivo.
         formData.append(`fotos`, item.file); 
     });
 
