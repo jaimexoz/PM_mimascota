@@ -11,7 +11,6 @@ class ReviewModel {
      * @returns {Promise<object>} El registro de la reseña recién creada.
      */
     static async createReview(userId, content, stars) {
-        // En un INSERT, 'eliminado_logico' es FALSE por defecto y 'fecha_eliminacion' es NULL.
         const query = `
             INSERT INTO reviews (forane_usuari_id, conten_review, nstars_review, eliminado_logico)
             VALUES ($1, $2, $3, FALSE)
@@ -48,7 +47,8 @@ class ReviewModel {
                 r.nstars_review,
                 r.fechax_review,
                 u.nombre_usuari, 
-                u.imagep_usuari      
+                u.imagep_usuari,
+                r.forane_usuari_id      
             FROM 
                 reviews r
             JOIN 
@@ -89,7 +89,17 @@ class ReviewModel {
      * @param {number} reviewId - ID de la reseña a eliminar.
      * @returns {Promise<boolean>} Verdadero si se modificó 1 registro.
      */
-    static async softDelete(reviewId) {
+
+    static async findUserReview(userId) {
+        const query = `
+            SELECT idxxxx_review FROM reviews 
+            WHERE forane_usuari_id = $1 AND eliminado_logico = FALSE;
+        `;
+        const result = await pool.query(query, [userId]);
+        return result.rows[0];
+    }
+
+    static async softDeleteByAdmin(reviewId) { // 🚨 NUEVA FUNCIÓN MÁS CLARA
         const query = `
             UPDATE reviews
             SET 
@@ -100,9 +110,10 @@ class ReviewModel {
         `;
         try {
             const result = await pool.query(query, [reviewId]);
-            return result.rowCount > 0;
+            // ✅ Retorna el número de filas afectadas
+            return result.rowCount; 
         } catch (error) {
-            console.error("Error al eliminar lógicamente la reseña:", error);
+            console.error("Error al eliminar lógicamente la reseña (Admin):", error);
             throw new Error("Error en la base de datos al eliminar la reseña.");
         }
     }

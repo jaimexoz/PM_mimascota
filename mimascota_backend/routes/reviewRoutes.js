@@ -12,4 +12,6 @@ router.get('/', reviewController.getReviews);
 // router.post('/', authMiddleware, reviewController.createReview); // Con autenticación
 router.post('/', protect, reviewController.createReview); // Sin autenticación
 
+router.delete('/:id', protect, reviewController.deleteReview);
+
 module.exports = router;

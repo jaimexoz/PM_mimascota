@@ -388,12 +388,11 @@ const toggleDropdown = () => {
   isDropdownOpen.value = !isDropdownOpen.value;
 };
 
-// Toggle del menú desplegable de Notificaciones 👈 NUEVA FUNCIÓN
+
 const toggleNotifications = () => {
-    isDropdownOpen.value = false; // Cierra perfil al abrir notificaciones
+    isDropdownOpen.value = false; 
     isNotificationsOpen.value = !isNotificationsOpen.value;
     
-    // ⭐️ LLAMAR A MARCAR COMO LEÍDAS AL ABRIR ⭐️
     if (isNotificationsOpen.value && unreadCount.value > 0) {
         markAllAsRead(); 
     }
@@ -832,7 +831,7 @@ button.view-more-button {
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  min-width: 200px;
+  min-width: 210px;
   z-index: 1001;
   margin-top: 0.5rem;
 }

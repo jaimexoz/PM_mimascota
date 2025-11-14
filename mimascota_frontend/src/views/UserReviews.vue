@@ -1,162 +1,172 @@
 <template>
-    <div class="reviews-page-container">
-        <Navbar/>
-      <div class="hero-section">
-        <div class="hero-overlay">
-          <h2>COMPARTE <br> TU EXPERIENCIA</h2>
-        </div>
+  <div class="reviews-page-container">
+      <Navbar/>
+    <div class="hero-section">
+      <div class="hero-overlay">
+        <h2>COMPARTE <br> TU EXPERIENCIA</h2>
       </div>
-  
-      <main class="content-section">
-        <section class="review-form-card">
-          <h3>Deja tu valoración</h3>
-          
-          <div class="rating-stars">
-            <span v-for="star in 5" :key="star" @mouseover="setHoverRating(star)" @mouseleave="setHoverRating(0)" @click="setRating(star)">
-                <svg
-                    :class="{ 'star-icon': true, 'star-filled': star <= (hoverRating || newRating) }"
-                    xmlns="http://www.w3.org/2000/svg" 
-                    viewBox="0 0 24 24" 
-                    fill="currentColor"
-                >
-                    <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd" />
-                </svg>
-            </span>
-          </div>
-          
-          <textarea
-            v-model="newComment"
-            placeholder="Déjanos un comentario"
-            rows="4"
-            maxlength="100"
-          ></textarea>
-          <p class="char-count">{{ newComment.length }} / 100</p>
-          
-          <div class="button-container">
-              <button @click="submitReview" class="btn-primary" :disabled="isLoading">
-                  {{ isLoading ? 'Enviando...' : 'Enviar' }}
-              </button>
-          </div>
-        </section>
-  
-        <section class="user-reviews-list">
-          <h2>Reseñas de usuarios</h2>
-          <p class="reviews-subtitle">
-            Lee las reseñas dejadas por los usuarios de la aplicación web.
-          </p>
-          
-          <div class="filter-controls">
-            <label>Filtrar por:</label>
-            <button 
-                class="filter-button" 
-                :class="{ 'active-filter': currentSort === 'DESC' }"
-                @click="fetchReviews(1, 'DESC')"
-            >
-                Más recientes
-            </button>
-            <button 
-                class="filter-button" 
-                :class="{ 'active-filter': currentSort === 'ASC' }"
-                @click="fetchReviews(1, 'ASC')"
-            >
-                Más antiguos
+    </div>
+
+    <main class="content-section">
+      <section class="review-form-card">
+        <h3>Deja tu valoración</h3>
+        
+        <div class="rating-stars">
+          <span v-for="star in 5" :key="star" @mouseover="setHoverRating(star)" @mouseleave="setHoverRating(0)" @click="setRating(star)">
+              <svg
+                  :class="{ 'star-icon': true, 'star-filled': star <= (hoverRating || newRating) }"
+                  xmlns="http://www.w3.org/2000/svg" 
+                  viewBox="0 0 24 24" 
+                  fill="currentColor"
+              >
+                  <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd" />
+              </svg>
+          </span>
+        </div>
+        
+        <textarea
+          v-model="newComment"
+          placeholder="Déjanos un comentario"
+          rows="4"
+          maxlength="100"
+        ></textarea>
+        <p class="char-count">{{ newComment.length }} / 100</p>
+        
+        <div class="button-container">
+            <button @click="submitReview" class="btn-primary" :disabled="isLoading">
+                {{ isLoading ? 'Enviando...' : 'Enviar' }}
             </button>
         </div>
-          
-          <p v-if="isLoadingReviews" class="loading-message">Cargando reseñas...</p>
-          
-          <div v-else>
-            <div
-              v-for="review in reviews"
-              :key="review.idxxxx_review"
-              class="review-item"
-            >
-              <img :src="review.avatar_url || 'https://i.imgur.com/Kq489Q3.jpg'" :alt="'Avatar de ' + review.nombre_usuario" class="user-avatar" />
-              <div class="review-details">
-                <div class="review-rating">
-                  <span v-for="s in 5" :key="s" :class="{ 'star-filled': s <= review.nstars_review }">&#9733;</span>
-                </div>
-                <p class="review-text">
-                  {{ review.conten_review }}
-                </p>
-                <div class="review-meta">
-                    <p class="review-user-name">Por: {{ review.nombre_usuario || 'Usuario Anónimo' }}</p>
-                    <p class="review-date">{{ formatDate(review.fechax_review) }}</p>
-                </div>
+      </section>
+
+      <section class="user-reviews-list">
+        <h2>Reseñas de usuarios</h2>
+        <p class="reviews-subtitle">
+          Lee las reseñas dejadas por los usuarios de la aplicación web.
+        </p>
+        
+        <div class="filter-controls">
+          <label>Filtrar por:</label>
+          <button 
+              class="filter-button" 
+              :class="{ 'active-filter': currentSort === 'DESC' }"
+              @click="fetchReviews(1, 'DESC')"
+          >
+              Más recientes
+          </button>
+          <button 
+              class="filter-button" 
+              :class="{ 'active-filter': currentSort === 'ASC' }"
+              @click="fetchReviews(1, 'ASC')"
+          >
+              Más antiguos
+          </button>
+      </div>
+        
+        <p v-if="isLoadingReviews" class="loading-message">Cargando reseñas...</p>
+        
+        <div v-else>
+          <div
+            v-for="review in reviews"
+            :key="review.idxxxx_review"
+            class="review-item"
+          >
+            <img :src="review.avatar_url || 'https://i.imgur.com/Kq489Q3.jpg'" :alt="'Avatar de ' + review.nombre_usuario" class="user-avatar" />
+            <div class="review-details">
+              <div class="review-rating">
+                <span v-for="s in 5" :key="s" :class="{ 'star-filled': s <= review.nstars_review }">&#9733;</span>
               </div>
+              <p class="review-text">
+                {{ review.conten_review }}
+              </p>
+              <div class="review-meta">
+                  <p class="review-user-name">Por: {{ review.nombre_usuario || 'Usuario Anónimo' }}</p>
+                  <p class="review-date">{{ formatDate(review.fechax_review) }}</p>
+                  
+                  <button 
+                      v-if="isAuthorizedForDeletion"
+                      @click="deleteReview(review.idxxxx_review)" 
+                      :disabled="isDeleting"
+                      class="delete-button"
+                      title="Eliminar Reseña">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                          <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" />
+                      </svg>
+                  </button>
+                  </div>
             </div>
-            
-            <p v-if="reviews.length === 0 && !isLoadingReviews">No hay reseñas disponibles.</p>
           </div>
-  
-          <div class="pagination" v-if="totalPages > 1 && !isLoadingReviews">
-            <span 
-              v-for="page in totalPages" 
-              :key="page" 
-              :class="{ 'page-number': true, 'active': currentPage === page }"
-              @click="goToPage(page)"
-            >
-              {{ page }}
-            </span>
-            <a v-if="currentPage < totalPages" @click="goToPage(currentPage + 1)" class="next-link">Siguiente</a>
-          </div>
-  
-        </section>
-      </main>
-      <div v-if="modal.visible" class="modal-overlay">
-            <div class="modal-content" :class="modal.tipo">
-                <div class="modal-x">
-                    <button @click="cerrarModal" class="close-button">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-                <div class="modal-header">
-                    <h2 class="modal-title">Reseña</h2> 
-                    <template v-if="modal.tipo === 'success'">
-                      <p>{{ modal.mensaje }}</p>
-                </template>
-                <template v-if="modal.tipo === 'error'">
-                    <p>{{ modal.mensaje }}</p>
-                </template>
-                    
-                </div>
-                
-                <div class="button-actions">
-                    <button @click="cerrarModal" class="btn-primary">
-                        Aceptar
-                    </button>
-                </div>
-            </div>
+          
+          <p v-if="reviews.length === 0 && !isLoadingReviews">No hay reseñas disponibles.</p>
         </div>
+
+        <div class="pagination" v-if="totalPages > 1 && !isLoadingReviews">
+          <span 
+            v-for="page in totalPages" 
+            :key="page" 
+            :class="{ 'page-number': true, 'active': currentPage === page }"
+            @click="goToPage(page)"
+          >
+            {{ page }}
+          </span>
+          <a v-if="currentPage < totalPages" @click="goToPage(currentPage + 1)" class="next-link">Siguiente</a>
+        </div>
+
+      </section>
+    </main>
+    <div v-if="modal.visible" class="modal-overlay">
+          <div class="modal-content" :class="modal.tipo">
+              <div class="modal-x">
+                  <button @click="cerrarModal" class="close-button">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                  </button>
+              </div>
+              <div class="modal-header">
+                  <h2 class="modal-title">Reseña</h2> 
+                  <template v-if="modal.tipo === 'success'">
+                    <p>{{ modal.mensaje }}</p>
+              </template>
+              <template v-if="modal.tipo === 'error'">
+                  <p>{{ modal.mensaje }}</p>
+              </template>
+                  
+              </div>
+              
+              <div class="button-actions">
+                  <button @click="cerrarModal" class="btn-primary">
+                      Aceptar
+                  </button>
+              </div>
+          </div>
       </div>
-      <Footer/>
+    </div>
+    <Footer/>
 </template>
-  
+
 <script setup>
 import Navbar from '@/components/Navbar.vue'; 
 import Footer from '@/components/Footer.vue';
-import { ref, onMounted, reactive } from 'vue';
-import { useRouter } from 'vue-router'; // Necesario para la redirección
-// Se elimina axios
-  
+import { ref, onMounted, reactive, computed } from 'vue'; // Importar 'computed'
+import { useRouter } from 'vue-router'; 
+
 const API_BASE_URL = 'http://localhost:3000/api/reviews';
 const router = useRouter(); 
-  
 
-// --- ESTADO DEL MODAL (Integrado) ---
+// --- ESTADO DEL MODAL ---
 const modal = reactive({
-    visible: false,
-    mensaje: '',
-    tipo: 'success' // 'success' o 'error'
+  visible: false,
+  mensaje: '',
+  tipo: 'success' 
 });
+
 // --- ESTADO DEL FORMULARIO DE RESEÑA ---
 const newRating = ref(0);
 const hoverRating = ref(0); 
 const newComment = ref('');
 const isLoading = ref(false); 
-  
+
 // --- ESTADO DE LA LISTA Y PAGINACIÓN ---
 const reviews = ref([]);
 const currentPage = ref(1);
@@ -164,156 +174,225 @@ const totalPages = ref(1);
 const isLoadingReviews = ref(false); 
 const currentSort = ref('DESC');
 
+// --- ESTADO DE AUTENTICACIÓN Y ROL ---
+const currentUserRole = ref(null); // 🚨 Nuevo estado para el rol
+const isDeleting = ref(false); 
 
-// --- LÓGICA DEL MODAL (Integrada) ---
+// --- COMPUTED: Verifica si el usuario tiene rol de Administrador o Empleado ---
+const isAuthorizedForDeletion = computed(() => {
+  // Roles permitidos: 'Administrador' o 'Empleado'
+  return currentUserRole.value === 'Administrador' || currentUserRole.value === 'Empleado';
+});
 
+// --- LÓGICA DE AUTENTICACIÓN Y ROL ---
+/**
+* @description Obtiene el rol del usuario logueado desde localStorage.userData.
+*/
+const getCurrentUserRole = () => {
+  const userDataString = localStorage.getItem('userData');
+  
+  if (userDataString) {
+      try {
+          const userData = JSON.parse(userDataString);
+          // 🚨 Accede a la propiedad 'role' dentro del objeto userData
+          currentUserRole.value = userData.role; 
+          console.log('Rol de usuario cargado:', currentUserRole.value);
+          
+      } catch (e) {
+          console.error('Error al parsear userData de localStorage:', e);
+          currentUserRole.value = null;
+      }
+  } else {
+      currentUserRole.value = null;
+  }
+};
+
+
+// --- LÓGICA DEL MODAL ---
 function mostrarModal(msg, type) {
-    modal.mensaje = msg;
-    modal.tipo = type;
-    modal.visible = true;
+  modal.mensaje = msg;
+  modal.tipo = type;
+  modal.visible = true;
 }
 
 function cerrarModal() {
-    modal.visible = false;
-    // En caso de éxito, la lista ya se recargó en submitReview. 
-    // En caso de error, no hacemos nada más que cerrar el modal.
+  modal.visible = false;
 }
+
 // --- LÓGICA DE ESTRELLAS (HOVER Y CLICK) ---
 const setHoverRating = (rating) => {
-    hoverRating.value = rating;
-};
-  
-const setRating = (rating) => {
-    newRating.value = rating;
-};
-  
-// --- LÓGICA DE LA API (GET y POST con FETCH) ---
-  
-/**
- * @description Obtiene las reseñas paginadas. Se mantiene con fetch para consistencia.
- */
- const fetchReviews = async (page = 1, sortOrder = 'DESC') => {
-    isLoadingReviews.value = true;
-    currentSort.value = sortOrder; // 🆕 Actualizar el estado del orden
-    try {
-        const response = await fetch(`${API_BASE_URL}?page=${page}&sortOrder=${sortOrder}`);
-        
-        if (!response.ok) {
-             throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        reviews.value = data.reviews.map(review => ({
-            ...review,
-            nombre_usuario: review.nombre_usuari, 
-            avatar_url: review.imagep_usuari, 
-            nstars_review: review.nstars_review,
-            conten_review: review.conten_review,
-            fechax_review: review.fechax_review
-        }));
-        totalPages.value = data.totalPages;
-        currentPage.value = data.currentPage;
-  
-    } catch (error) {
-        console.error('Error al cargar las reseñas:', error);
-    } finally {
-        isLoadingReviews.value = false;
-    }
+  hoverRating.value = rating;
 };
 
-const formatDate = (dateString) => {
-    if (!dateString) return 'Fecha desconocida';
-    try {
-        const date = new Date(dateString);
-        // Opciones para formato en español (locale 'es-ES')
-        const options = { year: 'numeric', month: 'long', day: 'numeric' };
-        return date.toLocaleDateString('es-ES', options);
-    } catch (e) {
-        return 'Fecha inválida';
-    }
+const setRating = (rating) => {
+  newRating.value = rating;
 };
+
+// --- UTILIDAD ---
+const formatDate = (dateString) => {
+  if (!dateString) return 'Fecha desconocida';
+  try {
+      const date = new Date(dateString);
+      const options = { year: 'numeric', month: 'long', day: 'numeric' };
+      return date.toLocaleDateString('es-ES', options);
+  } catch (e) {
+      return 'Fecha inválida';
+  }
+};
+
+// --- LÓGICA DE LA API (GET, POST y DELETE) ---
+
+const fetchReviews = async (page = 1, sortOrder = 'DESC') => {
+  isLoadingReviews.value = true;
+  currentSort.value = sortOrder;
+  try {
+      const response = await fetch(`${API_BASE_URL}?page=${page}&sortOrder=${sortOrder}`);
+      
+      if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      reviews.value = data.reviews.map(review => ({
+          ...review,
+          nombre_usuario: review.nombre_usuari, 
+          avatar_url: review.imagep_usuari, 
+          nstars_review: review.nstars_review,
+          conten_review: review.conten_review,
+          fechax_review: review.fechax_review
+      }));
+      totalPages.value = data.totalPages;
+      currentPage.value = data.currentPage;
+
+  } catch (error) {
+      console.error('Error al cargar las reseñas:', error);
+  } finally {
+      isLoadingReviews.value = false;
+  }
+};
+
 
 const submitReview = async () => {
-    if (newRating.value === 0 || newComment.value.trim() === '') {
-      mostrarModal('Por favor, selecciona una valoración y escribe un comentario.', 'error');
-        return;
-    }
-    
-    // ⭐️ 1. Obtener el token de autenticación
-    const token = localStorage.getItem('authToken'); 
-
-    if (!token) {
-      mostrarModal('Debes iniciar sesión para dejar una reseña.', 'error');
-        router.push('/login'); // Redirigir si no hay token
-        return;
-    }
-
-    isLoading.value = true;
-    
-    const newReviewData = {
-        stars: newRating.value,
-        comment: newComment.value.trim(),
-    };
-    
-    try {
-        const response = await fetch(API_BASE_URL, {
-            method: 'POST',
-            // El Content-Type es necesario para que Express/body-parser entienda el JSON
-            headers: {
-                'Content-Type': 'application/json',
-                // ⭐️ 4. AÑADIR LA CABECERA DE AUTORIZACIÓN
-                'Authorization': `Bearer ${token}`, 
-            },
-            // Enviamos el body como JSON
-            body: JSON.stringify(newReviewData), 
-        });
-
-        if (response.ok) {
-          mostrarModal('¡Reseña enviada con éxito!', 'success');
-            
-            // Limpiar formulario
-            newRating.value = 0;
-            newComment.value = '';
-            
-            // Recargar la primera página de reseñas (las más recientes)
-            await fetchReviews(1); 
-
-        } else {
-            // Lógica robusta de manejo de errores, similar a tu ejemplo
-            const errorText = await response.text(); 
-            let mensajeError = 'Error desconocido.';
-            
-            try {
-                const errorJson = JSON.parse(errorText);
-                // Busca el mensaje en el cuerpo de la respuesta del servidor
-                mensajeError = errorJson.message || errorJson.mensaje || 'Error desconocido del servidor.';
-            } catch (e) {
-                mensajeError = `Error ${response.status}: ${response.statusText}.`;
-            }
-
-            mostrarModal(`Hubo un error: ${mensajeError}`, 'error');
-        }
-        
-    } catch (error) {
-        console.error('Error de red al enviar el formulario:', error);
-        mostrarModal('No se pudo conectar al servidor. Asegúrate de que Express esté corriendo.', 'error');
-    } finally {
-        isLoading.value = false;
-    }
-};
+  if (newRating.value === 0 || newComment.value.trim() === '') {
+    mostrarModal('Por favor, selecciona una valoración y escribe un comentario.', 'error');
+      return;
+  }
   
+  const token = localStorage.getItem('authToken'); 
+
+  if (!token) {
+    mostrarModal('Debes iniciar sesión para dejar una reseña.', 'error');
+      router.push('/login'); 
+      return;
+  }
+
+  isLoading.value = true;
+  
+  const newReviewData = {
+      stars: newRating.value,
+      comment: newComment.value.trim(),
+  };
+  
+  try {
+      const response = await fetch(API_BASE_URL, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`, 
+          },
+          body: JSON.stringify(newReviewData), 
+      });
+
+      if (response.ok) {
+        mostrarModal('¡Reseña enviada con éxito!', 'success');
+          
+          newRating.value = 0;
+          newComment.value = '';
+          
+          // Recargar la primera página de reseñas (las más recientes)
+          await fetchReviews(1); 
+
+      } else {
+          const errorText = await response.text(); 
+          let mensajeError = 'Error desconocido.';
+          
+          try {
+              const errorJson = JSON.parse(errorText);
+              mensajeError = errorJson.message || errorJson.mensaje || 'Error desconocido del servidor.';
+          } catch (e) {
+              mensajeError = `Error ${response.status}: ${response.statusText}.`;
+          }
+
+          mostrarModal(`Hubo un error: ${mensajeError}`, 'error');
+      }
+      
+  } catch (error) {
+      console.error('Error de red al enviar el formulario:', error);
+      mostrarModal('No se pudo conectar al servidor. Asegúrate de que Express esté corriendo.', 'error');
+  } finally {
+      isLoading.value = false;
+  }
+};
+
+/**
+* ⭐️ FUNCIÓN PARA ELIMINAR LA RESEÑA ⭐️
+* @param {number} reviewId - El ID de la reseña a eliminar.
+*/
+async function deleteReview(reviewId) {
+  if (!confirm('¿Estás seguro de que deseas eliminar esta reseña? Esta acción es irreversible.')) {
+      return;
+  }
+
+  isDeleting.value = true;
+  const token = localStorage.getItem('authToken');
+
+  if (!token) {
+      alert('Error: Token de autenticación no encontrado. Inicie sesión.');
+      isDeleting.value = false;
+      return;
+  }
+
+  try {
+      const response = await fetch(`http://localhost:3000/api/reviews/${reviewId}`, {
+          method: 'DELETE',
+          headers: {
+              // El servidor usará este token para verificar el rol/permisos (aunque el cliente ya filtró)
+              'Authorization': `Bearer ${token}`, 
+          },
+      });
+
+      if (response.ok) {
+          alert('Reseña eliminada con éxito.');
+          // Recargar la lista para mostrar el cambio
+          fetchReviews(currentPage.value, currentSort.value); 
+      } else if (response.status === 403) {
+          alert('No tienes permiso para eliminar esta reseña (Rol insuficiente o problema del servidor).');
+      } else if (response.status === 404) {
+          alert('La reseña no fue encontrada.');
+      } else {
+          const errorData = await response.json();
+          alert(`Error al eliminar la reseña: ${errorData.message || 'Error desconocido'}`);
+      }
+  } catch (error) {
+      console.error('Error de red al intentar eliminar:', error);
+      alert('Error de conexión con el servidor.');
+  } finally {
+      isDeleting.value = false;
+  }
+}
+
+
 const goToPage = (page) => {
-  
-    if (page >= 1 && page <= totalPages.value && page !== currentPage.value) {
-        // 🚨 CAMBIO CLAVE: Pasa el orden de clasificación actual (currentSort.value)
-        fetchReviews(page, currentSort.value); 
-    }
+  if (page >= 1 && page <= totalPages.value && page !== currentPage.value) {
+      fetchReviews(page, currentSort.value); 
+  }
 };
-  
-// Cargar las reseñas iniciales
+
+// Cargar el rol y las reseñas iniciales al montar el componente
 onMounted(() => {
-    fetchReviews(1);
+  getCurrentUserRole(); // 🚨 Primero obtenemos el rol
+  fetchReviews(1);
 });
 </script>
   
@@ -424,6 +503,12 @@ onMounted(() => {
       color: #FFD700;; /* ¡Esto hará que las estrellas se pinten! */
     }
 
+    .star-icon {
+    width: 35px; /* Define el ancho */
+    height: 35px; /* Define el alto */
+    fill: currentColor; /* Asegura que el SVG use el color definido por su contenedor (rating-stars o star-filled) */
+    margin: 0 2px;
+}
     /* La clase `.rating-stars` apunta a la variable de borde (gris claro): */
     .rating-stars {
       display: flex;
@@ -700,6 +785,32 @@ onMounted(() => {
 
 .review-date {
     font-style: italic;
-    color: #999; /* Color más claro para la fecha */
+    color: #999; 
+    padding-left: 200px;
+}
+
+.delete-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #ef4444; /* Rojo suave */
+    padding: 5px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.delete-button:hover:not(:disabled) {
+    background-color: #fee2e2;
+}
+
+.delete-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.delete-button svg {
+    width: 20px;
+    height: 20px;
+    vertical-align: middle;
 }
   </style>
