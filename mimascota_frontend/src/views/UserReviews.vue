@@ -317,7 +317,7 @@ onMounted(() => {
 });
 </script>
   
-  <style>
+<style>
 
   
 .modal-overlay {

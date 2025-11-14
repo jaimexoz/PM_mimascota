@@ -304,7 +304,7 @@ funcionen con el componente funcional PetCard creado con h().
 
 .adoption-feed-container { 
     min-height: 100vh; 
-    background-color: #f9fafb; 
+    background-color: #ffffff; 
     padding-top: 1rem; }
 
 .content-wrapper { 

@@ -232,7 +232,7 @@
       </div>
     </div>
     
-    <footer class="footer-bar">MI MASCOTA</footer>
+    <Footer/>
   </div>
 </template>
 
@@ -241,6 +241,7 @@ import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 // Asumiendo que Navbar es un componente funcional
 import Navbar from '../components/Navbar.vue'; 
+import Footer from '@/components/Footer.vue';
 // Asumiendo que estas utilidades existen y manejan el token y localStorage
 import { getToken, updateUserData, onUserDataChange } from '../utils/auth'; 
 
@@ -1038,20 +1039,6 @@ onUnmounted(() => {
   transform: translateY(-2px);
 }
 
-
-
-.footer-bar {
-  width: 100%;
-  background: #111;
-  color: #fff;
-  text-align: center;
-  font-weight: 700;
-  font-size: 1.1rem;
-  padding: 1.2rem 0 1rem 0;
-  margin-top: 3rem;
-  letter-spacing: 2px;
-  z-index: 2;
-}
 
 /* Estilos para el modal de cambio de contraseña */
 .modal-overlay {

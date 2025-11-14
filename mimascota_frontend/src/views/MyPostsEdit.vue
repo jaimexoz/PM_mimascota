@@ -253,7 +253,7 @@ funcionen con el componente funcional PetCard creado con h().
 .paw-icon-color { color: #FF9933; }
 .adoption-feed-container { 
     min-height: 100vh; 
-    background-color: #f9fafb; 
+    background-color: #ffffff; 
     padding-top: 1rem; }
 
 .content-wrapper { 

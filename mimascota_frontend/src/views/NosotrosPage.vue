@@ -1,146 +1,190 @@
 <template>
-  <div class="nosotros-page">
-    <!-- Navbar -->
+  <div class="veterinaria-container">
     <Navbar />
-    
-    <div v-if="isLoading" class="loading-message">
-        <span class="loader"></span>
-    </div>
-    <!-- Contenido Principal -->
-    <main class="main-content">
-      <!-- Título de la Página -->
-      <div class="page-header">
-        <h1 class="page-title">NOSOTROS</h1>
-        <div class="page-underline"></div>
-      </div>
 
-      <!-- Contenido de la Página -->
-      <div class="page-content">
-        <div class="content-placeholder">
-          <h2>Página de Nosotros</h2>
-          <p>Aquí se mostrará información sobre el equipo y la empresa.</p>
+    <main class="veterinaria-content">
+      <section class="hero-section-nos">
+        <div class="header-box">
+          <h1 class="title">
+            VETERINARIA <span class="brand-text">MI MASCOTA</span>
+          </h1>
         </div>
-      </div>
+        
+        <div class="info-layout">
+          <div class="text-column">
+            <p>
+              Ubicada en Ecuador, nos destacamos por ofrecer un servicio de calidad y por brindar
+              una atención personalizada a cada mascota que ingresa por sus puertas. Además, cuentan
+              con las instalaciones y equipamiento necesarios para realizar diagnósticos precisos
+              y procedimientos médicos efectivos.
+            </p>
+            
+            <p>
+              Nos encontramos ubicados en la provincia de Santo Domingo de los Tsáchilas,
+              específicamente en el cantón Santo Domingo, Ecuador. Especializada en servicios
+              veterinarios, sus instalaciones se encuentran en la dirección <strong>PRWH+RQJ, C. Latacunga,
+              Santo Domingo, Ecuador</strong>.
+            </p>
+
+            <p class="highlight-text">
+              Si estás en la búsqueda de un veterinario confiable y comprometido con el cuidado de tu mascota,
+              la Veterinaria Mi Mascota es una excelente opción en Santo Domingo. Con años de experiencia en el campo de
+              la veterinaria, este centro se posiciona como una de las mejores opciones para el bienestar de tus animales de
+              compañía.
+            </p>
+          </div>
+
+          <div class="image-column-nos">
+            <img 
+              src="../assets/dog-nosotros.jpg" 
+              alt="Cachorro blanco acostado, emblema de la Veterinaria Mi Mascota"
+              class="puppy-image"
+            />
+          </div>
+        </div>
+      </section>
     </main>
-    <footer class="footer-bar">MI MASCOTA</footer>
+    
+    <Footer />
   </div>
 </template>
 
-<script setup>
-import Navbar from '../components/Navbar.vue';
+<script>
+// NOTA: En Vue 3 con Composition API, no necesitas importar nada si usas
+// <Navbar> y <Footer> como componentes globales o los registras localmente.
+
+// Ejemplo de registro local (si no son globales):
+import Navbar from '@/components/Navbar.vue';
+import Footer from '@/components/Footer.vue'; 
+
+export default {
+  name: 'VeterinariaPage',
+  components: {
+    Navbar,
+    Footer,
+  },
+  
+};
 </script>
 
 <style scoped>
-.loader {
-  width: 48px;
-  height: 48px;
-  border: 5px solid;
-  border-color: #FF3D00 transparent;
-  border-radius: 50%;
-  display: inline-block;
-  box-sizing: border-box;
-  animation: rotation 1s linear infinite;
+/* Colores de Marca */
+:root {
+  --brand-pink: #FFB6C1;
+  --text-color: #333333;
+  --light-grey: #f8f8f8;
 }
 
-@keyframes rotation {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-} 
-
-.loading-message {
-    position: fixed; 
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    /* Centrado del contenido (spinner y texto) */
+/* Estilos Globales para el Contenedor */
+.veterinaria-container {
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    justify-content: center; /* Centrado vertical */
-    align-items: center;    /* Centrado horizontal */
-    background-color: white;
-    z-index: 999; 
-    color: #333;
-    font-size: 1.2em;
-
-}
-.nosotros-page {
-  min-height: 100vh;
-  background-color: #f8f9fa;
-  font-family: 'Inter', sans-serif;
+    font-family: 'Montserrat', sans-serif; /* Usando una fuente moderna */
+    color: var(--text-color);
 }
 
-.main-content {
-  padding-top: 80px;
-  min-height: calc(100vh - 80px);
+/* Estilos de la Sección Principal */
+.veterinaria-content {
+    flex: 1;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    margin-top: 100px;
+    width: 100%;
 }
 
-.page-header {
-  background: white;
-  padding: 2rem 0;
-  border-bottom: 1px solid #e9ecef;
-  margin-bottom: 2rem;
+/* Estilos de la Cabecera */
+.hero-section {
+    padding-top: 40px;
+    padding-bottom: 40px;
 }
 
-.page-title {
-  text-align: center;
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #333;
-  margin: 0;
-  letter-spacing: 2px;
+.header-box {
+    margin-bottom: 40px;
+    /* Estilo de línea sutil */
+    border-bottom: 2px solid var(--brand-pink);
+    padding-bottom: 10px;
 }
 
-.page-underline {
-  width: 60px;
-  height: 3px;
-  background: #333;
-  margin: 1rem auto 0;
-  border-radius: 2px;
+.title {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--text-color);
+    letter-spacing: -1px;
+    margin: 0;
 }
 
-.page-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
+.brand-text {
+    color: var(--brand-pink);
+    font-weight: 800;
 }
 
-.content-placeholder {
-  text-align: center;
-  padding: 3rem 0;
+/* Layout del Texto y la Imagen */
+.info-layout {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
 }
 
-.content-placeholder h2 {
-  font-size: 2rem;
-  color: #333;
-  margin-bottom: 1rem;
+.text-column {
+    flex: 1;
+    font-size: 1.1rem;
+    line-height: 1.7;
 }
 
-.content-placeholder p {
-  font-size: 1.1rem;
-  color: #666;
+.text-column p {
+    margin-bottom: 25px;
+}
+
+.highlight-text {
+    font-weight: 600;
+    color: #555555;
+    padding: 15px;
+    background-color: var(--light-grey);
+    border-left: 5px solid var(--brand-pink);
+    border-radius: 4px;
+}
+
+.image-column-nos {
+    flex: 1;
+    max-width: 50%;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    border-radius: 50px;
+    overflow: hidden;
+}
+
+.puppy-image {
+    width: 120%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+}
+
+/* --- Media Queries para Responsividad --- */
+@media (max-width: 992px) {
+    .title {
+        font-size: 2.5rem;
+    }
+    .info-layout {
+        gap: 30px;
+    }
 }
 
 @media (max-width: 768px) {
-  .page-title {
-    font-size: 2rem;
-  }
-}
+    .info-layout {
+        flex-direction: column; /* Apila las columnas en móviles */
+        gap: 20px;
+    }
 
-.footer-bar {
-  width: 100%;
-  background: #111;
-  color: #fff;
-  text-align: center;
-  font-weight: 700;
-  font-size: 1.1rem;
-  padding: 1.2rem 0 1rem 0;
-  margin-top: 3rem;
-  letter-spacing: 2px;
-  z-index: 2;
+    .image-column {
+        max-width: 100%; /* La imagen ocupa todo el ancho */
+        order: -1; /* Mueve la imagen arriba del texto en móvil */
+    }
+    
+    .title {
+        font-size: 2rem;
+    }
 }
-</style> 
+</style>

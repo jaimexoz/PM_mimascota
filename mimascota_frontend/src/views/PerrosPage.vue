@@ -81,7 +81,7 @@
           </button>
       </div>
   </div>
-  <footer class="footer-bar">MI MASCOTA</footer>
+  <Footer/>
 </div>
 </template>
 
@@ -90,6 +90,7 @@ import Navbar from '../components/Navbar.vue';
 import { ref, onMounted, computed, reactive, h } from 'vue';
 import { PawPrint, Search, Loader } from 'lucide-vue-next';
 import { useRouter } from 'vue-router'; 
+import Footer from '@/components/Footer.vue';
 
 // Inicialización
 const router = useRouter(); 
@@ -388,7 +389,7 @@ const PetCard = ({ mascota }) => {
 
 .adoption-feed-container {
   min-height: 100vh;
-  background-color: #f9fafb; /* gray-50 */
+  background-color: #ffffff; /* gray-50 */
   padding-top: 1rem;
 }
 
@@ -754,16 +755,5 @@ aplicarse a las clases internas de PetCard.
 .show-all-button:hover {
   background-color: #4338ca; /* hover:bg-indigo-700 */
 }
-.footer-bar {
-  width: 100%;
-  background: #111;
-  color: #fff;
-  text-align: center;
-  font-weight: 700;
-  font-size: 1.1rem;
-  padding: 1.2rem 0 1rem 0;
-  margin-top: 3rem;
-  letter-spacing: 2px;
-  z-index: 2;
-}
+
 </style>

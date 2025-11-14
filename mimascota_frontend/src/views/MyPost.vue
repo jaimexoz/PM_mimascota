@@ -352,7 +352,7 @@ const authStore = useAuthStore();
   
   .adoption-feed-container {
     min-height: 100vh;
-    background-color: #f9fafb; /* gray-50 */
+    background-color: #ffffff; /* gray-50 */
     padding-top: 1rem;
   }
   

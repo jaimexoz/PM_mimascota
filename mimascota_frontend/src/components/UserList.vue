@@ -90,7 +90,7 @@
       </div>
       </div>
     </main>
-    <footer class="footer-bar">MI MASCOTA</footer>
+    <Footer/>
   </div>
 </template>
 
@@ -98,6 +98,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import Navbar from './Navbar.vue';
+import Footer from './Footer.vue';
 import { getToken } from '../utils/auth';
 
 import { Search } from 'lucide-vue-next';
@@ -235,7 +236,7 @@ const handleClickOutside = (event) => {
 <style scoped>
 .user-list-page {
   min-height: 100vh;
-  background-color: #f8f9fa;
+  background-color: #ffffff;
   font-family: 'Inter', sans-serif;
 }
 
@@ -250,7 +251,6 @@ const handleClickOutside = (event) => {
   padding: 10px 20px;
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
   margin-top: 46px;
 }
 
@@ -471,16 +471,4 @@ h2 {
   }
 }
 
-.footer-bar {
-  width: 100%;
-  background: #111;
-  color: #fff;
-  text-align: center;
-  font-weight: 700;
-  font-size: 1.1rem;
-  padding: 1.2rem 0 1rem 0;
-  margin-top: 3rem;
-  letter-spacing: 2px;
-  z-index: 2;
-}
 </style> 

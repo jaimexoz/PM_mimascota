@@ -3,3 +3,7 @@ update usuarios set edadxx_usuari = <valor> where idxxxx_usuari=5;
 
 
 
+
+
+
+

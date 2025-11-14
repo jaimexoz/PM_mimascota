@@ -686,7 +686,7 @@ box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
 
 .is-selected {
     /* Estilo para un chip marcado */
-    background-color: rgb(255, 170, 0);
+    background-color: #ff9595; 
     color: #ffffff;
 }
 
