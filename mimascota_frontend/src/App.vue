@@ -69,6 +69,7 @@ html, body {
   margin: 0;
   padding: 0;
   width: 100%;
+  background-color: #ffffff;
   min-height: 75vh; /* Asegura que la raíz del documento ocupe toda la altura visible */
   /* El siguiente es CLAVE para la barra horizontal. Si no la quieres, ocultala aquí: */
   /* Evita que el scroll horizontal aparezca a menos que sea forzado */

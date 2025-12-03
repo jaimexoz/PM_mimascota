@@ -17,7 +17,7 @@
         <router-link to="/perros" class="nav-link" :class="{ 'active': $route.path === '/perros' }">
           PERROS
         </router-link>
-        <router-link to="/match" class="nav-link" :class="{ 'active': $route.path === '/nosotros' }">
+        <router-link to="/match" class="nav-link" :class="{ 'active': $route.path === '/match' }">
           MATCH
         </router-link>
         <router-link to="/nosotros" class="nav-link" :class="{ 'active': $route.path === '/nosotros' }">

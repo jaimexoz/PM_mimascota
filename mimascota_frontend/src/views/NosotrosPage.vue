@@ -113,6 +113,7 @@ export default {
     color: var(--text-color);
     letter-spacing: -1px;
     margin: 0;
+    color: #555555;
 }
 
 .brand-text {
@@ -135,6 +136,7 @@ export default {
 
 .text-column p {
     margin-bottom: 25px;
+    color: #555555;
 }
 
 .highlight-text {

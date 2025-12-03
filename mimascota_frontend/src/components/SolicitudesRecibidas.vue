@@ -518,6 +518,9 @@ th {
     text-transform: uppercase;
 }
 
+tr {
+    color: #555555;
+}
 
 select{
     width: 136px;
