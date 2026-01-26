@@ -33,16 +33,20 @@ const router = createRouter({
 
         {
             path: '/',
-            name: 'auth',
-            component: AuthPage, // AuthPage está en la carpeta 'views'
+            name: 'home',
+            component: HomePage, // HomePage está en la carpeta 'components'
             meta: { requiresAuth: false } // No requiere autenticación para acceder
         },
         
         {
             path: '/home',
-            name: 'home',
-            component: HomePage, // HomePage está en la carpeta 'components'
-            meta: { requiresAuth: true } // Requiere que el usuario esté autenticado
+            redirect: '/'
+        },
+        {
+            path: '/auth',
+            name: 'auth',
+            component: AuthPage, // AuthPage está en la carpeta 'views'
+            meta: { requiresAuth: false } // No requiere autenticación para acceder
         },
         {
             path: '/reset-password',
@@ -202,12 +206,20 @@ const router = createRouter({
 
 // Guardia de navegación global para proteger rutas
 router.beforeEach((to, from, next) => {
-    // Si la ruta a la que vas requiere autenticación y el usuario no está autenticado
-    if (to.meta.requiresAuth && !isAuthenticated()) {
+    const isUserAuthenticated = isAuthenticated();
+
+    // 1. Si el usuario ya está autenticado e intenta ir a la página de login/registro
+    if (to.name === 'auth' && isUserAuthenticated) {
+        // Redirigirlo a la página principal
+        next({ name: 'home' });
+    } 
+    // 2. Si la ruta a la que va requiere autenticación y el usuario NO está autenticado
+    else if (to.meta.requiresAuth && !isUserAuthenticated) {
         // Redirige al usuario a la página de autenticación (login)
         next({ name: 'auth' });
-    } else {
-        // Si no se necesita autenticación o el usuario está autenticado, procede
+    } 
+    else {
+        // En cualquier otro caso, procede
         next();
     }
 });

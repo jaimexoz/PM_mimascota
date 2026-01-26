@@ -41,6 +41,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { login } from '../utils/auth'; 
 import { defineEmits } from 'vue';
+import { useAuthStore } from '@/stores/authStore'; 
 // 🔥 IMPORTANTE: Ahora usaremos estas dos importaciones
 import apiClient, { setAuthHeader } from '@/http'; 
 
@@ -51,6 +52,7 @@ const password = ref('');
 const error = ref('');
 const loading = ref(false);
 const router = useRouter();
+const authStore = useAuthStore();
 
 const DURATION = 3000;
 
@@ -65,14 +67,14 @@ const handleLogin = async () => {
             contra_usuari: password.value 
         });
         const data = response.data; 
-        login(data.token); 
         
+        // 1. Guardar en Store (esto maneja localStorage 'authToken' y 'userData' automáticamente)
+        authStore.setToken(data.token); 
+        authStore.setUser(data.user);
+        
+        // 2. Otras utilidades legacy
+        login(data.token); 
         setAuthHeader(data.token); 
-
-        // Guardar datos del usuario
-        if (data.user) {
-            localStorage.setItem('userData', JSON.stringify(data.user));
-        }
         
         
         router.push('/home');

@@ -26,131 +26,160 @@
       </div>
 
       <div class="navbar-right">
-        <div class="notifications-container">
-          <div 
-            class="notifications-icon"
-            @click="toggleNotifications" 
-          >
-            <span v-if="unreadCount > 0" class="notification-badge">{{ unreadCount }}</span>
-            <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/>
-            </svg>
-          </div>
-
-          <div v-if="isNotificationsOpen" class="notifications-dropdown">
-            <div class="dropdown-header">Notificaciones</div>
-            
-            <div v-if="notifications.length === 0" class="notification-empty">
-                No tienes notificaciones.
-            </div>
-
+        <!-- Mostrar esto solo si el usuario ESTÁ autenticado -->
+        <template v-if="authStore.isAuthenticated">
+          <div class="notifications-container">
             <div 
-                v-else
-                v-for="notif in displayedNotifications" 
-                :key="notif.id" 
-                :class="['notification-item', { 'unread': !notif.is_read }]"
+              class="notifications-icon"
+              @click="toggleNotifications" 
             >
-    
-            
-              <span class="notification-time">
-              {{ formatNotificationDate(notif.created_at) }}
-          </span>
-              <div class="imagen-noti">
-                <img :src="notif.image_url || '/default-avatar.png'" class="notification-avatar" alt="Avatar">
-              </div >
-                
-                <span class="message-noti" v-html="notif.message"></span> 
-                
+              <span v-if="unreadCount > 0" class="notification-badge">{{ unreadCount }}</span>
+              <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/>
+              </svg>
             </div>
-            
-            <button 
-                v-if="showViewMoreButton" 
-                class="view-more-button" 
-                @click.stop="loadMoreNotifications"
-            >
-                Ver más
-            </button>
-          </div>
-        </div>
 
-        <div class="vertical-separator"></div>
+            <div v-if="isNotificationsOpen" class="notifications-dropdown">
+              <div class="dropdown-header">Notificaciones</div>
+              
+              <div v-if="notifications.length === 0" class="notification-empty">
+                  No tienes notificaciones.
+              </div>
 
-        <div class="user-profile-container">
-          <div class="user-profile" @click="toggleDropdown">
-            <div class="user-avatar">
-              <img 
-                :src="userImageUrl" 
-                :alt="userName"
-                @error="handleImageError"
-              />
+              <div 
+                  v-else
+                  v-for="notif in displayedNotifications" 
+                  :key="notif.id" 
+                  :class="['notification-item', { 'unread': !notif.is_read }]"
+              >
+      
+              
+                <span class="notification-time">
+                {{ formatNotificationDate(notif.created_at) }}
+            </span>
+                <div class="imagen-noti">
+                  <img :src="notif.image_url || '/default-avatar.png'" class="notification-avatar" alt="Avatar">
+                </div >
+                  
+                  <span class="message-noti" v-html="notif.message"></span> 
+                  
+              </div>
+              
+              <button 
+                  v-if="showViewMoreButton" 
+                  class="view-more-button" 
+                  @click.stop="loadMoreNotifications"
+              >
+                  Ver más
+              </button>
             </div>
-            <span class="user-name">{{ userName }}</span>
-            <svg 
-              class="dropdown-arrow" 
-              :class="{ 'rotated': isDropdownOpen }"
-              width="16" 
-              height="16" 
-              fill="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path d="M7 10l5 5 5-5z"/>
-            </svg>
           </div>
 
-          <div v-if="isDropdownOpen" class="dropdown-menu">
-            <router-link to="/perfil" class="dropdown-item" @click="closeDropdown">
-              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                <circle cx="12" cy="8" r="4"/>
-                <path d="M12 14c-4 0-7 2-7 4v2h14v-2c0-2-3-4-7-4z"/>
-              </svg>
-              Ver Perfil
-            </router-link>
+          <div class="vertical-separator"></div>
 
-            <router-link to="/favoritos" class="dropdown-item" @click="closeDropdown">
-              <font-awesome-icon :icon="['fas', 'star']" class="w-10 h-10" />
-              Favoritos
-            </router-link>
-            <router-link v-if="isAdmin" to="/usuarios" class="dropdown-item" @click="closeDropdown">
-              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+          <div class="user-profile-container">
+            <div class="user-profile" @click="toggleDropdown">
+              <div class="user-avatar">
+                <img 
+                  :src="userImageUrl" 
+                  :alt="userName"
+                  @error="handleImageError"
+                />
+              </div>
+              <span class="user-name">{{ userName }}</span>
+              <svg 
+                class="dropdown-arrow" 
+                :class="{ 'rotated': isDropdownOpen }"
+                width="16" 
+                height="16" 
+                fill="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path d="M7 10l5 5 5-5z"/>
               </svg>
-              Lista de Usuarios
-            </router-link>
+            </div>
 
-            <router-link v-if="isAdminOrEmployee" to="/petManagement" class="dropdown-item" @click="closeDropdown">
-              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                <path :d="petManagementIconPath"/> 
-              </svg>
-              Gestión de Mascotas
-            </router-link>
+            <div v-if="isDropdownOpen" class="dropdown-menu">
+              <router-link to="/perfil" class="dropdown-item" @click="closeDropdown">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                  <circle cx="12" cy="8" r="4"/>
+                  <path d="M12 14c-4 0-7 2-7 4v2h14v-2c0-2-3-4-7-4z"/>
+                </svg>
+                Ver Perfil
+              </router-link>
 
-            <button class="dropdown-item" @click="handleDeleteAccount">
-              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                <path :d="deleteCountIconPath"/>
-              </svg>
-              Eliminar cuenta
-            </button>
+              <router-link to="/favoritos" class="dropdown-item" @click="closeDropdown">
+                <font-awesome-icon :icon="['fas', 'star']" class="w-10 h-10" />
+                Favoritos
+              </router-link>
+              <router-link v-if="isAdmin" to="/usuarios" class="dropdown-item" @click="closeDropdown">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                </svg>
+                Lista de Usuarios
+              </router-link>
 
-            <button class="dropdown-item logout-item" @click="handleLogout">
-              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
-              </svg>
-              Cerrar Sesión
-            </button>
+              <router-link v-if="isAdminOrEmployee" to="/petManagement" class="dropdown-item" @click="closeDropdown">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                  <path :d="petManagementIconPath"/> 
+                </svg>
+                Gestión de Mascotas
+              </router-link>
+
+              <button class="dropdown-item" @click="handleDeleteAccount">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                  <path :d="deleteCountIconPath"/>
+                </svg>
+                Eliminar cuenta
+              </button>
+
+              <button class="dropdown-item logout-item" @click="handleLogout">
+                <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
+                </svg>
+                Cerrar Sesión
+              </button>
+            </div>
           </div>
-        </div>
+        </template>
+
+        <!-- Mostrar esto solo si el usuario NO está autenticado -->
+        <template v-else>
+          <router-link to="/auth" class="access-button">
+            <div class="access-icon">
+              <PawPrint width="18" height="18" />
+            </div>
+            <span>ACCEDER</span>
+          </router-link>
+        </template>
       </div>
     </div>
   </nav>
+  
+  <!-- Overlay de logout FUERA del nav para no afectar su tamaño -->
+  <Transition name="fade-overlay">
+    <div v-if="isLoggingOut" class="logout-overlay">
+      <div class="logout-content">
+        <div v-if="logoutMessage === 'Cerrando sesión...'" class="logout-spinner"></div>
+        <div v-else class="logout-success-icon">✓</div>
+        <p class="logout-message">{{ logoutMessage }}</p>
+      </div>
+    </div>
+  </Transition>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { logout, onUserDataChange } from '../utils/auth';
+import { useAuthStore } from '@/stores/authStore';
+import { PawPrint } from 'lucide-vue-next';
 import { mdiCat } from '@mdi/js';
 import { mdiTrashCanOutline } from '@mdi/js';
 import { io } from 'socket.io-client';
+
+
+const authStore = useAuthStore();
 
 
 
@@ -167,11 +196,34 @@ const deleteCountIconPath = computed(() => {
 
 const router = useRouter();
 const isScrolled = ref(false);
-const userName = ref('Usuario');
-const userImageUrl = ref('/default-avatar.png');
 const isDropdownOpen = ref(false);
-const isNotificationsOpen = ref(false); 
-const userRole = ref('');
+const isNotificationsOpen = ref(false);
+const isLoggingOut = ref(false); // Estado para el loader de logout
+const logoutMessage = ref(''); // Mensaje de logout
+
+// Computed properties vinculadas al Store (Esto elimina el bug de "Usuario")
+const userName = computed(() => authStore.user?.nombre || authStore.user?.name || 'Invitado');
+const userRole = computed(() => authStore.user?.role || authStore.user?.rol || '');
+const userImageUrl = computed(() => {
+  const user = authStore.user;
+  if (user?.imageUrl) {
+    return user.imageUrl.startsWith('http') 
+      ? user.imageUrl 
+      : `http://localhost:3000${user.imageUrl}`;
+  }
+  return '/default-avatar.png';
+});
+
+const isAdmin = computed(() => {
+  const role = userRole.value;
+  return role === 'admin' || role === 'Administrador';
+});
+
+const isAdminOrEmployee = computed(() => {
+  const role = userRole.value;
+  return isAdmin.value || role === 'empleado' || role === 'Empleado';
+});
+
 // ⭐️ ESTADOS CLAVE PARA NOTIFICACIONES ⭐️
 const notifications = ref([]); // Lista de notificaciones reales (las cargadas de la DB y las recibidas por Socket)
 const unreadCount = computed(() => { // El contador que se muestra en el badge
@@ -371,17 +423,6 @@ const handleImageError = (event) => {
   event.target.src = '/default-avatar.png';
 };
 
-// Verificar si es admin
-const isAdmin = computed(() => {
-  return userRole.value === 'admin' || userRole.value === 'Administrador';
-});
-
-const isAdminOrEmployee = computed(() => {
-  const role = userRole.value;
-  // Retorna true si el rol es 'admin', 'Administrador', 'employee' o 'Empleado'
-  return isAdmin.value || role === 'empleado' || role === 'Empleado';
-});
-
 // Toggle del menú desplegable
 const toggleDropdown = () => {
   isNotificationsOpen.value = false;
@@ -404,11 +445,25 @@ const closeDropdown = () => {
   isNotificationsOpen.value = false;
 };
 
-// Manejar logout
-const handleLogout = () => {
-  logout();
+// Manejar logout con feedback visual
+const handleLogout = async () => {
+  isLoggingOut.value = true;
+  logoutMessage.value = 'Cerrando sesión...';
+  
+  // Simular un pequeño delay para que el usuario vea el loader
+  await new Promise(resolve => setTimeout(resolve, 800));
+  
+  authStore.logout();
   closeDropdown();
-  router.push({ name: 'auth' });
+  
+  logoutMessage.value = '¡Sesión cerrada exitosamente!';
+  
+  // Mostrar mensaje de éxito brevemente antes de redirigir
+  await new Promise(resolve => setTimeout(resolve, 1200));
+  
+  isLoggingOut.value = false;
+  logoutMessage.value = '';
+  router.push({ name: 'home' }); 
 };
 
 // Cerrar dropdown al hacer clic fuera
@@ -422,49 +477,12 @@ const handleClickOutside = (event) => {
     }
 };
 // Obtener datos del usuario desde localStorage o contexto
-const loadUserData = () => {
-  const userData = localStorage.getItem('userData');
-  if (userData) {
-    try {
-      const user = JSON.parse(userData);
-      userName.value = user.nombre || user.name || 'Usuario';
-      userRole.value = user.role || user.rol || '';
-      
-      // Manejar la URL de la imagen
-      if (user.imageUrl) {
-        // Si ya es una URL completa de Cloudinary, usarla directamente
-        if (user.imageUrl.startsWith('http')) {
-          userImageUrl.value = user.imageUrl;
-        } else {
-          // Si es una ruta local, convertirla a URL completa
-          userImageUrl.value = `http://localhost:3000${user.imageUrl}`;
-        }
-      } else {
-        userImageUrl.value = '/default-avatar.png';
-      }
-    } catch (error) {
-      console.error('Error parsing user data:', error);
-      userName.value = 'Usuario';
-      userImageUrl.value = '/default-avatar.png';
-    }
-  }
-};
+// Eliminamos loadUserData local ya que no es necesario con computed
 
 // Función para actualizar datos del usuario reactivamente
 const updateUserData = (newUserData) => {
-  userName.value = newUserData.nombre || newUserData.name || 'Usuario';
-  userRole.value = newUserData.role || newUserData.rol || '';
-  
-  // Manejar la URL de la imagen
-  if (newUserData.imageUrl) {
-    if (newUserData.imageUrl.startsWith('http')) {
-      userImageUrl.value = newUserData.imageUrl;
-    } else {
-      userImageUrl.value = `http://localhost:3000${newUserData.imageUrl}`;
-    }
-  } else {
-    userImageUrl.value = '/default-avatar.png';
-  }
+  // Ahora actualizamos el store en lugar de refs locales
+  authStore.setUser(newUserData);
 };
 
 const handleDeleteAccount = async () => {
@@ -510,7 +528,7 @@ let unsubscribe = null;
 onMounted(() => {
     window.addEventListener('scroll', handleScroll);
     document.addEventListener('click', handleClickOutside);
-    loadUserData();
+    // loadUserData() eliminado - ahora usamos computed properties del store
     
     // Suscribirse a cambios en los datos del usuario
     unsubscribe = onUserDataChange(updateUserData);
@@ -689,6 +707,7 @@ img.notification-avatar {
 .message-noti{
   margin-left: 10px;
   margin-top: 1.2rem;
+  color: #555;
 }
 
 button.view-more-button {
@@ -865,6 +884,44 @@ button.view-more-button {
   background-color: #fff5f5;
 }
 
+
+/* Botón ACCEDER (Estilo YouTube) */
+.access-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
+  color: #666;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.access-button:hover {
+  background-color: #ffbdbd;
+  color: #fff;
+  border-color: transparent;
+}
+
+.access-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1.5px solid #666;
+  border-radius: 50%;
+  padding: 4px;
+  transition: all 0.2s ease;
+}
+
+.access-button:hover .access-icon {
+  border-color: #fff;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .navbar-container {
@@ -894,5 +951,80 @@ button.view-more-button {
 
 .dropdown-item font-awesome-icon {
   font-size: 2.5rem;
+}
+
+/* Estilos para el overlay de logout */
+.logout-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+.logout-content {
+  background-color: white;
+  padding: 2.5rem 3rem;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  min-width: 300px;
+}
+
+.logout-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #ffbdbd;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.logout-success-icon {
+  width: 50px;
+  height: 50px;
+  background-color: #27ae60;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+  font-weight: bold;
+  margin: 0 auto 1rem;
+  animation: scaleIn 0.3s ease-out;
+}
+
+@keyframes scaleIn {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.logout-message {
+  font-size: 1.1rem;
+  color: #333;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Transiciones para el overlay */
+.fade-overlay-enter-active, .fade-overlay-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-overlay-enter-from, .fade-overlay-leave-to {
+  opacity: 0;
 }
 </style> 

@@ -263,6 +263,39 @@ module.exports = (io) => {
             }
         },
         
+        /**
+         * Verifica si el usuario tiene una solicitud de adopción para una mascota específica.
+         */
+        checkAdoptionStatus: async (req, res) => {
+            const userId = req.user.id;
+            const { mascotId } = req.params;
+            
+            if (!mascotId) {
+                return res.status(400).json({ message: 'ID de mascota faltante.' });
+            }
+            
+            try {
+                const solicitud = await AdoptionModel.checkUserAdoptionForPet(userId, mascotId);
+                
+                if (solicitud) {
+                    // El usuario ya tiene una solicitud para esta mascota
+                    res.status(200).json({
+                        hasRequest: true,
+                        solicitud: solicitud
+                    });
+                } else {
+                    // No hay solicitud
+                    res.status(200).json({
+                        hasRequest: false,
+                        solicitud: null
+                    });
+                }
+            } catch (error) {
+                console.error('Error al verificar estado de adopción (Controlador):', error);
+                res.status(500).json({ message: 'Error interno del servidor al verificar el estado de adopción.', error: error.message });
+            }
+        },
+        
         // --- HANDLERS DE NOTIFICACIONES (Usan NotificationModel) ---
 
         /**

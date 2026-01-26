@@ -115,10 +115,20 @@
           </p>
 
           
-          <!-- 6. Botón de Acción -->
-          <button @click="navigateToAdoptionForm" class="adopt-button">
+          <!-- 6. Botón de Acción / Mensaje de Solicitud Existente -->
+          <button 
+            v-if="!hasAdoptionRequest" 
+            @click="navigateToAdoptionForm" 
+            class="adopt-button"
+          >
             ADOPTAR
           </button>
+          <div v-else class="already-requested-message">
+            <svg xmlns="http://www.w3.org/2000/svg" class="check-icon" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+            <p>Ya has solicitado adopción para esta mascota</p>
+          </div>
           
         </div>
       </div>
@@ -161,6 +171,10 @@ const navigateToAdoptionForm = () => {
 
 // --- ESTADO REACTIVO PARA EL FAVORITO ---
 const isFavorite = ref(false);
+
+// --- ESTADO REACTIVO PARA VERIFICAR SOLICITUD DE ADOPCIÓN ---
+const hasAdoptionRequest = ref(false);
+const adoptionRequestData = ref(null);
 
 
 
@@ -355,6 +369,38 @@ const toggleFavorite = async () => {
     }
 };
 
+// --- NUEVA FUNCIÓN: Verificar si el usuario ya tiene una solicitud para esta mascota ---
+const checkAdoptionStatus = async (petId) => {
+    const userToken = authStore.token;
+    
+    // Solo verificar si el usuario está autenticado
+    if (!userToken) {
+        hasAdoptionRequest.value = false;
+        return;
+    }
+    
+    try {
+        const response = await fetch(`http://localhost:3000/api/adoptions/check/${petId}`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${userToken}`,
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            hasAdoptionRequest.value = data.hasRequest;
+            adoptionRequestData.value = data.solicitud;
+        } else {
+            // Si hay error, asumimos que no hay solicitud
+            hasAdoptionRequest.value = false;
+        }
+    } catch (err) {
+        console.error('Error al verificar estado de adopción:', err);
+        hasAdoptionRequest.value = false;
+    }
+};
+
 
 // --- Función para Cargar Datos (Modificada para Favoritos) ---
 const fetchPetData = async () => {
@@ -392,6 +438,9 @@ const fetchPetData = async () => {
     
     // ⚠️ Llama a la función para verificar el estado de favorito DESPUÉS de obtener el ID de la mascota
     await checkFavoriteStatus(pet.value.id); 
+    
+    // ⚠️ Verificar si el usuario ya tiene una solicitud de adopción para esta mascota
+    await checkAdoptionStatus(pet.value.id);
 
   } catch (err) {
     console.error('Fetch error:', err);
@@ -996,6 +1045,35 @@ onMounted(() => {
 .is-favorite:focus {
     /* Ring de enfoque para el estado favorito (amarillo) */
     box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.5); 
+}
+
+/* Estilos para el mensaje de solicitud existente */
+.already-requested-message {
+    background-color: #d1fae5; /* Verde suave */
+    color: #059669; /* Verde oscuro */
+    padding: 1.2rem 1.5rem;
+    border-radius: 0.75rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-align: center;
+    border: 2px solid #059669;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.already-requested-message .check-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    flex-shrink: 0;
+}
+
+.already-requested-message p {
+    margin: 0;
+    line-height: 1.4;
 }
 
 </style>

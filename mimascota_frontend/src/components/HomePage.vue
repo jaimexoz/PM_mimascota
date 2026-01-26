@@ -36,7 +36,7 @@
         <div class="pet-card-grid"> 
             
 
-            <span v-if="isNavigating" class="loader">
+            <span v-if="isLoading || isNavigating" class="loader">
                 Cargando las mascotas...
             </span>
             <div v-else-if="mascotas.length === 0">
@@ -46,10 +46,6 @@
             </div>
 
             <template v-else>
-            
-            <span v-if="isNavigating" class="loader">
-                Cargando las mascotas...
-            </span>
                 <component 
                     v-for="mascota in mascotas" 
                     :key="mascota.idxxxx_mascot"
@@ -99,10 +95,10 @@
                     </li>
                 </ol>
 
-                <a href="/auth" class="adopcion-boton">
+                <button @click="handleGetStarted" class="adopcion-boton">
                     Comienza ahora 
                     <svg class="boton-icono" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-                </a>
+                </button>
             </div>
 
             
@@ -184,7 +180,7 @@ const scrollToSection = (selector) => {
 async function getMascotasRecientes() {
     isLoading.value = true;
     try {
-        // Usamos el endpoint que configuraste para obtener SOLO los 4 más recientes
+        console.log("Intentando obtener mascotas del backend...");
         const response = await fetch('http://localhost:3000/api/mascotas/home2nd', { 
             method: 'GET',
             headers: {
@@ -193,21 +189,20 @@ async function getMascotasRecientes() {
         });
 
         if (!response.ok) {
-            throw new Error('Error al cargar las mascotas: ' + response.statusText);
+            throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
 
         const data = await response.json();
         
-        if (data.length === 0) {
-            // Fallback: Usar mocks si no hay datos.
-            mascotas.value = createMockMascotas(4); 
-        } else {
+        if (Array.isArray(data) && data.length > 0) {
             mascotas.value = data;
+        } else {
+            console.warn("Backend no retornó mascotas, usando datos de ejemplo.");
+            mascotas.value = createMockMascotas(4); 
         }
         
     } catch (error) {
-        console.error("Error al obtener las mascotas:", error);
-        // Fallback a datos simulados en caso de error
+        console.error("Error al obtener las mascotas, activando fallback:", error);
         mascotas.value = createMockMascotas(4); 
     } finally {
         isLoading.value = false;
@@ -325,6 +320,15 @@ const PetCard = ({ mascota }) => {
         ])
     ]);
 };
+
+const handleGetStarted = () => {
+    if (!authStore.isAuthenticated) {
+        router.push('/auth');
+    } else {
+        // Si ya está logueado, se queda en la misma página
+        console.log("Usuario ya autenticado. Permaneciendo en Home.");
+    }
+};
 </script>
 
 <style scoped>
@@ -396,6 +400,7 @@ const PetCard = ({ mascota }) => {
 .page-title-3rd{
   font-weight: 700;
   font-size: 2.0rem;
+  color:#a8a8a8;
 }
 
 .explore-button{
@@ -476,6 +481,31 @@ const PetCard = ({ mascota }) => {
 }
 .button-orange:hover {
     background-color: #ff6060;
+}
+
+.adopcion-boton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    background-color: #ff9595;
+    color: white;
+    font-weight: 700;
+    border-radius: 9999px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.adopcion-boton:hover {
+    background-color: #ff6060;
+}
+
+.boton-icono {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-left: 0.5rem;
 }
 
 /* ==============================================

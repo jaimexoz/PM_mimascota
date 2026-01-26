@@ -1,5 +1,13 @@
 <template>
     <div class="auth-container">
+        <div v-if="isLogin" class="back-to-home">
+            <router-link to="/" class="back-link">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                Volver al Inicio
+            </router-link>
+        </div>
         <div class="form-section">
             <p v-show="showPostRegistrationMessage" class="success-message-on-login">
                 {{ postRegistrationMessage }}
@@ -64,10 +72,10 @@ const handleRegistrationSuccess = (message) => {
     /* ¡CAMBIOS CLAVE AQUÍ! */
     /* La imagen de fondo ahora va aquí */
     background-image: url('../assets/cat.jpeg');
-    background-position: 40px;
+    background-position: center; /* Centramos la imagen */
     background-size: cover; /* Cubre todo el contenedor */
     background-repeat: no-repeat; /* No repite la imagen */
-    
+    background-color: #fce4ec; /* Color de fondo por si falla la imagen */
 }
 
 .form-section {
@@ -145,10 +153,42 @@ const handleRegistrationSuccess = (message) => {
         
         box-shadow: 1px 10px 10px 10px rgba(32,32,32,0.3);
     }
-/*
-    .image-section {
-        flex: 2;
-        background: none;
-    }*/
+}
+
+/* Estilos para el botón Volver */
+.back-to-home {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+}
+
+.back-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: #333;
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 10px 16px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 50px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.back-link:hover {
+    background-color: #ffbdbd;
+    color: white;
+    transform: translateX(-5px);
+}
+
+.back-link svg {
+    transition: transform 0.3s ease;
+}
+
+.back-link:hover svg {
+    transform: translateX(-3px);
 }
 </style>

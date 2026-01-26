@@ -82,269 +82,232 @@
         </div>
     </div>
     <Footer/>
- 
   </div>
   </template>
-  
-  <script setup>
-  import Navbar from '../components/Navbar.vue';
-  import Footer from '@/components/Footer.vue';
-  import { ref, onMounted, computed, reactive, h } from 'vue';
-  import { PawPrint, Search, Loader } from 'lucide-vue-next';
-  import { useRouter } from 'vue-router'; 
-  
-  // Inicialización
-  const router = useRouter(); 
-  const mascotas = ref([]);
-  const isLoading = ref(true);
-  
-  // Estado de los filtros y búsqueda
-  const filters = reactive({
-    edad: '',
-    sexo: '',
-    tamano: '',
-    orden: 'mas_recientes', 
-    busqueda: ''
-  });
-  
-  // Opciones de filtro
-  const filterOptions = {
-    edad: ['Cachorro (0-12m)', 'Joven (1-3a)', 'Adulto (+3a)'],
-    sexo: ['Macho', 'Hembra'],
-    tamano: ['Pequeño', 'Mediano', 'Grande'],
-    orden: [
-        { value: 'mas_recientes', label: 'Más recientes' },
-        { value: 'mas_antiguos', label: 'Más antiguos' },
-        { value: 'alfabetico', label: 'A-Z' }
-    ]
-  };
-  
-  // ==============================================
-  // 1. OBTENCIÓN DE DATOS DEL BACKEND (Simulación)
-  // ==============================================
-  
-  /**
-  * Función para obtener TODAS las mascotas de la base de datos.
-  */
-  async function getMascotas() {
-    isLoading.value = true;
-    try {
-        // NOTA: Asegúrate de que tu backend tenga un endpoint que devuelva todas las mascotas
-        const response = await fetch('http://localhost:3000/api/mascotas/feed', { 
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-        });
-  
-        if (!response.ok) {
-            throw new Error('Error al cargar las mascotas: ' + response.statusText);
-        }
-  
-        const data = await response.json();
-        
-        if (data.length === 0) {
-            mascotas.value = createMockMascotas(8); // Usar mocks si no hay datos
-        } else {
-            mascotas.value = data;
-        }
-        
-    } catch (error) {
-        console.error("Error al obtener las mascotas:", error);
-        // Fallback a datos simulados
-        mascotas.value = createMockMascotas(8); 
-    } finally {
-        const minimumLoadingTime = 500; // Define el tiempo mínimo en milisegundos (ej: 500ms o 1000ms)
-      
-      setTimeout(() => {
-        isLoading.value = false; // El spinner se oculta después de este tiempo
-      }, minimumLoadingTime);
-    }
-  }
-  
-  /**
-  * Función de filtrado y ordenamiento principal.
-  * Se ejecuta automáticamente cuando cambian los filtros.
-  */
-  const applyFilters = computed(() => {
-    let results = [...mascotas.value];
-  
-    // 1. FILTRADO POR BÚSQUEDA (Nombre o Raza)
-    if (filters.busqueda) {
-        const busquedaLower = filters.busqueda.toLowerCase();
-        results = results.filter(m => 
-            (m.nombre_mascot && m.nombre_mascot.toLowerCase().includes(busquedaLower)) ||
-            (m.raza_mascot && m.raza_mascot.toLowerCase().includes(busquedaLower))
-        );
-    }
-    
-    // 2. FILTRADO POR SEXO
-    if (filters.sexo) {
-        results = results.filter(m => m.sexoxx_mascot === filters.sexo);
-    }
-  
-    // 3. FILTRADO POR TAMAÑO
-    if (filters.tamano) {
-        results = results.filter(m => m.tamano_mascot === filters.tamano);
-    }
-  
-    // 4. FILTRADO POR EDAD (Asume 'edadme_mascot' está en meses)
-    if (filters.edad) {
-        results = results.filter(m => {
-            const edadMeses = m.edadme_mascot; 
-            switch (filters.edad) {
-                case 'Cachorro (0-12m)': return edadMeses >= 0 && edadMeses <= 12;
-                case 'Joven (1-3a)': return edadMeses > 12 && edadMeses <= 36;
-                case 'Adulto (+3a)': return edadMeses > 36;
-                default: return true;
-            }
-        });
-    }
-  
-    // 5. ORDENAMIENTO
-    switch (filters.orden) {
-          case 'alfabetico':
-              results.sort((a, b) => (a.nombre_mascot || '').localeCompare(b.nombre_mascot || ''));
-              break;
-              
-          case 'mas_antiguos':
-              // Orden Ascendente (ID más bajo = más antiguo)
-              results.sort((a, b) => (a.idxxxx_mascot || 0) - (b.idxxxx_mascot || 0)); 
-              break;
-              
-          case 'mas_recientes':
-          default:
-              // Orden Descendente (ID más alto = más reciente) - El valor por defecto
-              results.sort((a, b) => (b.idxxxx_mascot|| 0) - (a.idxxxx_mascot || 0)); 
-              break;
-      }
-  
-    return results;
-    });
-  
-  /**
-  * Función para limpiar todos los filtros
-  */
-  function clearFilters() {
-    Object.assign(filters, {
-        edad: '',
-        sexo: '',
-        tamano: '',
-        orden: 'mas_recientes',
-        busqueda: ''
-    });
-  }
-  
-  // Llama a la función al cargar el componente
-  onMounted(() => {
-    getMascotas();
-  });
-  
-  
-  // ==============================================
-  // 2. UTILIDADES DE VISUALIZACIÓN
-  // ==============================================
-  
-  /**
-  * Función para simular datos de mascotas si la base de datos no funciona.
-  */
-  function createMockMascotas(count) {
-    const mockData = [];
-    const names = ["Max", "Luna", "Rocky", "Bella", "Coco", "Kira", "Toby", "Nala"];
-    const breeds = ["Labrador", "Border Collie", "Mestizo", "Poodle", "Pastor Alemán"];
-    const sizes = ["Pequeño", "Mediano", "Grande"];
-    const imageBaseUrl = 'https://placehold.co/400x400/FF9933/FFFFFF/png?text=';
-  
-    for (let i = 0; i < count; i++) {
-        const name = names[i % names.length];
-        const ageYears = Math.floor(Math.random() * 5) + 1;
-        const ageMonths = ageYears * 12 + Math.floor(Math.random() * 12);
-        
-        mockData.push({
-            id: i + 1,
-            nombre_mascot: name,
-            especie_mascot: i % 2 === 0 ? 'Perro' : 'Gato',
-            sexoxx_mascot: i % 4 < 2 ? 'Macho' : 'Hembra',
-            edadme_mascot: ageMonths, // Edad en meses
-            raza_mascot: breeds[i % breeds.length],
-            tamano_mascot: sizes[i % sizes.length],
-            image1_mascot: `${imageBaseUrl}${name.replace(' ', '+')}`,
-        });
-    }
-    return mockData;
-  }
-  
-  /**
-  * Convierte edad en meses a formato legible (años y meses).
-  */
-  function formatAge(months) {
-    if (months < 12) {
-        return `${months} meses`;
-    }
-    const years = Math.floor(months / 12);
-    const remainingMonths = months % 12;
-    if (remainingMonths === 0) {
-        return `${years} años`;
-    }
-    return `${years} a ${remainingMonths} m`;
-  }
-  
-  /**
-  * Componente funcional para renderizar una tarjeta de mascota.
-  * Se han movido las clases de Tailwind a PetCard classes y chips.
-  */
-  const PetCard = ({ mascota }) => {
-    const ageDisplay = formatAge(mascota.edadme_mascot);
-    const imageUrl = mascota.image1_mascot || `https://placehold.co/400x400/9933FF/FFFFFF/png?text=Sin+Foto`;
-  
-    
-    // ⚠️ ERROR CORREGIDO: navigateToProfile NO DEBE SER UNA FUNCIÓN NUEVA DENTRO DE ESTA FUNCIÓN. 
-    // DEBE SER UNA FUNCIÓN QUE RETORNA OTRA FUNCIÓN PARA EL ONCLICK.
-    const navigateToProfile = () => {
-        // Utilizamos el router del componente padre
-        router.push(`/card/${mascota.id || mascota.idxxxx_mascot}`);
-    };
-    
-    return h('div', { class: 'pet-card' }, [
-        // Imagen
-        h('div', { class: 'pet-card-image-container' }, [
-            h('img', { 
-                src: imageUrl, 
-                alt: `Foto de ${mascota.nombre_mascot}`, 
-                class: 'pet-card-image',
-                onerror: (e) => e.target.src = `https://placehold.co/400x400/9933FF/FFFFFF/png?text=Sin+Foto`
-            })
-        ]),
-        
-        // Contenido
-        h('div', { class: 'pet-card-content' }, [
-            h('h3', { class: 'pet-card-name' }, mascota.nombre_mascot),
-            
-            // Detalles (Chips)
-            h('div', { class: 'pet-card-chips' }, [
-                h('span', { class: 'chip chip-grey' }, mascota.sexoxx_mascot),
-                h('span', { class: 'chip chip-grey' }, ageDisplay),
-                h('span', { class: 'chip chip-grey' }, mascota.razaxx_mascot || 'Mestizo'),
-            ])
-            
-        ]),
-            
-        h('div', { class: 'pet-card-content-button' }, [
-            // Botón Ver Perfil
-            h('button', { 
-              class: 'pet-card-button',
-              // ⚠️ CORRECCIÓN CLAVE: Pasamos la referencia a la función, no la LLAMAMOS inmediatamente.
-              onClick: navigateToProfile 
-            }, 'Ver más')
-          ])
-  
-    ]);
-  };
-  </script>
-  
-  
-  <style scoped>
 
+<script setup>
+import Navbar from '../components/Navbar.vue';
+import { ref, onMounted, computed, reactive, h } from 'vue';
+import { PawPrint, Search, Loader } from 'lucide-vue-next';
+import { useRouter } from 'vue-router'; 
+import Footer from '@/components/Footer.vue';
+
+// Inicialización
+const router = useRouter(); 
+const mascotas = ref([]);
+const isLoading = ref(true);
+
+// Estado de los filtros y búsqueda
+const filters = reactive({
+  edad: '',
+  sexo: '',
+  tamano: '',
+  orden: 'mas_recientes', 
+  busqueda: ''
+});
+
+// Opciones de filtro
+const filterOptions = {
+  edad: ['Cachorro (0-12m)', 'Joven (1-3a)', 'Adulto (+3a)'],
+  sexo: ['Macho', 'Hembra'],
+  tamano: ['Pequeño', 'Mediano', 'Grande'],
+  orden: [
+      { value: 'mas_recientes', label: 'Más recientes' },
+      { value: 'mas_antiguos', label: 'Más antiguos' },
+      { value: 'alfabetico', label: 'A-Z' }
+  ]
+};
+
+// ==============================================
+// 1. OBTENCIÓN DE DATOS DEL BACKEND (Simulación)
+// ==============================================
+
+/**
+* Función para obtener TODAS las mascotas de la base de datos.
+*/
+async function getMascotas() {
+  isLoading.value = true;
+  try {
+      // NOTA: Asegúrate de que tu backend tenga un endpoint que devuelva todas las mascotas
+      const response = await fetch('http://localhost:3000/api/mascotas/feed', { 
+          method: 'GET',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+      });
+
+      if (!response.ok) {
+          throw new Error('Error al cargar las mascotas: ' + response.statusText);
+      }
+
+      const data = await response.json();
+      
+      if (data.length === 0) {
+          mascotas.value = [];
+      } else {
+          mascotas.value = data;
+      }
+      
+  } catch (error) {
+      console.error("Error al obtener las mascotas:", error);
+      mascotas.value = [];
+  } finally {
+      const minimumLoadingTime = 500; // Define el tiempo mínimo en milisegundos (ej: 500ms o 1000ms)
+        
+        setTimeout(() => {
+          isLoading.value = false; // El spinner se oculta después de este tiempo
+        }, minimumLoadingTime);
+  }
+}
+
+/**
+* Función de filtrado y ordenamiento principal.
+* Se ejecuta automáticamente cuando cambian los filtros.
+*/
+const applyFilters = computed(() => {
+  let results = [...mascotas.value];
+
+  // 1. FILTRADO POR BÚSQUEDA (Nombre o Raza)
+  if (filters.busqueda) {
+      const busquedaLower = filters.busqueda.toLowerCase();
+      results = results.filter(m => 
+          (m.nombre_mascot && m.nombre_mascot.toLowerCase().includes(busquedaLower)) ||
+          (m.raza_mascot && m.raza_mascot.toLowerCase().includes(busquedaLower))
+      );
+  }
+  
+  // 2. FILTRADO POR SEXO
+  if (filters.sexo) {
+      results = results.filter(m => m.sexoxx_mascot === filters.sexo);
+  }
+
+  // 3. FILTRADO POR TAMAÑO
+  if (filters.tamano) {
+      results = results.filter(m => m.tamano_mascot === filters.tamano);
+  }
+
+  // 4. FILTRADO POR EDAD (Asume 'edadme_mascot' está en meses)
+  if (filters.edad) {
+      results = results.filter(m => {
+          const edadMeses = m.edadme_mascot; 
+          switch (filters.edad) {
+              case 'Cachorro (0-12m)': return edadMeses >= 0 && edadMeses <= 12;
+              case 'Joven (1-3a)': return edadMeses > 12 && edadMeses <= 36;
+              case 'Adulto (+3a)': return edadMeses > 36;
+              default: return true;
+          }
+      });
+  }
+
+  // 5. ORDENAMIENTO
+  switch (filters.orden) {
+        case 'alfabetico':
+            results.sort((a, b) => (a.nombre_mascot || '').localeCompare(b.nombre_mascot || ''));
+            break;
+            
+        case 'mas_antiguos':
+            // Orden Ascendente (ID más bajo = más antiguo)
+            results.sort((a, b) => (a.idxxxx_mascot || 0) - (b.idxxxx_mascot || 0)); 
+            break;
+            
+        case 'mas_recientes':
+        default:
+            // Orden Descendente (ID más alto = más reciente) - El valor por defecto
+            results.sort((a, b) => (b.idxxxx_mascot|| 0) - (a.idxxxx_mascot || 0)); 
+            break;
+    }
+
+  return results;
+  });
+
+/**
+* Función para limpiar todos los filtros
+*/
+function clearFilters() {
+  Object.assign(filters, {
+      edad: '',
+      sexo: '',
+      tamano: '',
+      orden: 'mas_recientes',
+      busqueda: ''
+  });
+}
+
+// Llama a la función al cargar el componente
+onMounted(() => {
+  getMascotas();
+});
+
+
+/**
+* Convierte edad en meses a formato legible (años y meses).
+*/
+function formatAge(months) {
+  if (months < 12) {
+      return `${months} meses`;
+  }
+  const years = Math.floor(months / 12);
+  const remainingMonths = months % 12;
+  if (remainingMonths === 0) {
+      return `${years} años`;
+  }
+  return `${years} a ${remainingMonths} m`;
+}
+
+/**
+* Componente funcional para renderizar una tarjeta de mascota.
+* Se han movido las clases de Tailwind a PetCard classes y chips.
+*/
+const PetCard = ({ mascota }) => {
+  const ageDisplay = formatAge(mascota.edadme_mascot);
+  const imageUrl = mascota.image1_mascot || `https://placehold.co/400x400/9933FF/FFFFFF/png?text=Sin+Foto`;
+
+  
+  // ⚠️ ERROR CORREGIDO: navigateToProfile NO DEBE SER UNA FUNCIÓN NUEVA DENTRO DE ESTA FUNCIÓN. 
+  // DEBE SER UNA FUNCIÓN QUE RETORNA OTRA FUNCIÓN PARA EL ONCLICK.
+  const navigateToProfile = () => {
+      // Utilizamos el router del componente padre
+      router.push(`/card/${mascota.id || mascota.idxxxx_mascot}`);
+  };
+  
+  return h('div', { class: 'pet-card' }, [
+      // Imagen
+      h('div', { class: 'pet-card-image-container' }, [
+          h('img', { 
+              src: imageUrl, 
+              alt: `Foto de ${mascota.nombre_mascot}`, 
+              class: 'pet-card-image',
+              onerror: (e) => e.target.src = `https://placehold.co/400x400/9933FF/FFFFFF/png?text=Sin+Foto`
+          })
+      ]),
+      
+      // Contenido
+      h('div', { class: 'pet-card-content' }, [
+          h('h3', { class: 'pet-card-name' }, mascota.nombre_mascot),
+          
+          // Detalles (Chips)
+          h('div', { class: 'pet-card-chips' }, [
+              h('span', { class: 'chip chip-grey' }, mascota.sexoxx_mascot),
+              h('span', { class: 'chip chip-grey' }, ageDisplay),
+              h('span', { class: 'chip chip-grey' }, mascota.razaxx_mascot || 'Mestizo'),
+          ])
+          
+      ]),
+          
+      h('div', { class: 'pet-card-content-button' }, [
+          // Botón Ver Perfil
+          h('button', { 
+            class: 'pet-card-button',
+            // ⚠️ CORRECCIÓN CLAVE: Pasamos la referencia a la función, no la LLAMAMOS inmediatamente.
+            onClick: navigateToProfile 
+          }, 'Ver más')
+        ])
+  
+  ]);
+};
+</script>
+
+<style scoped>
 .loader {
   width: 48px;
   height: 48px;
@@ -725,7 +688,7 @@
   /* Usamos la regla de color definida arriba */
   :deep(.pet-card-button) {
     background-color: #ff9595; 
-
+  
     transition: background-color 300ms ease;
   }
   :deep(.pet-card-button:hover) {
@@ -767,6 +730,6 @@
   .show-all-button:hover {
     background-color: #4338ca; /* hover:bg-indigo-700 */
   }
-
-
+  
+  
   </style>
