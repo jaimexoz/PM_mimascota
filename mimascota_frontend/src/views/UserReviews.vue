@@ -532,6 +532,7 @@ onMounted(() => {
     flex-direction: column;
     margin-top: 80px;
     align-items: center;
+    background-color:rgb(255, 255, 255);
   }
   
   /* Sección Superior (Hero) */
