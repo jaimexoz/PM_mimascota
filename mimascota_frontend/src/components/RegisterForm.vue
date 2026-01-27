@@ -140,13 +140,15 @@ const register = async () => {
 .register-container {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start; /* Cambiado de center a flex-start */
   align-items: center;
   padding: 40px;
   font-family: 'Inter', sans-serif;
   color: black;
   width: 100%;
-  box-sizing: border;
+  box-sizing: border-box;
+  max-height: 100%; /* Usa el 100% de la altura disponible del padre */
+  overflow-y: auto; /* Permite scroll vertical */
 }
 
 .register-header {

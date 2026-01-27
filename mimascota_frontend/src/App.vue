@@ -4,11 +4,16 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/authStore';
 
 const router = useRouter();
+const authStore = useAuthStore();
 
 // Esta función se ejecuta automáticamente cuando el componente App.vue se monta (al cargar la app)
 onMounted(async () => {
+    // Inicializar el store desde localStorage
+    authStore.loadTokenFromLocalStorage();
+    
     // Usar la clave correcta 'authToken' en lugar de 'token'
     const token = localStorage.getItem('authToken');
     
@@ -45,18 +50,13 @@ onMounted(async () => {
             console.log("Token verificado correctamente. Sesión activa.");
 
         } catch (error) {
-            // Este bloque se ejecuta si hay un error de red, o si lanzamos el error 401 arriba
             console.error('Fallo en la verificación del token. Forzando cierre de sesión.', error.message);
 
-            // 1. Limpia los datos de sesión expirados (limpiar todas las claves posibles de token)
-            localStorage.removeItem('authToken'); 
-            localStorage.removeItem('token'); // Limpiar clave antigua por compatibilidad
-            localStorage.removeItem('userToken'); // Limpiar clave antigua por compatibilidad
-            localStorage.removeItem('userData'); 
+            // Usamos el store para limpiar TODO (token, usuario, localStorage)
+            authStore.logout();
             
-            // 2. Redirige al login, solo si el usuario no está ya en la ruta de login
             if (router.currentRoute.value.path !== '/login') {
-                router.push('/login');
+                router.push({ name: 'auth' }); // Redirigir a la página de auth
             }
         }
     }
@@ -69,6 +69,7 @@ html, body {
   margin: 0;
   padding: 0;
   width: 100%;
+  background-color: #ffffff;
   min-height: 75vh; /* Asegura que la raíz del documento ocupe toda la altura visible */
   /* El siguiente es CLAVE para la barra horizontal. Si no la quieres, ocultala aquí: */
   /* Evita que el scroll horizontal aparezca a menos que sea forzado */

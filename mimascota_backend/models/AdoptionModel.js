@@ -311,6 +311,34 @@ async function getReceivedAdoptionForms(userId) {
     return result.rows;
 }
 
+/**
+ * Verifica si un usuario ya tiene una solicitud de adopción para una mascota específica.
+ * @param {number} userId - ID del usuario.
+ * @param {number} mascotId - ID de la mascota.
+ * @returns {object|null} La solicitud si existe, o null si no.
+ */
+async function checkUserAdoptionForPet(userId, mascotId) {
+    const query = `
+        SELECT 
+            s.idxxxx_solici, 
+            s.fechax_solici, 
+            s.estado_solici, 
+            s.adosuc_solici,
+            s.forane_mascot_id,
+            m.nombre_mascot
+        FROM "solicitudes_adopcion" s
+        JOIN "mascotas" m ON s.forane_mascot_id = m.idxxxx_mascot
+        WHERE s.forane_solici_id = $1 AND s.forane_mascot_id = $2
+        LIMIT 1;
+    `;
+    const result = await pool.query(query, [userId, mascotId]);
+    
+    if (result.rows.length > 0) {
+        return result.rows[0]; // Retorna la solicitud existente
+    }
+    return null; // No hay solicitud
+}
+
 // ===============================================
 // EXPORTACIÓN FINAL
 // ===============================================
@@ -323,5 +351,6 @@ module.exports = {
     getUserAdoptionForms,
     getUserAdoptionSuccess, // Nueva
     getAdoptionFormById, // Nueva
-    getReceivedAdoptionForms // Nueva
+    getReceivedAdoptionForms, // Nueva
+    checkUserAdoptionForPet // ← Añadida la nueva función
 };

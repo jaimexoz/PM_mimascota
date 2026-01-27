@@ -304,6 +304,9 @@ th {
     text-transform: uppercase;
 }
 
+tr {
+    color: #555555;
+}
 
 .status-adoptado{
     width: 125px;

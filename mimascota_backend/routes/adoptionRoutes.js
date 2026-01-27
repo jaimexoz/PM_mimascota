@@ -23,6 +23,9 @@ module.exports = (io) => {
     router.get('/form/:formId', protect, adoptionController.getAdoptionFormById); 
 
     router.get('/received', protect, adoptionController.getReceivedAdoptionForms);
+    
+    // Ruta para verificar si el usuario ya tiene una solicitud para una mascota específica
+    router.get('/check/:mascotId', protect, adoptionController.checkAdoptionStatus);
 
     router.patch('/:formId/status', protect, adoptionController.updateAdoptionStatus); 
 

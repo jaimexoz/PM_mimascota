@@ -323,6 +323,10 @@ th {
     text-transform: uppercase;
 }
 
+tr {
+    color: #555555;
+}
+
 .status-pendiente{
     width: 125px;
     font-size: 1rem;

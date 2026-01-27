@@ -128,7 +128,6 @@ const filterOptions = {
 async function getMascotas() {
   isLoading.value = true;
   try {
-      // NOTA: Asegúrate de que tu backend tenga un endpoint que devuelva todas las mascotas
       const response = await fetch('http://localhost:3000/api/mascotas/perros', { 
           method: 'GET',
           headers: {
@@ -143,20 +142,19 @@ async function getMascotas() {
       const data = await response.json();
       
       if (data.length === 0) {
-          mascotas.value = createMockMascotas(8); // Usar mocks si no hay datos
+          mascotas.value = [];
       } else {
           mascotas.value = data;
       }
       
   } catch (error) {
       console.error("Error al obtener las mascotas:", error);
-      // Fallback a datos simulados
-      mascotas.value = createMockMascotas(8); 
+      mascotas.value = [];
   } finally {
-      const minimumLoadingTime = 500; // Define el tiempo mínimo en milisegundos (ej: 500ms o 1000ms)
+      const minimumLoadingTime = 500;
         
         setTimeout(() => {
-          isLoading.value = false; // El spinner se oculta después de este tiempo
+          isLoading.value = false;
         }, minimumLoadingTime);
   }
 }
@@ -239,40 +237,6 @@ onMounted(() => {
   getMascotas();
 });
 
-
-// ==============================================
-// 2. UTILIDADES DE VISUALIZACIÓN
-// ==============================================
-
-/**
-* Función para simular datos de mascotas si la base de datos no funciona.
-*/
-function createMockMascotas(count) {
-  const mockData = [];
-  const names = ["Max", "Luna", "Rocky", "Bella", "Coco", "Kira", "Toby", "Nala"];
-  const breeds = ["Labrador", "Border Collie", "Mestizo", "Poodle", "Pastor Alemán"];
-  const sizes = ["Pequeño", "Mediano", "Grande"];
-  const imageBaseUrl = 'https://placehold.co/400x400/FF9933/FFFFFF/png?text=';
-
-  for (let i = 0; i < count; i++) {
-      const name = names[i % names.length];
-      const ageYears = Math.floor(Math.random() * 5) + 1;
-      const ageMonths = ageYears * 12 + Math.floor(Math.random() * 12);
-      
-      mockData.push({
-          id: i + 1,
-          nombre_mascot: name,
-          especie_mascot: i % 2 === 0 ? 'Perro' : 'Gato',
-          sexoxx_mascot: i % 4 < 2 ? 'Macho' : 'Hembra',
-          edadme_mascot: ageMonths, // Edad en meses
-          raza_mascot: breeds[i % breeds.length],
-          tamano_mascot: sizes[i % sizes.length],
-          image1_mascot: `${imageBaseUrl}${name.replace(' ', '+')}`,
-      });
-  }
-  return mockData;
-}
-
 /**
 * Convierte edad en meses a formato legible (años y meses).
 */
@@ -336,7 +300,7 @@ const PetCard = ({ mascota }) => {
             onClick: navigateToProfile 
           }, 'Ver más')
         ])
-
+  
   ]);
 };
 </script>

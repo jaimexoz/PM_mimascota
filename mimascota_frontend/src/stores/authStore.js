@@ -11,7 +11,8 @@ export const useAuthStore = defineStore('auth', {
     // 1. Estado (state): Datos reactivos
     state: () => ({
         token: null, // Almacena el token JWT
-        // isInitialized: false, // Opcional: para rastrear si se ha cargado el token del localStorage
+        user: null,  // Almacena los datos del usuario (nombre, rol, imagen, etc.)
+        // isInitialized: false, 
     }),
 
     // 2. Getters: Propiedades computadas basadas en el estado
@@ -28,18 +29,29 @@ export const useAuthStore = defineStore('auth', {
         setToken(newToken) {
             this.token = newToken;
             if (newToken) {
-                // IMPORTANTE: Limpiar todos los tokens viejos antes de guardar el nuevo
-                // Esto evita que queden tokens expirados en localStorage con diferentes claves
-                localStorage.removeItem('token'); // Limpiar clave antigua
-                localStorage.removeItem('userToken'); // Limpiar clave antigua
-                
-                // Guarda en localStorage para mantener la sesión
+                // Limpiar claves antiguas por compatibilidad
+                localStorage.removeItem('token');
+                localStorage.removeItem('userToken');
                 localStorage.setItem(TOKEN_KEY, newToken);
             } else {
-                // Si el token es nulo (cierre de sesión), limpiar todas las claves posibles
                 localStorage.removeItem(TOKEN_KEY);
-                localStorage.removeItem('token'); // Limpiar clave antigua
-                localStorage.removeItem('userToken'); // Limpiar clave antigua
+                localStorage.removeItem('token');
+                localStorage.removeItem('userToken');
+                this.user = null; // También limpiamos el usuario si el token es nulo
+                localStorage.removeItem('userData');
+            }
+        },
+
+        /**
+         * Establece los datos del usuario y los guarda en localStorage.
+         * @param {Object} userData - Los datos del usuario.
+         */
+        setUser(userData) {
+            this.user = userData;
+            if (userData) {
+                localStorage.setItem('userData', JSON.stringify(userData));
+            } else {
+                localStorage.removeItem('userData');
             }
         },
 
@@ -47,11 +59,21 @@ export const useAuthStore = defineStore('auth', {
          * Carga el token desde el localStorage al iniciar la aplicación.
          */
         loadTokenFromLocalStorage() {
-            if (!this.token) { // Evita sobreescribir si ya está en memoria
+            if (!this.token) {
                 const storedToken = localStorage.getItem(TOKEN_KEY);
                 if (storedToken) {
                     this.token = storedToken;
-                    console.log("Token de autenticación cargado desde localStorage.");
+                }
+            }
+            // También cargamos los datos del usuario para mantener la reactividad
+            if (!this.user) {
+                const storedUser = localStorage.getItem('userData');
+                if (storedUser) {
+                    try {
+                        this.user = JSON.parse(storedUser);
+                    } catch (e) {
+                        console.error("Error al cargar datos de usuario de localStorage", e);
+                    }
                 }
             }
         },
@@ -62,8 +84,7 @@ export const useAuthStore = defineStore('auth', {
          */
         logout(showAlert = false) {
             this.setToken(null);
-            // Opcional: Redirigir al login o página principal
-            // router.push('/login'); 
+            this.setUser(null);
             console.log("Sesión cerrada.");
             if (showAlert) {
                 alert("Tu sesión ha expirado. Por favor, vuelve a iniciar sesión.");

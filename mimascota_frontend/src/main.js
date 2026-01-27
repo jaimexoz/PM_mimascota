@@ -27,4 +27,4 @@ const authStore = useAuthStore();
 authStore.loadTokenFromLocalStorage();
 
 app.use(router); // Le decimos a Vue que use Vue Router
-app.mount('#app');
+app.mount('#app'); // IMPORTANTE: mount() debe ser lo ÚLTIMO

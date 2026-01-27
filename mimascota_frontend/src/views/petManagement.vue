@@ -277,6 +277,7 @@ onMounted(() => {
 /* Estilos para el contenedor principal */
 .gestion-posts-page{
     min-height: 80.1vh;
+   
 }
 
 .content-wrapper {
@@ -372,6 +373,10 @@ th {
     color: #fff;
     font-weight: bold;
     text-transform: uppercase;
+}
+
+tr {
+    color: #555555;
 }
 
 .status-pendiente{

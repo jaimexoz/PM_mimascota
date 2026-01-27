@@ -25,8 +25,12 @@
                 </div>
             </form>
             
-            <div v-if="success" class="success-message">{{ success }}</div>
-            <div v-if="error" class="error-message">{{ error }}</div>
+            <Transition name="fade-message">
+                <div v-if="success" class="success-message">{{ success }}</div>
+            </Transition>
+            <Transition name="fade-message">
+                <div v-if="error" class="error-message">{{ error }}</div>
+            </Transition>
             
             <div class="links">
                 <router-link to="/">Volver al inicio de sesión</router-link>
@@ -37,20 +41,32 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
-const route = useRoute(); // Para acceder a los parámetros de la URL
+const route = useRoute();
+const router = useRouter();
 const email = ref('');
 const newPassword = ref('');
 const confirmPassword = ref('');
-const token = ref(null); // Para almacenar el token de la URL
+const token = ref(null);
 const loading = ref(false);
 const error = ref('');
 const success = ref('');
 
-// Se ejecuta cuando el componente se monta
+const MESSAGE_DURATION = 5000; // 5 segundos
+
+// Auto-ocultar mensajes después de un tiempo
+const autoHideMessage = (messageType) => {
+    setTimeout(() => {
+        if (messageType === 'success') {
+            success.value = '';
+        } else if (messageType === 'error') {
+            error.value = '';
+        }
+    }, MESSAGE_DURATION);
+};
+
 onMounted(() => {
-    // Extrae el token de la URL si existe (ej: /reset-password?token=XYZ)
     if (route.query.token) {
         token.value = route.query.token;
     }
@@ -61,9 +77,8 @@ const handleResetPassword = async () => {
     success.value = '';
     loading.value = true;
 
-    // Lógica para solicitar el enlace o para restablecer la contraseña
     if (!token.value) {
-        // Lógica para enviar el email de restablecimiento
+        // Solicitar enlace de restablecimiento
         try {
             const response = await fetch('http://localhost:3000/api/auth/request-password-reset', {
                 method: 'POST',
@@ -72,19 +87,24 @@ const handleResetPassword = async () => {
             });
             const data = await response.json();
             if (response.ok) {
-                success.value = data.msg;
+                success.value = 'Se ha enviado un enlace a tu correo electrónico para restablecer tu contraseña. Por favor, revisa tu bandeja de entrada.';
+                autoHideMessage('success');
+                email.value = ''; // Limpiar el campo
             } else {
-                error.value = data.msg || 'Error al enviar el enlace.';
+                error.value = data.msg || 'Error al enviar el enlace. Por favor, verifica que el correo sea correcto.';
+                autoHideMessage('error');
             }
         } catch (err) {
             error.value = 'No se pudo conectar con el servidor. Inténtalo de nuevo.';
+            autoHideMessage('error');
         } finally {
             loading.value = false;
         }
     } else {
-        // Lógica para actualizar la contraseña con el token
+        // Actualizar contraseña con el token
         if (newPassword.value !== confirmPassword.value) {
             error.value = 'Las contraseñas no coinciden.';
+            autoHideMessage('error');
             loading.value = false;
             return;
         }
@@ -99,15 +119,31 @@ const handleResetPassword = async () => {
             });
             const data = await response.json();
             if (response.ok) {
-                success.value = data.msg;
-                // Opcional: limpiar los campos después del éxito
+                success.value = '¡Tu contraseña se ha restablecido con éxito! Redirigiendo al inicio de sesión...';
                 newPassword.value = '';
                 confirmPassword.value = '';
+                
+                // Redirigir al login después de 3 segundos
+                setTimeout(() => {
+                    router.push('/auth');
+                }, 3000);
             } else {
-                error.value = data.msg || 'Error al restablecer la contraseña.';
+                // Detectar si el token está expirado o ya fue usado
+                const errorMsg = data.msg || '';
+                if (errorMsg.toLowerCase().includes('expirado') || 
+                    errorMsg.toLowerCase().includes('expired') || 
+                    errorMsg.toLowerCase().includes('utilizado') ||
+                    errorMsg.toLowerCase().includes('used') ||
+                    errorMsg.toLowerCase().includes('invalid')) {
+                    error.value = 'Este enlace ya ha sido utilizado o ha expirado. Por favor, solicita un nuevo enlace de restablecimiento.';
+                } else {
+                    error.value = errorMsg || 'Error al restablecer la contraseña.';
+                }
+                autoHideMessage('error');
             }
         } catch (err) {
             error.value = 'No se pudo conectar con el servidor. Inténtalo de nuevo.';
+            autoHideMessage('error');
         } finally {
             loading.value = false;
         }
@@ -146,8 +182,21 @@ const handleResetPassword = async () => {
 .submit-button { padding: 0.9rem; background-color: #000; color: #fff; border: none; border-radius: 8px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: background-color 0.3s ease; margin-top: 1rem; width: 100%; }
 .submit-button:hover { background-color: #333; }
 .submit-button:disabled { background-color: #ccc; cursor: not-allowed; }
-.success-message { color: #27ae60; background-color: #e8f9ed; border: 1px solid #27ae60; padding: 0.75rem; border-radius: 8px; text-align: center; margin-top: 1rem; }
-.error-message { color: #e74c3c; background-color: #fce7e7; border: 1px solid #e74c3c; padding: 0.75rem; border-radius: 8px; text-align: center; margin-top: 1rem; }
+.success-message { color: #27ae60; background-color: #e8f9ed; border: 1px solid #27ae60; padding: 0.75rem; border-radius: 8px; text-align: center; margin-top: 1rem; font-weight: 600; }
+.error-message { color: #e74c3c; background-color: #fce7e7; border: 1px solid #e74c3c; padding: 0.75rem; border-radius: 8px; text-align: center; margin-top: 1rem; font-weight: 600; }
+
+/* Transiciones para mensajes */
+.fade-message-enter-active, .fade-message-leave-active {
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.fade-message-enter-from {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+.fade-message-leave-to {
+    opacity: 0;
+    transform: translateY(10px);
+}
 .links { margin-top: 2rem; font-size: 0.9rem; }
 .links a { color: #007bff; text-decoration: none; }
 .links a:hover { text-decoration: underline; }
