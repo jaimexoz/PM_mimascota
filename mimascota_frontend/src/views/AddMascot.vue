@@ -85,8 +85,18 @@
                                 <option value="Mediano">Mediano</option>
                                 <option value="Grande">Grande</option>
                             </select> 
-                        </div> 
+                        </div>
+                        <div class="fila4-col2">
+                            <label>Nivel de Energia:</label>
+                            <select v-model="mascota.energia">
+                                <option disabled value="">Selecciona</option>
+                                <option value="Tranquilo">Tranquilo</option>
+                                <option value="Moderado">Moderado</option>
+                                <option value="Energético">Energético</option>
+                            </select> 
+                        </div>
                     </div>
+                    
                 </div>
         
                 <h2>Personalidad y temperamento</h2>
@@ -222,11 +232,9 @@ const mascota = reactive({
     raza: '',
     peso: null,
     tamano: '',
+    energia: '',
     personalidad: [],
     informacionAdicional: '',
-    // La foto principal (ya no es un solo archivo, lo manejamos en archivosSubidos)
-    // Dejamos esta línea si se planea enviar solo una, pero la ajustamos abajo.
-    // fotoArchivo: null, 
 });
 
 // NUEVOS ESTADOS para el Drag and Drop
@@ -412,6 +420,7 @@ function eliminarArchivo(id) {
         raza: mascota.raza,
         peso: mascota.peso,
         tamano: mascota.tamano,
+        energia: mascota.energia,
         personalidad: mascota.personalidad,
         informacionAdicional: mascota.informacionAdicional,
     }));
@@ -541,22 +550,18 @@ function irAtras() {
     color: #000000;
 }
 
-.fila-form-1st, .fila-form-2nd, .fila-form-3rd{
+.fila-form-1st, .fila-form-2nd, .fila-form-3rd, .fila-form-4th{
     display: flex;
     width: 100%;
 }
 
 
-.fila1-col1, .fila1-col2, .fila2-col1, .fila2-col2, .fila3-col1, .fila3-col2, .fila4-col1{
+.fila1-col1, .fila1-col2, .fila2-col1, .fila2-col2, .fila3-col1, .fila3-col2, .fila4-col1, .fila4-col2{
     width: 50%;
     margin: 8px;
 }
 
 
-
-.fila4-col1{
-    padding-right: 20px;
-}
 
 
 .image-panel {

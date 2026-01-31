@@ -77,7 +77,7 @@
             <h2 class="no-results-title">¡Vaya! No encontramos mascotas con esos filtros.</h2>
             <p class="no-results-text">Intenta ajustar tus criterios de búsqueda o limpiar los filtros.</p>
             <button @click="clearFilters" class="show-all-button">
-                Mostrar todas las mascotas
+                Limpiar filtros
             </button>
         </div>
     </div>
@@ -720,15 +720,16 @@ const PetCard = ({ mascota }) => {
   .show-all-button {
     margin-top: 1rem;
     padding: 0.5rem 1.5rem;
+    border: #111827;
     border-radius: 9999px; /* rounded-full */
     color: #ffffff; /* text-white */
     font-weight: 700; /* font-bold */
-    background-color: #4f46e5; /* indigo-600 */
+    background-color: #ff9595;
     transition: background-color 200ms ease;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); /* shadow-lg */
+    box-shadow: 0 4px 6px -1px rgb(195, 195, 195); /* shadow-lg */
   }
   .show-all-button:hover {
-    background-color: #4338ca; /* hover:bg-indigo-700 */
+    background-color: #ff6060; /* hover:bg-indigo-700 */
   }
   
   

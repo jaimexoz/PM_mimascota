@@ -4,6 +4,8 @@ const fs = require('fs').promises; // Usamos promesas para limpieza
 const path = require('path');
 const cloudinary = require('../config/cloudinaryConfig'); 
 const mascotaModel = require('../models/mascotaModel'); 
+const NotificationModel = require('../models/NotificationModel');
+const mlService = require('../services/mlService');
 
 // =================================================================
 // FUNCIONES DE UTILIDAD DEL CONTROLADOR (Archivos)
@@ -53,10 +55,6 @@ exports.getMascotaForEdit = async (req, res) => {
         if (result.rows.length === 0) {
             return res.status(404).json({ mensaje: 'Mascota no encontrada o no tienes permiso para editarla.' });
         }
-        // Validación adicional implícita: si la mascota existe, el modelo ya filtró por owner (m.forane_usuari_id = $2) en la versión anterior, 
-        // aquí se asume que el modelo/SQL maneja que solo el dueño acceda o el controller debe verificar el forane_usuari_id.
-        // **Nota**: El SQL en el modelo se simplificó para obtener detalles; se sugiere agregar la cláusula `AND m.forane_usuari_id = $2` si la protección de autoría es crucial aquí.
-        
         res.json(result.rows[0]);
 
     } catch (dbError) {
@@ -242,7 +240,7 @@ exports.createMascota = async (req, res) => {
         return res.status(400).json({ mensaje: 'Formato de datos de la mascota inválido (JSON no válido).' });
     }
 
-    // 1. Subir Imágenes
+    // 1. Subir Imágenes (Lógica intacta)
     let cloudinaryImageUrls = [];
     try {
         const uploadPromises = localImagePaths.map(path => uploadToCloudinary(path, 'mascotas_para_adopcion'));
@@ -263,16 +261,48 @@ exports.createMascota = async (req, res) => {
     try {
         await client.query('BEGIN'); 
 
-        // 2. Insertar Mascota
+        // 2. Insertar Mascota (Lógica intacta)
+        // NOTA: Asumo que 'caracteristicasNombres' es un array de strings ej: ['Juguetón', 'Amigable']
         const { mascotaId, caracteristicasNombres } = await mascotaModel.insertNewMascotaDB(
             client, 
             { ...datosMascota, forane_usuari_id }, 
             cloudinaryImageUrls
         ); 
 
-        // 3. Sincronizar Características
+        // 3. Sincronizar Características (Lógica intacta)
         const caracteristicaIds = await mascotaModel.getCaracteristicaIds(client, caracteristicasNombres);
         await mascotaModel.insertMascotaCaracteristicasDB(client, mascotaId, caracteristicaIds);
+
+        // -----------------------------------------------------------------------
+        // 4. NUEVA LÓGICA: CÁLCULO DE MACHINE LEARNING
+        // -----------------------------------------------------------------------
+        try {
+            // A. Preparamos el objeto con los nombres de columna que espera el mlService.
+            // Mapeamos los datos del JSON (datosMascota) a lo que el servicio necesita.
+            const datosParaVector = {
+                especi_mascot: datosMascota.especie,   // Asegúrate que tu JSON trae .especie
+                edadme_mascot: datosMascota.edad,      // Asegúrate que tu JSON trae .edad
+                tamano_mascot: datosMascota.tamano,    // Asegúrate que tu JSON trae .tamano
+                nenerg_mascot: datosMascota.energia,   // Asegúrate que tu JSON trae .energia
+                lista_personalidad: caracteristicasNombres || [] // Usamos los nombres retornados en paso 2
+            };
+
+            // B. Calculamos el vector matemático
+            const vectorCalculado = mlService.createPetVector(datosParaVector);
+
+            // C. Guardamos el vector en la base de datos (dentro de la misma transacción)
+            // Asegúrate que 'idxxxx_mascot' es el nombre real de tu ID en la tabla
+            await client.query(
+                'UPDATE mascotas SET vector_caracteristicas = $1 WHERE idxxxx_mascot = $2',
+                [vectorCalculado, mascotaId]
+            );
+
+        } catch (mlError) {
+            // Opcional: Si el ML falla, ¿quieres cancelar todo el registro? 
+            // Aquí solo lo logueamos para no impedir el registro, pero puedes hacer throw mlError si prefieres estricto.
+            console.error("Advertencia: No se pudo generar el vector ML para la mascota " + mascotaId, mlError);
+        }
+        // -----------------------------------------------------------------------
 
         await client.query('COMMIT'); 
 
@@ -291,6 +321,7 @@ exports.createMascota = async (req, res) => {
 };
 
 // PUT /api/mascotas/actualizar/:id
+
 exports.updateMascota = async (req, res) => {
     const petId = req.params.id;
     const localImagePaths = req.files ? req.files.map(file => file.path) : [];
@@ -303,7 +334,7 @@ exports.updateMascota = async (req, res) => {
         return res.status(400).json({ mensaje: 'Formato de datos de la mascota inválido (JSON no válido).' });
     }
     
-    // 1. Subir nuevas imágenes si existen
+    // 1. Subir nuevas imágenes si existen (Lógica intacta)
     let newCloudinaryUrls = [];
     if (localImagePaths.length > 0) {
         try {
@@ -320,7 +351,6 @@ exports.updateMascota = async (req, res) => {
         }
     }
     
-    // Limpiar archivos locales después de procesar o fallar la subida
     cleanupUploadedFiles(localImagePaths); 
 
     const client = await pool.connect(); 
@@ -328,7 +358,7 @@ exports.updateMascota = async (req, res) => {
     try {
         await client.query('BEGIN'); 
 
-        // 2. Actualizar datos principales (incluye lógica de URL old/new)
+        // 2. Actualizar datos principales (Lógica intacta)
         const updateResult = await mascotaModel.updateMascotaPrincipalDB(
             client, 
             petId, 
@@ -341,18 +371,50 @@ exports.updateMascota = async (req, res) => {
             return res.status(404).json({ mensaje: 'Mascota no encontrada o no se pudo actualizar.' });
         }
         
-        // 3. Sincronizar características
-        console.log(`[updateMascota] Sincronizando características para mascota ${petId}:`, datosMascota.personalidad_array);
+        // 3. Sincronizar características (Lógica intacta)
         await mascotaModel.syncMascotaCaracteristicasDB(client, petId, datosMascota.personalidad_array);
+        // -----------------------------------------------------------------------
+        // 4. NUEVA LÓGICA: RE-CALCULAR VECTOR DE MACHINE LEARNING
+        // -----------------------------------------------------------------------
+        try {
+            // A. Traemos la mascota "fresca" de la base de datos
+            // Esto garantiza que tenemos 'especi_mascot', 'edadme_mascot' correctos
+            // y la 'lista_personalidad' actualizada.
+            const mascotaFresca = await mascotaModel.obtenerMascotaCompletaPorId(client, petId);
+
+            if (mascotaFresca) {
+                // B. Debug: Ver qué estamos enviando al ML (mira esto en tu consola)
+                console.log("Datos para Vector ML:", {
+                    especie: mascotaFresca.especi_mascot,
+                    edad: mascotaFresca.edadme_mascot,
+                    tamano: mascotaFresca.tamano_mascot,
+                    energia: mascotaFresca.nenerg_mascot,
+                    personalidad: mascotaFresca.lista_personalidad
+                });
+
+                // C. Calculamos el vector usando el objeto directo de la DB
+                // (mlService.createPetVector ya sabe leer las columnas _mascot)
+                const vectorCalculado = mlService.createPetVector(mascotaFresca);
+
+                // D. Guardamos el vector
+                await client.query(
+                    'UPDATE mascotas SET vector_caracteristicas = $1 WHERE idxxxx_mascot = $2',
+                    [vectorCalculado, petId]
+                );
+            }
+
+        } catch (mlError) {
+            console.error(`Error generando vector ML:`, mlError);
+        }
+        // =====================================================================
 
         await client.query('COMMIT'); 
-        
         res.status(200).json({ mensaje: 'Mascota actualizada con éxito.' });
 
     } catch (dbError) {
         await client.query('ROLLBACK'); 
-        console.error('Error de base de datos en la actualización:', dbError);
-        res.status(500).json({ mensaje: 'Error interno del servidor al actualizar la mascota.', error: dbError.message });
+        console.error('Error update:', dbError);
+        res.status(500).json({ mensaje: 'Error al actualizar.' });
     } finally {
         client.release();
     }

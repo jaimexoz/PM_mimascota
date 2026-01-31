@@ -105,7 +105,7 @@ const getMascotaEditByIdDB = async (client, petId, userId) => {
     const mascotaQuery = `
         SELECT
             m.idxxxx_mascot, m.nombre_mascot, m.especi_mascot, m.sexoxx_mascot, 
-            m.edadme_mascot, m.razaxx_mascot, m.pesokg_mascot, m.tamano_mascot, 
+            m.edadme_mascot, m.razaxx_mascot, m.pesokg_mascot, m.tamano_mascot, m.nenerg_mascot, 
             m.infoad_mascot, m.image1_mascot, m.image2_mascot, m.image3_mascot, 
             m.forane_usuari_id, m.status_mascot
         FROM mascotas m
@@ -237,6 +237,29 @@ const getAllMascotasDB = async (client) => {
     return client.query(query);
 };
 
+const obtenerMascotasParaRecomendacion = async () => {
+    const querySQL = `
+        SELECT 
+            m.*,
+            -- array_remove elimina valores nulos si alguna mascota no tiene rasgos
+            array_remove(array_agg(c.nombre_caract), NULL) as lista_personalidad
+        FROM mascotas m
+        LEFT JOIN mascota_caracteristicas mc ON m.idxxxx_mascot = mc.forane_mascot_id
+        LEFT JOIN caracteristicas c ON mc.forane_caract_id = c.idxxxx_caract
+        WHERE m.status_mascot = 'Disponible'
+            AND m.eliminado_logico = FALSE
+            AND m.approv_mascot = 'Aprobada'
+        GROUP BY m.idxxxx_mascot
+    `;
+    
+    try {
+        const { rows } = await pool.query(querySQL);
+        return rows;
+    } catch (error) {
+        throw new Error('Error al obtener mascotas para recomendación: ' + error.message);
+    }
+};
+
 async function updateMascotaApproval(mascotaId, newStatus) {
     const query = `
         UPDATE mascotas
@@ -255,7 +278,7 @@ async function updateMascotaApproval(mascotaId, newStatus) {
 const insertNewMascotaDB = async (client, petData, cloudinaryUrls) => {
 
     const {
-        nombre, especie, sexo, edad, raza, peso, tamano, informacionAdicional, forane_usuari_id
+        nombre, especie, sexo, edad, raza, peso, tamano, energia, informacionAdicional, forane_usuari_id
     } = petData;
     const [image1_mascot, image2_mascot, image3_mascot] = cloudinaryUrls;
     const infoad_mascot = informacionAdicional || 'N/A'; 
@@ -265,15 +288,15 @@ const insertNewMascotaDB = async (client, petData, cloudinaryUrls) => {
     const insertQuery = `
         INSERT INTO mascotas (
             nombre_mascot, especi_mascot, sexoxx_mascot, edadme_mascot, 
-            razaxx_mascot, pesokg_mascot, tamano_mascot, infoad_mascot, 
+            razaxx_mascot, pesokg_mascot, tamano_mascot, nenerg_mascot,infoad_mascot, 
             image1_mascot, image2_mascot, image3_mascot, eliminado_logico, 
             forane_usuari_id, approv_mascot, fechap_mascot, status_mascot
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
         RETURNING idxxxx_mascot;
     `;
 
     const insertValues = [
-        nombre, especie, sexo, edad, raza, peso, tamano, infoad_mascot, 
+        nombre, especie, sexo, edad, raza, peso, tamano, energia, infoad_mascot, 
         image1_mascot, image2_mascot, image3_mascot, false, forane_usuari_id, 'Pendiente', currentTimestamp, 'Disponible'
     ];
 
@@ -305,7 +328,7 @@ const insertMascotaCaracteristicasDB = async (client, mascotaId, caracteristicaI
 const updateMascotaPrincipalDB = async (client, petId, petData, finalImageUrls) => {
     const {
         nombre_mascot, especi_mascot, sexoxx_mascot, edadme_mascot, 
-        razaxx_mascot, pesokg_mascot, tamano_mascot, infoad_mascot,
+        razaxx_mascot, pesokg_mascot, tamano_mascot, nenerg_mascot, infoad_mascot,
         image1_mascot: existingUrl1, 
         image2_mascot: existingUrl2, 
         image3_mascot: existingUrl3,
@@ -324,16 +347,16 @@ const updateMascotaPrincipalDB = async (client, petId, petData, finalImageUrls) 
         SET 
             nombre_mascot = $1, especi_mascot = $2, sexoxx_mascot = $3, 
             edadme_mascot = $4, razaxx_mascot = $5, pesokg_mascot = $6, 
-            tamano_mascot = $7, infoad_mascot = $8, 
-            image1_mascot = $9, image2_mascot = $10, image3_mascot = $11,
-            status_mascot = $12 
-        WHERE idxxxx_mascot = $13 
+            tamano_mascot = $7, nenerg_mascot= $8, infoad_mascot = $9, 
+            image1_mascot = $10, image2_mascot = $11, image3_mascot = $12,
+            status_mascot = $13 
+        WHERE idxxxx_mascot = $14 
         RETURNING idxxxx_mascot;
     `;
     
     const updateValues = [
         nombre_mascot, especi_mascot, sexoxx_mascot, edadme_mascot, 
-        razaxx_mascot, pesokg_mascot, tamano_mascot, infoad_mascot, 
+        razaxx_mascot, pesokg_mascot, tamano_mascot, nenerg_mascot, infoad_mascot, 
         finalImage1, finalImage2, finalImage3, status_mascot, petId 
     ];
 
@@ -344,6 +367,22 @@ const updateMascotaPrincipalDB = async (client, petId, petData, finalImageUrls) 
     }
     return { success: true };
 };
+
+async function obtenerMascotaCompletaPorId(client, mascotaId) {
+    const query = `
+        SELECT 
+            m.*,
+            -- Creamos el array de personalidades al vuelo
+            array_remove(array_agg(c.nombre_caract), NULL) as lista_personalidad
+        FROM mascotas m
+        LEFT JOIN mascota_caracteristicas mc ON m.idxxxx_mascot = mc.forane_mascot_id AND mc.status_mascar = true
+        LEFT JOIN caracteristicas c ON mc.forane_caract_id = c.idxxxx_caract
+        WHERE m.idxxxx_mascot = $1
+        GROUP BY m.idxxxx_mascot
+    `;
+    const res = await client.query(query, [mascotaId]);
+    return res.rows[0];
+}
 
 /**
  * Desactiva características viejas y actualiza a activas las nuevas (Soft Delete en la tabla pivote).
@@ -423,6 +462,8 @@ module.exports = {
     getMascotasForHome2ndDB,
     getMascotasForFeedDB,
     getAllMascotasDB,
+    obtenerMascotasParaRecomendacion,
+    obtenerMascotaCompletaPorId,
     updateMascotaApproval,
     insertNewMascotaDB,
     insertMascotaCaracteristicasDB,

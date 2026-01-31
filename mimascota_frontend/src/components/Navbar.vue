@@ -269,7 +269,7 @@ const showViewMoreButton = computed(() => {
     return notifications.value.length > currentLimit.value;
 });
 
- const connectSocket = () => {
+const connectSocket = () => {
     const userId = getUserId(); // Obtener el ID del usuario actual
 
     if (!userId) {
@@ -277,29 +277,64 @@ const showViewMoreButton = computed(() => {
         return;
     }
 
+    // Desconectar socket anterior si existe
+    if (socket && socket.connected) {
+        socket.disconnect();
+    }
+
     // ⚠️ AJUSTA ESTA URL a la de tu backend si no es http://localhost:3000
     socket = io('http://localhost:3000', {
         query: {
             userId: userId // ⭐️ Enviar el ID de usuario para la autenticación y unión al "room"
-        }
+        },
+        transports: ['websocket', 'polling'], // ⭐️ Especificar transportes
+        reconnection: true, // ⭐️ Habilitar reconexión automática
+        reconnectionDelay: 1000, // ⭐️ Esperar 1 segundo antes de reconectar
+        reconnectionAttempts: 5, // ⭐️ Intentar hasta 5 veces
+        timeout: 20000 // ⭐️ Timeout de 20 segundos
     });
 
     socket.on('connect', () => {
-        console.log('Socket.io conectado. ID:', socket.id);
+        console.log('✅ Socket.io conectado. ID:', socket.id);
+        console.log('Usuario ID:', userId, 'listo para recibir notificaciones');
+    });
+
+    socket.on('connect_error', (error) => {
+        console.error('❌ Error al conectar Socket.io:', error.message);
+    });
+
+    socket.on('disconnect', (reason) => {
+        console.log('⚠️ Socket.io desconectado. Razón:', reason);
+        if (reason === 'io server disconnect') {
+            // El servidor desconectó el socket, reconectar manualmente
+            socket.connect();
+        }
+    });
+
+    socket.on('reconnect', (attemptNumber) => {
+        console.log('🔄 Socket.io reconectado después de', attemptNumber, 'intentos');
+    });
+
+    socket.on('reconnect_attempt', (attemptNumber) => {
+        console.log('🔄 Intentando reconectar Socket.io... Intento', attemptNumber);
+    });
+
+    socket.on('reconnect_error', (error) => {
+        console.error('❌ Error al reconectar Socket.io:', error.message);
+    });
+
+    socket.on('reconnect_failed', () => {
+        console.error('❌ Falló la reconexión de Socket.io después de múltiples intentos');
     });
 
     // ⭐️ ESCUCHA EL EVENTO EN TIEMPO REAL ⭐️
     socket.on('new_notification', (newNotif) => {
-        console.log('Nueva notificación recibida por Socket:', newNotif);
+        console.log('🔔 Nueva notificación recibida por Socket:', newNotif);
         // Agregar la nueva notificación al inicio de la lista
         notifications.value.unshift({ 
             ...newNotif,
             is_read: false // Asumimos que la recibida en tiempo real aún no está leída
         });
-    });
-
-    socket.on('disconnect', () => {
-        console.log('Socket.io desconectado.');
     });
 };
 
@@ -705,8 +740,8 @@ img.notification-avatar {
 }
 
 .message-noti{
-  margin-left: 10px;
   margin-top: 1.2rem;
+  padding: 0.5rem;
   color: #555;
 }
 
@@ -901,7 +936,7 @@ button.view-more-button {
 }
 
 .access-button:hover {
-  background-color: #ffbdbd;
+  background-color: #ff9595;
   color: #fff;
   border-color: transparent;
 }
@@ -994,7 +1029,7 @@ button.view-more-button {
 .logout-success-icon {
   width: 50px;
   height: 50px;
-  background-color: #27ae60;
+  background-color: #ff9595;
   color: white;
   border-radius: 50%;
   display: flex;

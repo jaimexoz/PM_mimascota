@@ -15,10 +15,6 @@
           
       </div>
         
-        <div class="image-section" id="loquis">
-            <img src="../assets/inip.png" alt="Perro y Gato" class="mascot-image" />
-          
-        </div>
       </div>
 
       <!-- Contenido de la Página -->
@@ -364,9 +360,13 @@ const handleGetStarted = () => {
 }
 
 .page-header {
-  padding: 2.5rem 0;
+  padding: 7.7rem 0;
   margin-bottom: 2rem;
   display: flex;
+  background-image: url('../assets/init3.jpg');
+  background-size: cover;
+  background-position: center;
+  mask-image: linear-gradient(0deg, rgba(0,0,0,0) 5%, rgba(0,0,0,1) 18%);
 }
 
 .title-section{
@@ -411,7 +411,7 @@ const handleGetStarted = () => {
   border-radius: 50px; 
   margin-top: 25px;
   padding: 15px 40px; 
-  width: 40%;
+  width: 15%;
   font-family: sans-serif; 
   font-size: 30px; 
   font-weight: bold; 

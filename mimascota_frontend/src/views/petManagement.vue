@@ -454,13 +454,13 @@ tr {
     padding-left: 5px;
 }
 
-.empty-state {
+  .empty-state{
     text-align: center;
     padding: 5rem 1.5rem;
     background-color: #ffffff; /* bg-white */
     border-radius: 0.75rem; /* rounded-xl */
-    box-shadow: 0 4px 6px 3px rgba(0, 0, 0, 0.1); /* shadow-md */
-    margin-top: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); /* shadow-md */
+    margin-top: 2rem;
   }
   
   .no-results-title {
@@ -468,7 +468,6 @@ tr {
     font-weight: 600;
     color: #374151; /* gray-700 */
   }
-  
   .no-results-text {
     color: #6b7280; /* gray-500 */
     margin-top: 0.5rem;

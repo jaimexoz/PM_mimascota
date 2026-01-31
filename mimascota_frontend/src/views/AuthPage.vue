@@ -179,7 +179,7 @@ const handleRegistrationSuccess = (message) => {
 }
 
 .back-link:hover {
-    background-color: #ffbdbd;
+   background-color: #ff9595;
     color: white;
     transform: translateX(-5px);
 }

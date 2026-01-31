@@ -579,6 +579,7 @@ onMounted(() => {
     padding: 1rem;
     position: relative;
     z-index: 10;
+    height: 43rem;
 }
 
 .image-column {
@@ -618,7 +619,7 @@ onMounted(() => {
 }
 
 .section-title {
-    font-size: 1.55rem; /* text-xl */
+    font-size: 1.3rem; /* text-xl */
     font-weight: 700; /* font-bold */
     color: var(--gray-800);
     margin-bottom: 0.5rem; /* mb-2 */
@@ -630,8 +631,8 @@ onMounted(() => {
 .data-list {
     list-style: none;
     padding: 0;
-    margin-bottom: 1.5rem; /* mb-6 */
-    font-size: 1.125rem; /* text-lg */
+    margin-bottom: 0.5rem; /* mb-6 */
+    font-size: 1rem; /* text-lg */
     color: var(--gray-700);
     line-height: 1.5;
     color: #675e5e;
@@ -645,9 +646,10 @@ onMounted(() => {
 
 .info-text {
   color: #675e5e;
-    margin-bottom: 2rem; /* mb-8 */
+    margin-bottom: 0.5rem; /* mb-8 */
     line-height: 1.625; /* leading-relaxed */
     text-align: justify;
+    font-size: 1rem; /* text-lg */
 }
 
 /* ======================================= */
@@ -779,7 +781,7 @@ onMounted(() => {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.5rem;
 }
 
 .trait-chip {

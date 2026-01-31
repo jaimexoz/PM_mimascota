@@ -14,6 +14,7 @@ const mascotaRoutes = require('./routes/mascotaRoutes');
 const favoritesRoutes = require('./routes/favoritesRoutes');
 const createAdoptionRouter = require('./routes/adoptionRoutes'); // 👈 CAMBIO: Importamos la función
 const reviewRoutes = require('./routes/reviewRoutes');
+const recommendationsRoutes = require('./routes/recommendationsRoutes');
 const app = express();
 // 1. Crear el servidor HTTP a partir de la aplicación Express
 const server = http.createServer(app); 
@@ -21,23 +22,42 @@ const server = http.createServer(app);
 // 2. Inicializar Socket.io y adjuntarlo al servidor HTTP
 const io = new Server(server, {
     cors: {
-        origin: process.env.CLIENT_URL || "http://localhost:5173", // Usa la URL de tu frontend Vue
+        origin: process.env.CLIENT_URL || "http://localhost:5173",
         methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
-    }
+        credentials: true // ⭐️ Agregar esto para permitir credenciales
+    },
+    transports: ['websocket', 'polling'] // ⭐️ Especificar transportes explícitamente
 });
 
-// 3. Configurar la conexión de Socket.io (opcional, pero buena práctica)
+// 3. Configurar la conexión de Socket.io con mejor manejo de errores
 io.on('connection', (socket) => {
-    console.log(`Usuario conectado: ${socket.id}`);
+    console.log(`Cliente conectado: ${socket.id}`);
     
-    // Escucha el evento para unir al usuario a su sala personal
+    const userId = socket.handshake.query.userId;
+    
+    if (userId) {
+        socket.join(userId.toString());
+        console.log(`✅ Usuario ${userId} unido a su sala de notificaciones (Socket ID: ${socket.id})`);
+    } else {
+        console.warn(`⚠️ Cliente conectado sin userId (Socket ID: ${socket.id})`);
+    }
+
+    // Listener para registro manual de usuario (por si acaso)
     socket.on('register_user', (userId) => {
-        socket.join(userId);
-        console.log(`Usuario ${userId} unido a su sala.`);
+        if (userId) {
+            socket.join(userId.toString());
+            console.log(`Usuario ${userId} registrado manualmente en sala.`);
+        }
     });
 
-    socket.on('disconnect', () => {
-        console.log(`Usuario desconectado: ${socket.id}`);
+    // Manejo de desconexión
+    socket.on('disconnect', (reason) => {
+        console.log(`Cliente desconectado: ${socket.id}. Razón: ${reason}`);
+    });
+
+    // Manejo de errores
+    socket.on('error', (error) => {
+        console.error(`Error en socket ${socket.id}:`, error);
     });
 });
 // -----------------------------------------------------------
@@ -55,6 +75,8 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/mascotas', mascotaRoutes); 
 app.use('/api/favorites', favoritesRoutes); 
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/recommendations', recommendationsRoutes);
+
 
 
 // ⭐️ CAMBIO CLAVE: Usa la función importada para crear las rutas de adopción

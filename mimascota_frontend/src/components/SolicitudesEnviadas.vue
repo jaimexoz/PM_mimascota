@@ -27,7 +27,8 @@
             </div>
 
             <div v-else-if="solicitudes.length === 0" class="empty-state">
-                <p>No tienes solicitudes de adopción enviadas todavía. ¡Anímate a encontrar a tu nueva mascota!</p>
+                <h2 class="no-results-title">¡Vaya! No tienes solicitudes de adopción enviadas todavía.</h2>
+                <p class="no-results-text">¡Anímate a encontrar a tu nueva mascota!</p>
             </div>
 
             <div v-else class="table-container">
@@ -68,6 +69,7 @@
                 </table>
             </div>
         </div>
+        
       
     </div>
      <Footer/> 
@@ -409,6 +411,20 @@ tr {
 }
 
 /* Estilos para mensajes de estado */
+.empty-state{
+    text-align: center;
+    padding: 5rem 1.5rem;
+    background-color: #ffffff; /* bg-white */
+    border-radius: 0.75rem; /* rounded-xl */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); /* shadow-md */
+    margin-top: 2rem;
+  }
+  
+  .no-results-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #374151; /* gray-700 */
+  }
 .message {
     padding: 15px;
     margin: 20px auto;

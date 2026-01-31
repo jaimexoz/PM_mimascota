@@ -1,164 +1,177 @@
 <template>
     <div v-if="isOpen" class="modal-overlay" @click.self="emit('close')">
+        <div class="edit-modal-container-main">
 
-        <div class="edit-modal-container">
-            
-            <div class="modal-header">
-                <button @click="emit('close')" class="back-button"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
-                    </svg>
-                    Volver</button>
-
-                
-                <h2 class="modal-title">
-                    <PawPrint class="paw-icon" />
-                    Editar Publicación: {{ formData.nombre_mascot || 'Cargando...' }}
-                    <PawPrint class="paw-icon" />
-                </h2>
-            </div>
-
-            <div v-if="isLoadingData" class="loading-modal-state">
-                <Loader class="loading-icon animate-spin" />
-                <p>Cargando datos de la mascota...</p>
-            </div>
-            
-            <form v-else class="edit-form" @submit.prevent="saveChanges">
-                
-                <div class="form-content-wrapper">
-                    <div class="info-section">
-                        <h3>Información de la Mascota</h3>
+            <button type="button" class="edit-modal-close" @click="emit('close')" aria-label="Cerrar">
+                            ×
+            </button>
+            <div class="edit-modal-container">
                         
-                        <label for="nombre">Nombre:</label>
-                        <input type="text" id="nombre" v-model="formData.nombre_mascot" required>
-                        
-                        <div class="container-row"> 
-        
-                            <div class="container-col column-half"> 
-                                <label>Especie:</label>
-                                <div class="button-group">
-                                    <button type="button" :class="{ active: formData.especi_mascot === 'Perro' }" @click="formData.especi_mascot = 'Perro'">Perro</button>
-                                    <button type="button" :class="{ active: formData.especi_mascot === 'Gato' }" @click="formData.especi_mascot = 'Gato'">Gato</button>
+
+                <div class="modal-header">        
+                    <h2 class="modal-title">
+                        <PawPrint class="paw-icon" />
+                        Editar Publicación: {{ formData.nombre_mascot || 'Cargando...' }}
+                        <PawPrint class="paw-icon" />
+                    </h2>
+                </div>
+
+                <div v-if="isLoadingData" class="loading-modal-state">
+                    <Loader class="loading-icon animate-spin" />
+                    <p>Cargando datos de la mascota...</p>
+                </div>
+                
+                <form v-else class="edit-form" @submit.prevent="saveChanges">
+                    
+                    <div class="form-content-wrapper">
+                        <div class="info-section">
+                            <h3>Información de la Mascota</h3>
+                            
+                            <label for="nombre">Nombre:</label>
+                            <input type="text" id="nombre" v-model="formData.nombre_mascot" required>
+                            
+                            <div class="container-row"> 
+            
+                                <div class="container-col column-half"> 
+                                    <label>Especie:</label>
+                                    <div class="button-group">
+                                        <button type="button" :class="{ active: formData.especi_mascot === 'Perro' }" @click="formData.especi_mascot = 'Perro'">Perro</button>
+                                        <button type="button" :class="{ active: formData.especi_mascot === 'Gato' }" @click="formData.especi_mascot = 'Gato'">Gato</button>
+                                    </div>
                                 </div>
+
+                                <div class="container-col column-half"> 
+                                    <label>Sexo:</label>
+                                    <div class="button-group">
+                                        <button type="button" :class="{ active: formData.sexoxx_mascot === 'Macho' }" @click="formData.sexoxx_mascot = 'Macho'">Macho</button>
+                                        <button type="button" :class="{ active: formData.sexoxx_mascot === 'Hembra' }" @click="formData.sexoxx_mascot = 'Hembra'">Hembra</button>
+                                    </div>
+                                </div>
+
                             </div>
 
-                            <div class="container-col column-half"> 
-                                <label>Sexo:</label>
-                                <div class="button-group">
-                                    <button type="button" :class="{ active: formData.sexoxx_mascot === 'Macho' }" @click="formData.sexoxx_mascot = 'Macho'">Macho</button>
-                                    <button type="button" :class="{ active: formData.sexoxx_mascot === 'Hembra' }" @click="formData.sexoxx_mascot = 'Hembra'">Hembra</button>
-                                </div>
+
+                            <div class="column">
+
+                            <div class="container-col">
+                                <label for="edad">Edad (Meses):</label>
+                                <input type="number" id="edad" v-model.number="formData.edadme_mascot" min="0">
+                            </div>
+                            
+                            <div class="container-col">
+                            <label for="raza">Raza:</label>
+                            <input type="text" id="raza" v-model="formData.razaxx_mascot">
+                            </div>
+                            </div >
+
+                            <div class="column">
+
+                            <div class="container-col">
+                            <label for="peso">Peso (kg):</label>
+                            <input type="number" step="0.1" id="peso" v-model.number="formData.pesokg_mascot">
                             </div>
 
+                            <div class="container-col">
+                            <label for="tamano">Tamaño:</label>
+                            <select id="tamano" v-model="formData.tamano_mascot">
+                                <option value="Pequeño">Pequeño</option>
+                                <option value="Mediano">Mediano</option>
+                                <option value="Grande">Grande</option>
+                            </select>
+                            </div>
+                            </div>
+
+                            <div class="column">
+                                <div class="container-col">
+                                <label for="nivelenergia">Nivel de Energía:</label>
+                                <select id="nivelenergia" v-model="formData.nenerg_mascot">
+                                    <option value="Tranquilo">Tranquilo</option>
+                                    <option value="Moderado">Moderado</option>
+                                    <option value="Energético">Energético</option>
+                                </select>
+                                </div>
+                            </div>
+                            <h3 class="section-title">Personalidad y Temperamento</h3>
+
+                            <div class="traits-container checkbox-grid">
+                                <div v-for="rasgo in opcionesPersonalidad" :key="rasgo" class="trait-checkbox-wrapper">
+                                    <input 
+                                        type="checkbox" 
+                                        :id="'trait-' + rasgo" 
+                                        :value="rasgo" 
+                                        @change="togglePersonalidad(rasgo)"
+                                        :checked="formData.personalidad_array && formData.personalidad_array.includes(rasgo)"
+                                        style="display: none;" 
+                                    >
+                                    
+                                    <label 
+                                        :for="'trait-' + rasgo" 
+                                        class="trait-chip selectable-chip" 
+                                        :class="{ 'is-selected': formData.personalidad_array && formData.personalidad_array.includes(rasgo) }"
+                                    >
+                                        {{ rasgo }}
+                                    </label>
+                                </div>
+                            </div>
                         </div>
 
 
-                        <div class="column">
-
-                        <div class="container-col">
-                            <label for="edad">Edad (Meses):</label>
-                            <input type="number" id="edad" v-model.number="formData.edadme_mascot" min="0">
-                        </div>
-                        
-                        <div class="container-col">
-                        <label for="raza">Raza:</label>
-                        <input type="text" id="raza" v-model="formData.razaxx_mascot">
-                        </div>
-                        </div >
-
-                        <div class="column">
-
-                        <div class="container-col">
-                        <label for="peso">Peso (kg):</label>
-                        <input type="number" step="0.1" id="peso" v-model.number="formData.pesokg_mascot">
-                        </div>
-
-                        <div class="container-col">
-                        <label for="tamano">Tamaño:</label>
-                        <select id="tamano" v-model="formData.tamano_mascot">
-                            <option value="Pequeño">Pequeño</option>
-                            <option value="Mediano">Mediano</option>
-                            <option value="Grande">Grande</option>
-                        </select>
-                        </div>
-                        </div>
-                        <h3 class="section-title">Personalidad y Temperamento</h3>
-
-                        <div class="traits-container checkbox-grid">
-                            <div v-for="rasgo in opcionesPersonalidad" :key="rasgo" class="trait-checkbox-wrapper">
-                                <input 
-                                    type="checkbox" 
-                                    :id="'trait-' + rasgo" 
-                                    :value="rasgo" 
-                                    @change="togglePersonalidad(rasgo)"
-                                    :checked="formData.personalidad_array && formData.personalidad_array.includes(rasgo)"
-                                    style="display: none;" 
-                                >
-                                
-                                <label 
-                                    :for="'trait-' + rasgo" 
-                                    class="trait-chip selectable-chip" 
-                                    :class="{ 'is-selected': formData.personalidad_array && formData.personalidad_array.includes(rasgo) }"
-                                >
-                                    {{ rasgo }}
-                                </label>
+                        <div class="info-section">
+                            <h3>Información adicional</h3>
+                            <textarea v-model="formData.infoad_mascot" placeholder="Información de salud, historia, personalidad, temperamento..."></textarea>
+                            
+                            <div class="image-upload-container">
+                                <h3>Fotos (Máx. 3)</h3>
+                                <div class="image-previews">
+                                    <div v-for="(image, index) in localImages" :key="index" class="image-wrapper">
+                                        <button type="button" class="remove-image-btn" @click="removeImage(index)">×</button>
+                                        <img :src="image" :alt="'Mascota foto ' + (index + 1)">
+                                    </div>
+                                    
+                                    <div v-if="localImages.length < 3" class="add-image-wrapper">
+                                        <label for="image-upload" class="add-image-btn">+</label>
+                                        <input type="file" id="image-upload" accept="image/*" @change="addImage" style="display: none;">
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
+                    <button type="submit" class="save-button" :disabled="isSaving">
+                        {{ isSaving ? 'Guardando...' : 'Guardar Cambios' }}
+                    </button>
+                </form>
 
-                    <div class="info-section">
-                        <h3>Información adicional</h3>
-                        <textarea v-model="formData.infoad_mascot" placeholder="Información de salud, historia, personalidad, temperamento..."></textarea>
-                        
-                        <div class="image-upload-container">
-                            <h3>Fotos (Máx. 3)</h3>
-                            <div class="image-previews">
-                                <div v-for="(image, index) in localImages" :key="index" class="image-wrapper">
-                                    <button type="button" class="remove-image-btn" @click="removeImage(index)">×</button>
-                                    <img :src="image" :alt="'Mascota foto ' + (index + 1)">
-                                </div>
-                                
-                                <div v-if="localImages.length < 3" class="add-image-wrapper">
-                                    <label for="image-upload" class="add-image-btn">+</label>
-                                    <input type="file" id="image-upload" accept="image/*" @change="addImage" style="display: none;">
-                                </div>
-                            </div>
-                        </div>
+                
+
+            </div>
+            <div v-if="modal.visible" class="confirmation-modal-wrapper">
+
+                <div class="confirmation-modal-overlay" @click.self="cerrarModal"></div>
+
+                <div class="modal-content-confirmacion" :class="modal.tipo">
+                    <div class="modal-x">
+                        <button @click="cerrarModal" class="close-button-confirmacion">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="modal-header-confirmacion">
+                        <h2 class="modal-title-confirmacion">Resultado de la Edición</h2>
+                        <p>{{ modal.mensaje }}</p> 
+                    </div>
+                    
+                    <div class="button-actions-confirmacion">
+                        <button @click="cerrarModal" class="btn-primary-confirmacion">
+                            Aceptar
+                        </button>
                     </div>
                 </div>
-
-                <button type="submit" class="save-button" :disabled="isSaving">
-                    {{ isSaving ? 'Guardando...' : 'Guardar Cambios' }}
-                </button>
-            </form>
-
-            
-
-        </div>
-        <div v-if="modal.visible" class="confirmation-modal-wrapper">
-
-            <div class="confirmation-modal-overlay" @click.self="cerrarModal"></div>
-
-            <div class="modal-content-confirmacion" :class="modal.tipo">
-                <div class="modal-x">
-                    <button @click="cerrarModal" class="close-button-confirmacion">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-                <div class="modal-header-confirmacion">
-                    <h2 class="modal-title-confirmacion">Resultado de la Edición</h2>
-                    <p>{{ modal.mensaje }}</p> 
-                </div>
-                
-                <div class="button-actions-confirmacion">
-                    <button @click="cerrarModal" class="btn-primary-confirmacion">
-                        Aceptar
-                    </button>
-                </div>
             </div>
+
         </div>
+
     </div>
 </template>
 
@@ -415,32 +428,6 @@ async function saveChanges() {
 
 <style scoped>
 
-.back-button {
-    width: 110px;
-    height: 40px;
-    background: #f8f9fa;
-    border-radius: 6px;
-    border: 1px solid #dee2e6;
-    color: #6c757d;
-    box-shadow: 0px 6px 10px -1px #757373; 
-    font-size: 0.9rem;
-    font-weight: 700;
-    cursor: pointer;
-    padding: 0.5rem 1rem;
-    display: flex;
-    align-items: center;
-    transition: all 0.3s ease;
-    gap: 0.5rem;
-    margin-left: 30px;
-    margin-top: 10px;
-    position: absolute;
-}
-
-.back-button:hover {
-  background: #e9ecef;
-  color: #495057;
-}
-/* Estilos Básicos para la Modal */
 .modal-overlay { 
 position: fixed; 
 top: 0; 
@@ -453,7 +440,14 @@ justify-content: center;
 align-items: center;
 z-index: 1000; }
 
+.edit-modal-container-main{
+    position: relative;
+    max-width: 1000px;
+    overflow: hidden;
+}
+
 .edit-modal-container { 
+position: relative;
 background-color: #ffffff; 
 border-radius: 1.5rem; 
 box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); 
@@ -462,7 +456,33 @@ max-width: 1000px;
 max-height: 90vh; 
 overflow-y: auto; 
 padding: 2rem;
-scrollbar-width: none;
+margin: 1rem;
+scrollbar-width: thin;
+}
+
+
+.edit-modal-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 4.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  border: none;
+  background: #ff9595;
+  color: #ffffff;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.edit-modal-close:hover {
+  background: #ff6060;
 }
 
 .modal-header { 
