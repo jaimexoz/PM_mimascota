@@ -41,7 +41,7 @@
           </div>
           
           <button @click="retakeTest" class="btn-retake">
-            <img src="../assets/refresh.png" alt="refresh" style="width: 25px;"> Cambiar mis preferencias
+            <img src="https://res.cloudinary.com/dxf384txl/image/upload/v1770000809/refresh_qvgihy.png" alt="refresh" style="width: 25px;"> Cambiar mis preferencias
           </button>
         </div>
 

@@ -3,7 +3,7 @@
     <div class="navbar-container">
       <div class="navbar-logo">
         <router-link to="/home" class="logo-link">
-          <img src="../assets/LogoMiMascota.png" alt="MiMascota" class="logo-image" />
+          <img src="https://res.cloudinary.com/dxf384txl/image/upload/v1769999924/LogoMiMascota_hcfxly.png" alt="MiMascota" class="logo-image" />
         </router-link>
       </div>
 

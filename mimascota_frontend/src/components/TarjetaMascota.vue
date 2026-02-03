@@ -163,6 +163,9 @@ const navigateToAdoptionForm = () => {
         console.error("ID de mascota no disponible para iniciar adopción.");
         return;
     }
+    
+    // ⭐️ REGISTRAR INTERACCIÓN 'CONTACT'
+    registerInteraction(mascotId, 'contact');
 
     // 2. Usamos 'router.push' para navegar a la ruta del formulario.
     // Importante: Verifica que tu ruta en Vue Router esté definida como '/adoptform/:mascotId'
@@ -283,9 +286,30 @@ const getTraitColor = (trait) => {
     return assignedColor;
 };
 
-const handleAdopcion = async (petId) => {
-    alert(`Iniciando proceso de adopción para: ${pet.value.nombre}`);
+const registerInteraction = (petId, type) => {
+    if (!authStore.isAuthenticated) return;
 
+    fetch('http://localhost:3000/api/interactions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authStore.token}`
+        },
+        body: JSON.stringify({ petId, type })
+    }).catch(err => console.error("Error background interaction:", err));
+};
+
+const handleAdopcion = async (petId) => {
+    // ⭐️ REGISTRAR CONTACTO/INTENTO
+    registerInteraction(petId, 'contact');
+    
+    alert(`Iniciando proceso de adopción para: ${pet.value.nombre}`);
+    
+    // Aquí tu lógica existente para redirigir si hiciera falta...
+    // Como el botón "ADOPTAR" original hace un router.push a /adoptform, 
+    // lo ideal sería que 'handleAdopcion' haga eso mismo o que el botón llame a navigateToAdoptionForm.
+    // Viendo el template, el botón ADOPTAR llama a 'navigateToAdoptionForm' directo, 
+    // así que meteremos el registro ALLÍ.
 };
 
 // --- NUEVA FUNCIÓN: Verificar el estado de favorito al cargar ---
@@ -356,6 +380,11 @@ const toggleFavorite = async () => {
             // 4. Confirmación: El backend nos devuelve el nuevo estado (data.newStatus)
             isFavorite.value = data.newStatus;
             console.log(data.message);
+            
+            // ⭐️ REGISTRAR INTERACCIÓN 'FAVORITE' (Solo si se activó, no si se quitó)
+            if (isFavorite.value) {
+                registerInteraction(petId, 'favorite');
+            }
         } else {
             // 5. Rollback: Si falla la llamada, revertir el estado visual
             isFavorite.value = previousStatus;

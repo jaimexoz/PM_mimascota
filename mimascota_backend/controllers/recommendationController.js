@@ -15,7 +15,7 @@ exports.getRecommendations = async (req, res) => {
         const rankedPets = allPets.map(pet => {
             // Si la mascota ya tiene vector guardado, lo usa. Si no, lo calcula al vuelo.
             const petVector = pet.vector_caracteristicas || mlService.createPetVector(pet);
-            
+
             const similarityScore = mlService.cosineSimilarity(userVector, petVector);
 
             return {
@@ -38,9 +38,9 @@ exports.getRecommendations = async (req, res) => {
 
     } catch (error) {
         console.error("Error en recomendación:", error);
-        res.status(500).json({ 
-            status: 'error', 
-            message: 'Error calculando recomendaciones' 
+        res.status(500).json({
+            status: 'error',
+            message: 'Error calculando recomendaciones'
         });
     }
 };
@@ -54,14 +54,14 @@ exports.recalculateAllVectors = async (req, res) => {
     try {
         // 1. Traemos TODAS las mascotas usando el Modelo (que ya hace el JOIN de personalidades)
         const allPets = await mascotaModel.obtenerMascotasParaRecomendacion();
-        
+
         let updatedCount = 0;
 
         // 2. Recorremos una por una
         for (const pet of allPets) {
             // Calculamos su vector con el servicio
             const vector = mlService.createPetVector(pet);
-            
+
             // 3. Actualizamos la mascota en la DB
             await pool.query(
                 'UPDATE mascotas SET vector_caracteristicas = $1 WHERE idxxxx_mascot = $2',
@@ -106,26 +106,42 @@ exports.submitQuestionnaire = async (req, res) => {
 exports.getSavedRecommendations = async (req, res) => {
     const userId = req.user.id;
     try {
-        // 1. Buscar si el usuario tiene vector guardado
+        // 1. Buscar si el usuario tiene vector guardado (Preferencias Explícitas)
         const userRes = await pool.query(
-            'SELECT vector_preferencias FROM usuarios WHERE idxxxx_usuari = $1', 
+            'SELECT vector_preferencias FROM usuarios WHERE idxxxx_usuari = $1',
             [userId]
         );
 
-        const savedVector = userRes.rows[0]?.vector_preferencias;
+        const explicitVector = userRes.rows[0]?.vector_preferencias;
 
-        // Si no tiene vector, devolvemos array vacío (el front mostrará el botón "Hacer Test")
-        if (!savedVector) {
+        // Si no tiene vector explícito, devolvemos array vacío (el front mostrará el botón "Hacer Test")
+        // OPCIONAL: Podríamos recomendar solo por interacción si existe, pero por regla de negocio
+        // asumimos que el test es el punto de partida.
+        if (!explicitVector) {
             return res.json({ status: 'no_data', recommendations: [] });
         }
 
-        // 2. Si tiene vector, calculamos matches frescos
-        const rankedPets = await calculateMatchesForVector(savedVector);
+        // 2. Obtener Vector Implícito (Interacciones)
+        // Esto aprende del comportamiento real del usuario
+        const implicitVector = await mlService.getImplicitUserVector(userId);
 
-        res.json({ status: 'success', recommendations: rankedPets });
+        // 3. Combinar vectores (Híbrido)
+        // Alpha 0.7 = 70% peso al cuestionario, 30% al comportamiento
+        const finalVector = mlService.mergeUserVectors(explicitVector, implicitVector, 0.7);
+
+        // 4. Calcular matches con el vector final
+        const rankedPets = await calculateMatchesForVector(finalVector);
+
+        res.json({
+            status: 'success',
+            recommendations: rankedPets,
+            debug: {
+                used_implicit: !!implicitVector // Para saber si se usó ML
+            }
+        });
 
     } catch (error) {
-        console.error(error);
+        console.error("Error en getSavedRecommendations:", error);
         res.status(500).json({ message: 'Error obteniendo recomendaciones' });
     }
 };
@@ -133,7 +149,7 @@ exports.getSavedRecommendations = async (req, res) => {
 // --- Función Auxiliar para no repetir código ---
 async function calculateMatchesForVector(userVector) {
     const allPets = await mascotaModel.obtenerMascotasParaRecomendacion();
-    
+
     const rankedPets = allPets.map(pet => {
         const petVector = pet.vector_caracteristicas || mlService.createPetVector(pet);
         const score = mlService.cosineSimilarity(userVector, petVector);

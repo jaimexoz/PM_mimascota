@@ -258,16 +258,36 @@ function formatAge(months) {
 * Componente funcional para renderizar una tarjeta de mascota.
 * Se han movido las clases de Tailwind a PetCard classes y chips.
 */
+// ⚠️ NO OLVIDAR IMPORTAR useAuthStore AL PRINCIPIO
+import { useAuthStore } from "@/stores/authStore";
+
+const authStore = useAuthStore();
+
+const registerInteraction = (petId, type) => {
+    if (!authStore.isAuthenticated) return;
+
+    fetch('http://localhost:3000/api/interactions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authStore.token}`
+        },
+        body: JSON.stringify({ petId, type })
+    }).catch(err => console.error("Error background interaction:", err));
+};
+
 const PetCard = ({ mascota }) => {
   const ageDisplay = formatAge(mascota.edadme_mascot);
   const imageUrl = mascota.image1_mascot || `https://placehold.co/400x400/9933FF/FFFFFF/png?text=Sin+Foto`;
 
-  
-  // ⚠️ ERROR CORREGIDO: navigateToProfile NO DEBE SER UNA FUNCIÓN NUEVA DENTRO DE ESTA FUNCIÓN. 
-  // DEBE SER UNA FUNCIÓN QUE RETORNA OTRA FUNCIÓN PARA EL ONCLICK.
   const navigateToProfile = () => {
-      // Utilizamos el router del componente padre
-      router.push(`/card/${mascota.id || mascota.idxxxx_mascot}`);
+    // ⭐️ REGISTRAR CLICK
+    const petId = mascota.id || mascota.idxxxx_mascot;
+    if (petId) {
+        registerInteraction(petId, 'click');
+    }
+
+      router.push(`/card/${petId}`);
   };
   
   return h('div', { class: 'pet-card' }, [
@@ -298,7 +318,6 @@ const PetCard = ({ mascota }) => {
           // Botón Ver Perfil
           h('button', { 
             class: 'pet-card-button',
-            // ⚠️ CORRECCIÓN CLAVE: Pasamos la referencia a la función, no la LLAMAMOS inmediatamente.
             onClick: navigateToProfile 
           }, 'Ver más')
         ])

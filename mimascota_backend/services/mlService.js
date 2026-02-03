@@ -1,4 +1,5 @@
 // backend/services/mlService.js
+const InteractionModel = require('../models/InteractionModel');
 
 /**
  * SERVICIO DE MACHINE LEARNING (Content-Based Filtering)
@@ -105,7 +106,7 @@ function createPetVector(pet) {
     const especieStr = String(pet.especi_mascot || '').toLowerCase();
     const isDog = especieStr.includes('perro') || especieStr === '1';
     const isCat = especieStr.includes('gato') || especieStr === '2';
-    
+
     vec.push(isDog ? 1.0 : 0.0);
     vec.push(isCat ? 1.0 : 0.0);
 
@@ -127,7 +128,7 @@ function createPetVector(pet) {
     // --- DIM 5-17: PERSONALIDAD ---
     // Usamos 'lista_personalidad' que viene del array_agg en tu SQL Controller
     const rasgosDB = (pet.lista_personalidad || []).map(t => t.toLowerCase());
-    
+
     PERSONALITY_TRAITS.forEach(trait => {
         // Verificamos si la mascota tiene este rasgo específico
         // Mapeo flexible: ej. "juguetón" (con tilde) vs "jugueton" (sin tilde)
@@ -180,7 +181,7 @@ function createUserVector(formData) {
     // La recomendación debe respetar el límite físico de la vivienda.
     const desiredSize = SIZE_MAP[formData.tamanoMascota] || 0.5;
     const homeLimit = SIZE_MAP[formData.tipoVivienda] || 1.0;
-    
+
     // Usamos el mínimo entre lo que quiere y lo que puede tener
     vec.push(Math.min(desiredSize, homeLimit));
 
@@ -188,7 +189,7 @@ function createUserVector(formData) {
     // Calculamos un promedio entre su actividad física y la energía que pide
     const userActivity = ENERGY_MAP[formData.nivelActividad] || 0.5;
     const desiredEnergy = ENERGY_MAP[formData.nivelEnergia] || 0.5;
-    
+
     let finalEnergy = (userActivity + desiredEnergy) / 2;
 
     // Penalización: Si no está nunca en casa, no debería tener mascota de alta energía
@@ -200,11 +201,11 @@ function createUserVector(formData) {
     // --- 5-17. PERSONALIDAD ---
     // El array 'personalidad' viene del checkbox de Vue
     const userTraits = (formData.personalidad || []).map(t => t.toLowerCase());
-    
+
     PERSONALITY_TRAITS.forEach(trait => {
         // Mapeos especiales de sinónimos del Frontend
         let isMatch = userTraits.includes(trait);
-        
+
         // Ejemplo: Si el front manda 'curioso', lo mapeamos a 'jugueton' o 'inteligente'
         if (trait === 'jugueton' && userTraits.includes('curioso')) isMatch = true;
         if (trait === 'arisco' && userTraits.includes('independiente')) isMatch = true;
@@ -225,8 +226,84 @@ function createUserVector(formData) {
     return vec;
 }
 
+// ==========================================
+// 5. VECTORIZACIÓN IMPLÍCITA (Comportamiento)
+// ==========================================
+
+/**
+ * Calcula el vector implícito basado en las interacciones del usuario.
+ * @param {number} userId - ID del usuario.
+ * @returns {Promise<Array|null>} Vector promedio de interacciones positivas o null si no tiene.
+ */
+async function getImplicitUserVector(userId) {
+    try {
+        // 1. Obtener interacciones positivas recientes
+        const interactions = await InteractionModel.getUserPositiveInteractions(userId);
+
+        if (!interactions || interactions.length === 0) {
+            return null;
+        }
+
+        // 2. Extraer los vectores de las mascotas con las que interactuó
+        // Filtramos por si alguna mascota no tuviera vector generado aún
+        const vectors = interactions
+            .map(i => i.vector_caracteristicas)
+            .filter(v => v && Array.isArray(v) && v.length > 0);
+
+        if (vectors.length === 0) return null;
+
+        // 3. Calcular el promedio (Centroide) de los vectores
+        // Asumimos que todos los vectores tienen la misma longitud (20 dimensiones)
+        const dim = vectors[0].length;
+        const centroid = new Array(dim).fill(0.0);
+
+        for (const vec of vectors) {
+            for (let i = 0; i < dim; i++) {
+                centroid[i] += vec[i];
+            }
+        }
+
+        // Dividimos por la cantidad de interacciones para obtener el promedio
+        for (let i = 0; i < dim; i++) {
+            centroid[i] = centroid[i] / vectors.length;
+        }
+
+        return centroid;
+
+    } catch (error) {
+        console.error("Error calculando vector implícito:", error);
+        return null;
+    }
+}
+
+/**
+ * Combina el vector explícito (cuestionario) con el implícito (historial).
+ * @param {Array} explicitVec - Vector generado desde el formulario.
+ * @param {Array} implicitVec - Vector generado desde interacciones.
+ * @param {number} alpha - Peso del vector explícito (0.0 a 1.0). Default 0.7.
+ */
+function mergeUserVectors(explicitVec, implicitVec, alpha = 0.7) {
+    // Si no hay vector implícito, retornamos el explícito puro
+    if (!implicitVec) return explicitVec;
+    // Si no hay explícito (raro, pero posible), retornamos implícito
+    if (!explicitVec) return implicitVec;
+
+    const merged = [];
+    const length = Math.min(explicitVec.length, implicitVec.length);
+
+    for (let i = 0; i < length; i++) {
+        // Fórmula: v_final = (alpha * v_expl) + ((1 - alpha) * v_impl)
+        const val = (explicitVec[i] * alpha) + (implicitVec[i] * (1 - alpha));
+        merged.push(val);
+    }
+
+    return merged;
+}
+
 module.exports = {
     createPetVector,
     createUserVector,
-    cosineSimilarity
+    cosineSimilarity,
+    getImplicitUserVector,
+    mergeUserVectors
 };

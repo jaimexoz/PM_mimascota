@@ -36,7 +36,7 @@
 
           <div class="image-column-nos">
             <img 
-              src="../assets/dog-nosotros.jpg" 
+              src="https://res.cloudinary.com/dxf384txl/image/upload/v1769999851/dog-nosotros_gd3fam.jpg" 
               alt="Cachorro blanco acostado, emblema de la Veterinaria Mi Mascota"
               class="puppy-image"
             />

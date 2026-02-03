@@ -540,7 +540,7 @@ onMounted(() => {
     position: relative;
     width: 90%;
     height: 500px; 
-    background-image: url('../assets/experience.jpg'); 
+    background-image: url('https://res.cloudinary.com/dxf384txl/image/upload/v1769999906/experience_aqpufc.jpg'); 
     background-size: cover;
     background-position: center;
     border-bottom-left-radius: 50px;

@@ -10,14 +10,15 @@ require('dotenv').config();
 // Importar rutas
 const authRoutes = require('./routes/authRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
-const mascotaRoutes = require('./routes/mascotaRoutes'); 
+const mascotaRoutes = require('./routes/mascotaRoutes');
 const favoritesRoutes = require('./routes/favoritesRoutes');
 const createAdoptionRouter = require('./routes/adoptionRoutes'); // 👈 CAMBIO: Importamos la función
 const reviewRoutes = require('./routes/reviewRoutes');
 const recommendationsRoutes = require('./routes/recommendationsRoutes');
+const interactionRoutes = require('./routes/interactionRoutes');
 const app = express();
 // 1. Crear el servidor HTTP a partir de la aplicación Express
-const server = http.createServer(app); 
+const server = http.createServer(app);
 
 // 2. Inicializar Socket.io y adjuntarlo al servidor HTTP
 const io = new Server(server, {
@@ -32,9 +33,9 @@ const io = new Server(server, {
 // 3. Configurar la conexión de Socket.io con mejor manejo de errores
 io.on('connection', (socket) => {
     console.log(`Cliente conectado: ${socket.id}`);
-    
+
     const userId = socket.handshake.query.userId;
-    
+
     if (userId) {
         socket.join(userId.toString());
         console.log(`✅ Usuario ${userId} unido a su sala de notificaciones (Socket ID: ${socket.id})`);
@@ -63,7 +64,7 @@ io.on('connection', (socket) => {
 // -----------------------------------------------------------
 
 // Middlewares
-app.use(cors()); 
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
@@ -72,10 +73,11 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Rutas de la API (Sin cambio en cómo se usan las rutas que no necesitan 'io')
 app.use('/api/auth', authRoutes);
 app.use('/api/upload', uploadRoutes);
-app.use('/api/mascotas', mascotaRoutes); 
-app.use('/api/favorites', favoritesRoutes); 
+app.use('/api/mascotas', mascotaRoutes);
+app.use('/api/favorites', favoritesRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/recommendations', recommendationsRoutes);
+app.use('/api/interactions', interactionRoutes);
 
 
 
