@@ -6,6 +6,7 @@ const cloudinary = require('../config/cloudinaryConfig');
 const fs = require('fs');
 // Importamos el modelo
 const authModel = require('../models/authModel'); 
+const pool = require('../config/db'); // Para consultas directas en resendVerification 
 
 // --- Funciones de Ayuda (Lógica de Negocio No-DB) ---
 
@@ -74,7 +75,29 @@ const registerUser = async (req, res) => {
         const userExists = await authModel.findUserByEmailDB(emailx_usuari);
 
         if (userExists.rows.length > 0) {
-            return res.status(400).json({ message: 'El usuario ya existe con este correo electrónico.' });
+            const existingUser = userExists.rows[0];
+            
+            // 🔥 SOLUCIÓN: Si el usuario existe pero NO está verificado y el token expiró
+            if (!existingUser.mailve_usuari && existingUser.tokexp_usuari) {
+                const tokenExpired = new Date(existingUser.tokexp_usuari) < new Date();
+                
+                if (tokenExpired) {
+                    // Eliminar el usuario zombie para permitir re-registro
+                    await authModel.deleteUnverifiedUserDB(existingUser.idxxxx_usuari);
+                    console.log(`Usuario no verificado con token expirado eliminado: ${emailx_usuari}`);
+                    // Continuar con el registro normal
+                } else {
+                    // Token aún válido, sugerir reenvío
+                    return res.status(400).json({ 
+                        message: 'Ya existe una cuenta con este correo pendiente de verificación. Revisa tu bandeja de entrada o solicita un nuevo correo de verificación.',
+                        canResendVerification: true,
+                        email: emailx_usuari
+                    });
+                }
+            } else {
+                // Usuario ya verificado o sin token de verificación
+                return res.status(400).json({ message: 'El usuario ya existe con este correo electrónico.' });
+            }
         }
 
         // 4. Hashear contraseña
@@ -294,6 +317,58 @@ const verifyEmail = async (req, res) => {
     } catch (error) {
         console.error('Error al verificar el correo electrónico:', error);
         res.status(500).json({ message: 'Error interno del servidor al verificar el correo.' });
+    }
+};
+
+// @desc    Reenviar correo de verificación
+// @route   POST /api/auth/resend-verification
+// @access  Public
+const resendVerificationEmail = async (req, res) => {
+    const { emailx_usuari } = req.body;
+
+    if (!emailx_usuari) {
+        return res.status(400).json({ message: 'El correo electrónico es requerido.' });
+    }
+
+    try {
+        // 1. Buscar usuario
+        const result = await authModel.findUserByEmailDB(emailx_usuari);
+        const user = result.rows[0];
+
+        if (!user) {
+            return res.status(404).json({ message: 'No se encontró una cuenta con este correo electrónico.' });
+        }
+
+        // 2. Verificar que NO esté ya verificado
+        if (user.mailve_usuari) {
+            return res.status(400).json({ message: 'Esta cuenta ya está verificada. Puedes iniciar sesión.' });
+        }
+
+        // 3. Generar nuevo token de verificación
+        const verificationToken = uuidv4();
+        const verificationExpires = new Date(Date.now() + 3600000); // Expira en 1 hora
+
+        // 4. Actualizar token en DB
+        await pool.query(
+            'UPDATE usuarios SET tokeve_usuari = $1, tokexp_usuari = $2 WHERE idxxxx_usuari = $3',
+            [verificationToken, verificationExpires, user.idxxxx_usuari]
+        );
+
+        // 5. Enviar nuevo correo de verificación
+        const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: emailx_usuari,
+            subject: 'Verifica tu correo electrónico - Mi Mascota App',
+            html: `<p>Hola ${user.nombre_usuari},</p><p>Has solicitado un nuevo enlace de verificación. Por favor, verifica tu correo electrónico haciendo clic en el siguiente enlace:</p><p><a href="${verificationUrl}">Verificar Correo Electrónico</a></p><p>Este enlace expirará en 1 hora.</p><p>Si no solicitaste esto, por favor ignora este correo.</p>`,
+        };
+        await transporter.sendMail(mailOptions);
+
+        res.status(200).json({ message: 'Se ha enviado un nuevo correo de verificación. Por favor, revisa tu bandeja de entrada.' });
+
+    } catch (error) {
+        console.error('Error al reenviar correo de verificación:', error);
+        res.status(500).json({ message: 'Error interno del servidor al reenviar el correo de verificación.' });
     }
 };
 
@@ -580,6 +655,7 @@ module.exports = {
     loginUser,
     updateUserInfo,
     verifyEmail,
+    resendVerificationEmail,
     requestPasswordReset,
     resetPassword,
     getAllUsers,

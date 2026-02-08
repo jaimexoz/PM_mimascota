@@ -80,7 +80,14 @@
           <div class="user-profile-container">
             <div class="user-profile" @click="toggleDropdown">
               <div class="user-avatar">
+                <!-- Mostrar SVG placeholder si no hay imagen -->
+                <svg v-if="!userImageUrl" width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="8" r="4" fill="#ff9595"/>
+                  <path d="M12 14c-4 0-7 2-7 4v2h14v-2c0-2-3-4-7-4z" fill="#ff9595"/>
+                </svg>
+                <!-- Mostrar imagen si existe -->
                 <img 
+                  v-else
                   :src="userImageUrl" 
                   :alt="userName"
                   @error="handleImageError"
@@ -211,7 +218,7 @@ const userImageUrl = computed(() => {
       ? user.imageUrl 
       : `http://localhost:3000${user.imageUrl}`;
   }
-  return '/default-avatar.png';
+  return null;
 });
 
 const isAdmin = computed(() => {
@@ -825,6 +832,13 @@ button.view-more-button {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.user-avatar svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  background: #f5f5f5;
 }
 
 .user-name {
