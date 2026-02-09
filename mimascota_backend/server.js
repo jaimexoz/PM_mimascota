@@ -68,17 +68,16 @@ app.get('/', (req, res) => {
     res.send('API de Mi Mascota funcionando!');
 });
 
-// ... (Manejo de errores global y 404 existentes) ...
-
 // Configuración del puerto
 const PORT = process.env.PORT || 3000;
-
-app.use((req, res) => {
-    res.status(404).send('Ruta no encontrada');
-});
 
 // 4. Iniciar el servidor HTTP (NO app.listen)
 server.listen(PORT, () => {
     console.log(`Servidor Express/Socket.io corriendo en el puerto ${PORT}`);
     console.log(`Acceso a la API en: http://localhost:${PORT}/api`);
+});
+
+// ⚠️ IMPORTANTE: El middleware 404 debe ir AL FINAL, después de todas las rutas
+app.use((req, res) => {
+    res.status(404).send('Ruta no encontrada');
 });
