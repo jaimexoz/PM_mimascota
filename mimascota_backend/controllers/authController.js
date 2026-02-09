@@ -116,7 +116,7 @@ const registerUser = async (req, res) => {
         // 6. Crear usuario (Modelo)
         const newUser = await authModel.createNewUserDB(userData);
 
-        // 7. Enviar correo de verificación
+        // 7. Enviar correo de verificación (con manejo de errores)
         const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
         const mailOptions = {
             from: process.env.EMAIL_USER,
@@ -124,14 +124,35 @@ const registerUser = async (req, res) => {
             subject: 'Verifica tu correo electrónico - Mi Mascota App',
             html: `<p>Hola ${nombre_usuari},</p><p>Gracias por registrarte en Mi Mascota App. Por favor, verifica tu correo electrónico haciendo clic en el siguiente enlace:</p><p><a href="${verificationUrl}">Verificar Correo Electrónico</a></p><p>Este enlace expirará en 1 hora.</p><p>Si no te registraste en nuestra aplicación, por favor ignora este correo.</p>`,
         };
-        await transporter.sendMail(mailOptions);
+        
+        let emailSent = false;
+        let emailError = null;
+        
+        try {
+            await transporter.sendMail(mailOptions);
+            emailSent = true;
+            console.log(`✅ Email de verificación enviado exitosamente a: ${emailx_usuari}`);
+        } catch (emailErr) {
+            emailSent = false;
+            emailError = emailErr.message;
+            console.error('❌ Error al enviar email de verificación:', emailErr);
+            console.error('Detalles del error:', {
+                code: emailErr.code,
+                command: emailErr.command,
+                response: emailErr.response
+            });
+        }
 
-        // 8. Respuesta
+        // 8. Respuesta (siempre se envía, incluso si el email falló)
         res.status(201).json({
-            message: 'Registro exitoso. Se ha enviado un enlace de verificación a tu correo electrónico.',
+            message: emailSent 
+                ? 'Registro exitoso. Se ha enviado un enlace de verificación a tu correo electrónico.'
+                : 'Registro exitoso, pero hubo un problema al enviar el correo de verificación. Por favor, solicita un nuevo correo de verificación desde la página de inicio de sesión.',
             userId: newUser.idxxxx_usuari,
             redirectToVerification: true,
-            email: emailx_usuari
+            email: emailx_usuari,
+            emailSent: emailSent,
+            ...(emailError && { emailError: 'Error al enviar email. Por favor, solicita un reenvío.' })
         });
 
     } catch (error) {

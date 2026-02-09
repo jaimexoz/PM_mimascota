@@ -1,0 +1,51 @@
+# 🔐 Variables de Entorno para Render - MiMascota Backend
+
+## ✅ LISTO PARA COPIAR - Usa estos valores exactos en Render
+
+### 📊 Base de Datos (Supabase)
+DB_HOST=db.avkbmdnwbfpgqkeqsdt.supabase.co
+DB_PORT=5432
+DB_NAME=postgres
+DB_USER=postgres
+DB_PASSWORD=2YXQRbf7HLh20DZL
+
+### 🖼️ Cloudinary (Imágenes) - ✅ Tus datos reales
+CLOUDINARY_CLOUD_NAME=dxf384txl
+CLOUDINARY_API_KEY=515867844143549
+CLOUDINARY_API_SECRET=vBsgJ7ImYmKqvoXwUfWbWtM_U1I
+
+### 📧 Gmail (Emails) - ✅ Tus datos reales
+EMAIL_USER=mimascotitacfg@gmail.com
+EMAIL_PASS=msbi ifum hals urbz
+
+### 🔑 JWT y Frontend - ✅ Tu JWT existente
+JWT_SECRET=adce519bdf7859eed79c5c994b629cc1cac88f5894bfb204c3413c6b5075145d3c5cab97a233476539f8d1c2c756aaa809dda3158f458ce3a33decb76bedcbc5
+FRONTEND_URL=https://mimascota-frontend.vercel.app
+
+---
+
+## 📝 Instrucciones:
+
+1. Reemplaza los valores entre corchetes con tus datos reales
+2. NO incluyas los corchetes []
+3. NO agregues espacios antes o después del =
+4. El JWT_SECRET se generará automáticamente abajo
+
+---
+
+## ⚠️ Dónde encontrar cada valor:
+
+### Supabase (DB_PASSWORD):
+- Ve a Supabase → Settings → Database
+- Copia la password que configuraste
+
+### Cloudinary:
+- Ve a Cloudinary Dashboard
+- Copia Cloud Name, API Key, API Secret
+
+### Gmail (EMAIL_PASS):
+- Ve a Google Account → Security → 2-Step Verification → App Passwords
+- Genera una nueva app password
+
+### JWT_SECRET:
+- Se generará automáticamente en el siguiente paso
