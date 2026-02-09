@@ -143,6 +143,7 @@ import { ref, onMounted, h } from 'vue';
 import { Loader } from 'lucide-vue-next';
 import { useAuthStore } from "@/stores/authStore";
 import { useRouter } from 'vue-router'; 
+import { apiUrl } from '@/config/api';
   
   // Inicialización
   const router = useRouter(); 
@@ -181,7 +182,7 @@ async function getMascotasRecientes() {
     isLoading.value = true;
     try {
         console.log("Intentando obtener mascotas del backend...");
-        const response = await fetch('http://localhost:3000/api/mascotas/home2nd', { 
+        const response = await fetch(apiUrl('/mascotas/home2nd'), { 
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${authStore.token}` 

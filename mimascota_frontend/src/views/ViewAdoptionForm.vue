@@ -157,10 +157,12 @@
   
 <script setup>
 import Navbar from '../components/Navbar.vue';
-import { ref, onMounted, reactive } from 'vue';
+import Footer from '../components/Footer.vue';
+import { ref, onMounted, reactive, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { PawPrint, Loader } from 'lucide-vue-next';
 import { useAuthStore } from "@/stores/authStore"; 
+import { apiUrl } from '@/config/api';
 
 const route = useRoute();
 const router = useRouter();
@@ -224,7 +226,7 @@ function formatAge(months) {
 const getMascotaDetails = async (mascotId) => {
     isLoadingMascota.value = true;
     try {
-        const response = await fetch(`http://localhost:3000/api/mascotas/shortcard/${mascotId}`); 
+        const response = await fetch(apiUrl(`/mascotas/shortcard/${mascotId}`)); 
         if (!response.ok) {
             throw new Error('Error al cargar la mascota asociada.');
         }
@@ -252,7 +254,7 @@ const fetchFormData = async (id) => {
     
     try {
         // 🚨 URL CLAVE: Debe coincidir con tu adoptionRoutes.js (router.get('/form/:formId', ...))
-        const response = await fetch(`http://localhost:3000/api/adoptions/form/${id}`, { 
+        const response = await fetch(apiUrl(`/adoptions/form/${id}`), { 
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

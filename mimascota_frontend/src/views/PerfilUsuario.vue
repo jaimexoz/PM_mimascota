@@ -237,13 +237,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '../stores/authStore';
 // Asumiendo que Navbar es un componente funcional
 import Navbar from '../components/Navbar.vue'; 
 import Footer from '@/components/Footer.vue';
 // Asumiendo que estas utilidades existen y manejan el token y localStorage
 import { getToken, updateUserData, onUserDataChange } from '../utils/auth'; 
+import { apiUrl } from '@/config/api';
 
 const router = useRouter();
 const defaultAvatar = '/default-avatar.png';
@@ -383,7 +385,7 @@ const saveChanges = async () => {
         };
 
         // Simulación de llamada a API para guardar la información
-        const response = await fetch('http://localhost:3000/api/auth/update-user-info', {
+        const response = await fetch(apiUrl('/auth/update-user-info'), {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -463,7 +465,7 @@ async function onFileChange(e) {
     const formData = new FormData();
     formData.append('profileImage', file);
 
-    const response = await fetch('http://localhost:3000/api/auth/update-profile-image', {
+    const response = await fetch(apiUrl('/auth/update-profile-image'), {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -551,7 +553,7 @@ const changePassword = async () => {
       throw new Error('No hay token de autenticación');
     }
 
-    const response = await fetch('http://localhost:3000/api/auth/change-password', {
+    const response = await fetch(apiUrl('/auth/change-password'), {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

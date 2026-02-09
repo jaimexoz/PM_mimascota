@@ -91,6 +91,8 @@ import { ref, onMounted, computed, reactive, h } from 'vue';
 import { PawPrint, Search, Loader } from 'lucide-vue-next';
 import { useRouter } from 'vue-router'; 
 import Footer from '@/components/Footer.vue';
+import { getToken } from '../utils/auth';
+import { apiUrl } from '@/config/api';
 
 // Inicialización
 const router = useRouter(); 
@@ -128,7 +130,7 @@ const filterOptions = {
 async function getMascotas() {
   isLoading.value = true;
   try {
-      const response = await fetch('http://localhost:3000/api/mascotas/perros', { 
+      const response = await fetch(apiUrl('/mascotas/perros'), { 
           method: 'GET',
           headers: {
               'Content-Type': 'application/json'

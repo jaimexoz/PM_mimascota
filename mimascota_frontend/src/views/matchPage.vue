@@ -91,6 +91,9 @@ import { ref, onMounted, computed, reactive, h } from 'vue';
 import { PawPrint, Search, Loader } from 'lucide-vue-next';
 import { useRouter } from 'vue-router'; 
 import Footer from '@/components/Footer.vue';
+import TarjetaMascota from '../components/TarjetaMascota.vue';
+import { getToken } from '../utils/auth';
+import { apiUrl } from '@/config/api';
 
 // Inicialización
 const router = useRouter(); 
@@ -129,7 +132,7 @@ async function getMascotas() {
   isLoading.value = true;
   try {
       // NOTA: Asegúrate de que tu backend tenga un endpoint que devuelva todas las mascotas
-      const response = await fetch('http://localhost:3000/api/mascotas/match', { 
+      const response = await fetch(apiUrl('/mascotas/match'), { 
           method: 'GET',
           headers: {
               'Content-Type': 'application/json'

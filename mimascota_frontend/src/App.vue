@@ -5,6 +5,7 @@
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';
+import { apiUrl } from '@/config/api';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -24,7 +25,7 @@ onMounted(async () => {
         // Usamos una ruta protegida simple para verificar el token
         // Usaremos la ruta 'update-user-info' como endpoint de prueba
         try {
-            const response = await fetch('http://localhost:3000/api/auth/update-user-info', {
+            const response = await fetch(apiUrl('/auth/update-user-info'), {
                 method: 'PUT', // PUT requiere token y es un endpoint privado
                 headers: { 
                     'Content-Type': 'application/json',

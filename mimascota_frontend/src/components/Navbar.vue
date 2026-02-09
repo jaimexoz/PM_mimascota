@@ -178,8 +178,9 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { logout, onUserDataChange } from '../utils/auth';
+import { logout, onUserDataChange, getToken } from '../utils/auth';
 import { useAuthStore } from '@/stores/authStore';
+import { apiUrl, backendUrl, BACKEND_URL } from '@/config/api';
 import { PawPrint } from 'lucide-vue-next';
 import { mdiCat } from '@mdi/js';
 import { mdiTrashCanOutline } from '@mdi/js';
@@ -216,7 +217,7 @@ const userImageUrl = computed(() => {
   if (user?.imageUrl) {
     return user.imageUrl.startsWith('http') 
       ? user.imageUrl 
-      : `http://localhost:3000${user.imageUrl}`;
+      : backendUrl(user.imageUrl);
   }
   return null;
 });
@@ -284,8 +285,8 @@ const showViewMoreButton = computed(() => {
         return;
     }
 
-    // ⚠️ AJUSTA ESTA URL a la de tu backend si no es http://localhost:3000
-    socket = io('http://localhost:3000', {
+    // Socket.IO usa la URL del backend desde la configuración
+    socket = io(BACKEND_URL, {
         query: {
             userId: userId // ⭐️ Enviar el ID de usuario para la autenticación y unión al "room"
         }
@@ -362,7 +363,7 @@ const showViewMoreButton = computed(() => {
 
     try {
         // ⚠️ AJUSTA ESTA RUTA a la de tu endpoint de notificaciones
-        const response = await fetch('http://localhost:3000/api/adoptions/notificaciones', { 
+        const response = await fetch(apiUrl('/adoptions/notificaciones'), { 
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -394,7 +395,7 @@ const markAllAsRead = async () => {
         if (unreadCount.value === 0) return;
 
         // ⚠️ AJUSTA ESTA RUTA a la de tu endpoint de marcar como leídas
-        const response = await fetch('http://localhost:3000/api/adoptions/readnotifi', { 
+        const response = await fetch(apiUrl('/adoptions/readnotifi'), { 
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -508,7 +509,7 @@ const handleDeleteAccount = async () => {
 
     try {
         // ⚠️ AJUSTA ESTA RUTA a tu backend
-        const response = await fetch('http://localhost:3000/api/auth/delete-account', {
+        const response = await fetch(apiUrl('/auth/delete-account'), {
             method: 'PUT', // Usamos PATCH para una actualización parcial (cambiar un campo)
             headers: {
                 'Authorization': `Bearer ${token}`

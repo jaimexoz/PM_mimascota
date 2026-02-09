@@ -100,6 +100,7 @@ import { useRouter } from 'vue-router';
 import Navbar from './Navbar.vue';
 import Footer from './Footer.vue';
 import { getToken } from '../utils/auth';
+import { apiUrl } from '@/config/api';
 
 import { Search } from 'lucide-vue-next';
 
@@ -120,7 +121,7 @@ const fetchUsuarios = async () => {
       throw new Error('No hay token de autenticación');
     }
 
-    const response = await fetch('http://localhost:3000/api/auth/usuarios', {
+    const response = await fetch(apiUrl('/auth/usuarios'), {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
@@ -194,7 +195,7 @@ const changeUserRole = async (userId, newRole) => {
       throw new Error('No hay token de autenticación');
     }
 
-    const response = await fetch(`http://localhost:3000/api/auth/change-user-role`, {
+    const response = await fetch(apiUrl('/auth/change-user-role'), {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`,

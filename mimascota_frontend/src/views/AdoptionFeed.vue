@@ -89,6 +89,7 @@ import { ref, onMounted, computed, reactive, h } from 'vue';
 import { PawPrint, Search, Loader } from 'lucide-vue-next';
 import { useAuthStore } from '../stores/authStore';
 import Navbar from '../components/Navbar.vue'; 
+import { apiUrl } from '@/config/api';
 // Importaciones y definiciones de utilidades removidas
 
 // Inicialización
@@ -128,7 +129,7 @@ async function getMascotas() {
     isLoading.value = true;
     try {
         // Llama a la nueva ruta optimizada para el feed
-        const response = await fetch('http://localhost:3000/api/mascotas/feed', { 
+        const response = await fetch(apiUrl('/mascotas/feed'), { 
             method: 'GET',
             headers: {
                 // Aquí usamos el token del store para la autenticación
