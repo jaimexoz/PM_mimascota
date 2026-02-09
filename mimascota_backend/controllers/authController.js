@@ -28,13 +28,21 @@ const isValidEmailDomain = (email) => {
     return allowedDomains.includes(domain);
 };
 
-// Configuración de Nodemailer
+// Configuración de Nodemailer con timeout extendido y SSL
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465, // Puerto SSL (más confiable que 587 en Render)
+    secure: true, // true para puerto 465
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
     },
+    connectionTimeout: 10000, // 10 segundos
+    greetingTimeout: 10000,
+    socketTimeout: 10000,
+    pool: true, // Usar pool de conexiones
+    maxConnections: 5,
+    maxMessages: 10,
 });
 
 // --- Controladores ---
