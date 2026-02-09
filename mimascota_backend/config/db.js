@@ -6,7 +6,7 @@ require('dotenv').config(); // Carga las variables de entorno desde .env
 const pool = new Pool({
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
-    database: process.env.DB_DATABASE,
+    database: process.env.DB_NAME || process.env.DB_DATABASE, // Soporta ambos nombres
     password: process.env.DB_PASSWORD,
     port: process.env.DB_PORT,
     // Configuración SSL para entornos donde la base de datos requiere conexión segura (ej. Heroku Postgres)
