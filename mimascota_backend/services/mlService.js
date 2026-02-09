@@ -48,10 +48,10 @@ const EXP_MAP = {
 // ORDEN ESTRICTO DE RASGOS DE PERSONALIDAD (Dimensiones 5 a 17)
 // Es vital que este orden sea idéntico para Usuario y Mascota.
 const PERSONALITY_TRAITS = [
-    'jugueton',   // 5
+    'juguetón',   // 5
     'tranquilo',  // 6
-    'timido',     // 7
-    'energetico', // 8
+    'tímido',     // 7
+    'energético', // 8
     'ruidoso',    // 9
     'amigable',   // 10
     'cariñoso',   // 11

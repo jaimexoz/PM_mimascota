@@ -54,7 +54,8 @@
 
     <DeletePostModal
     :isOpen="isDeleteModalOpen"
-    :isDeleting="isDeletingPost"  
+    :isDeleting="isDeletingPost"
+    :isSuccess="isDeleteSuccess"
     @close="closeDeleteModal"
     @confirm-delete="executeDeletePost" 
     />
@@ -82,6 +83,7 @@ const isLoading = ref(true);
 const isDeleteModalOpen = ref(false); // Cambiado a 'isDeleteModalOpen' para claridad
 const postIdToDelete = ref(null); 
 const isDeletingPost = ref(false); // 🔥 Nuevo estado para el botón "Aceptar"
+const isDeleteSuccess = ref(false); // 🔥 Nuevo estado para el éxito de la eliminación
 
 /**
  * Abre la modal de confirmación con el ID de la publicación.
@@ -98,6 +100,7 @@ function closeDeleteModal() {
     isDeleteModalOpen.value = false;
     postIdToDelete.value = null;
     isDeletingPost.value = false; // Asegurar que el estado de carga se reinicie
+    isDeleteSuccess.value = false; // Reiniciar estado de éxito
 }
 
 /**
@@ -121,11 +124,10 @@ const executeDeletePost = async () => {
         await apiClient.delete(`/mascotas/eliminar/${postIdToDelete.value}`);
 
         // 6. Manejo de éxito
-        alert("¡Publicación eliminada con éxito!");
+        // alert("¡Publicación eliminada con éxito!"); // REEMPLAZADO POR MODAL
+        isDeleteSuccess.value = true;
+        isDeletingPost.value = false; // Detener spinner, mostrar estado de éxito
         
-        // Cierra la modal
-        closeDeleteModal(); 
-
         // 🔥 CRUCIAL: Vuelve a cargar la lista para reflejar el cambio
         getMascotas(); 
 

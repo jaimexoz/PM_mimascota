@@ -127,7 +127,7 @@
 
         <div class="image-panel">
             <div class="pet-image-placeholder">
-                    <img src="../assets/fondoAgregar.png" alt="Mascotas" class="main-pet-image">
+                    <img src="https://res.cloudinary.com/dxf384txl/image/upload/v1770166857/fondoAgregar_ej0ka8.png" alt="Mascotas" class="main-pet-image">
             </div>
                 
             <div 
@@ -138,7 +138,7 @@
     @drop.prevent="manejarDrop">
 
     <div v-if="archivosSubidos.length === 0" class="upload-box">
-        <img src="../assets/upload.jpg" alt="Arrastrar y Soltar Ilustración" class="upload-illustration">
+        <img src="https://res.cloudinary.com/dxf384txl/image/upload/v1770167095/upload_oyn7pv.png" alt="Arrastrar y Soltar Ilustración" class="upload-illustration">
         <p>Drag & Drop here</p>
         <p>- or -</p>
         <label for="file-upload" class="upload-button">
