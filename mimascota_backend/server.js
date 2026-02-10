@@ -98,7 +98,7 @@ app.get('/', (req, res) => {
 const PORT = process.env.PORT || 3000;
 
 app.use((req, res) => {
-    res.status(404).send('Ruta no encontrada');
+    res.status(404).json({ mensaje: 'Ruta no encontrada', ruta: req.originalUrl });
 });
 
 // 4. Iniciar el servidor HTTP (NO app.listen)

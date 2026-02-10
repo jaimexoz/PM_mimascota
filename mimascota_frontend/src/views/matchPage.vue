@@ -229,7 +229,7 @@ const chips = [
 ];
 
 if (matchPct) {
-    chips.push(h('span', { class: 'chip chip-match' }, `${matchPct} Match`));
+    chips.push(h('span', { class: 'chip chip-match' }, `${matchPct}% Match`));
 }
 
 return h('div', { class: 'pet-card' }, [

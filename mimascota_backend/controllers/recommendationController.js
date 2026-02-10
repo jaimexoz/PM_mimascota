@@ -1,160 +1,283 @@
 const pool = require('../config/db');
-const mlService = require('../services/mlService');
-const mascotaModel = require('../models/mascotaModel'); // Importamos el modelo
+const axios = require('axios');
 
+// URL de la API de ML en Python
+const ML_API_URL = process.env.ML_API_URL || 'http://localhost:5001';
+
+/**
+ * Genera recomendaciones para un usuario usando la API de ML de Python
+ * Este controlador actúa como proxy entre el frontend Vue y el servicio ML
+ */
 exports.getRecommendations = async (req, res) => {
     try {
-        // 1. Convertir Cuestionario (Frontend) -> Vector Usuario
-        const userVector = mlService.createUserVector(req.body);
+        const userId = req.user?.id || null; // ID del usuario autenticado (opcional)
+        const userProfile = req.body; // Respuestas del cuestionario
 
-        // 2. Obtener candidatos (Ahora delegamos esto al Modelo)
-        // El controlador no sabe de SQL, solo pide "dame las mascotas"
-        const allPets = await mascotaModel.obtenerMascotasParaRecomendacion();
+        console.log(`📊 Solicitando recomendaciones para usuario ${userId || 'nuevo'}`);
 
-        // 3. Fase de Ranking (Machine Learning)
-        const rankedPets = allPets.map(pet => {
-            // Si la mascota ya tiene vector guardado, lo usa. Si no, lo calcula al vuelo.
-            const petVector = pet.vector_caracteristicas || mlService.createPetVector(pet);
+        // Preparar payload para la API de Python
+        const mlPayload = {
+            user_profile: userProfile,
+            user_id: userId,
+            n_recommendations: 10
+        };
 
-            const similarityScore = mlService.cosineSimilarity(userVector, petVector);
+        // Llamar a la API de ML
+        const mlResponse = await axios.post(
+            `${ML_API_URL}/api/ml/recommend`,
+            mlPayload,
+            {
+                headers: { 'Content-Type': 'application/json' },
+                timeout: 10000 // 10 segundos timeout
+            }
+        );
 
-            return {
-                ...pet,
-                match_score: similarityScore,
-                // Opcional: Para mostrar porcentaje amigable en el frontend
-                match_percentage: Math.round(similarityScore * 100)
-            };
-        });
+        if (mlResponse.data.status !== 'success') {
+            throw new Error('ML API returned non-success status');
+        }
 
-        // 4. Ordenar: El más alto (1.0) primero
-        rankedPets.sort((a, b) => b.match_score - a.match_score);
+        const recommendations = mlResponse.data.recommendations;
 
-        // 5. Devolver respuesta
+        console.log(`✅ Recibidas ${recommendations.length} recomendaciones de ML API`);
+
+        // Enriquecer con datos completos de la BD PostgreSQL
+        const enrichedRecommendations = await enrichWithDatabaseData(recommendations);
+
+        // Retornar en el formato que espera el frontend
         res.status(200).json({
             status: 'success',
-            count: rankedPets.length,
-            recommendations: rankedPets.slice(0, 10) // Top 10
+            count: enrichedRecommendations.length,
+            recommendations: enrichedRecommendations
         });
 
     } catch (error) {
-        console.error("Error en recomendación:", error);
+        console.error("❌ Error en recomendación:", error);
+
+        // Si la API de ML no está disponible, devolver error específico
+        if (error.code === 'ECONNREFUSED') {
+            return res.status(503).json({
+                status: 'error',
+                message: 'Servicio de ML no disponible. Asegúrate de que la API de Python esté corriendo.',
+                details: 'python api/app.py'
+            });
+        }
+
         res.status(500).json({
             status: 'error',
-            message: 'Error calculando recomendaciones'
+            message: 'Error calculando recomendaciones',
+            details: error.message
         });
     }
 };
 
-
-
-
-// En recommendationController.js
-
-exports.recalculateAllVectors = async (req, res) => {
+/**
+ * Enriquece las recomendaciones con datos completos de PostgreSQL
+ * La API de ML solo retorna IDs y scores, necesitamos todos los datos de la mascota
+ */
+async function enrichWithDatabaseData(recommendations) {
     try {
-        // 1. Traemos TODAS las mascotas usando el Modelo (que ya hace el JOIN de personalidades)
-        const allPets = await mascotaModel.obtenerMascotasParaRecomendacion();
+        // Extraer IDs de las mascotas recomendadas
+        const petIds = recommendations.map(rec => rec.pet_id);
 
-        let updatedCount = 0;
-
-        // 2. Recorremos una por una
-        for (const pet of allPets) {
-            // Calculamos su vector con el servicio
-            const vector = mlService.createPetVector(pet);
-
-            // 3. Actualizamos la mascota en la DB
-            await pool.query(
-                'UPDATE mascotas SET vector_caracteristicas = $1 WHERE idxxxx_mascot = $2',
-                [vector, pet.idxxxx_mascot]
-            );
-            updatedCount++;
+        if (petIds.length === 0) {
+            return [];
         }
 
-        res.json({ message: `¡Éxito! Se actualizaron los vectores de ${updatedCount} mascotas.` });
+        console.log(`🔍 ML recomendó ${petIds.length} mascotas: [${petIds.slice(0, 5).join(', ')}${petIds.length > 5 ? '...' : ''}]`);
 
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Error en migración');
-    }
-};
+        // Query simplificado - solo datos de mascotas
+        const query = `
+            SELECT *
+            FROM mascotas
+            WHERE idxxxx_mascot = ANY($1)
+        `;
 
-// A. GUARDAR CUESTIONARIO Y MOSTRAR RESULTADOS (POST)
-exports.submitQuestionnaire = async (req, res) => {
-    const userId = req.user.id; // Asumiendo que tienes el ID del usuario en el token
-    try {
-        // 1. Calcular Vector del Usuario basado en respuestas
-        const userVector = mlService.createUserVector(req.body);
+        const result = await pool.query(query, [petIds]);
+        const petsMap = new Map(result.rows.map(pet => [pet.idxxxx_mascot, pet]));
 
-        // 2. GUARDAR este vector en la tabla de usuarios (Persistencia)
-        await pool.query(
-            'UPDATE usuarios SET vector_preferencias = $1 WHERE idxxxx_usuari = $2',
-            [userVector, userId]
-        );
+        console.log(`✅ Encontradas ${result.rows.length} mascotas en PostgreSQL`);
 
-        // 3. Obtener mascotas y calcular similitud (Reutilizamos lógica)
-        const rankedPets = await calculateMatchesForVector(userVector);
+        // Combinar datos de ML con datos de PostgreSQL
+        const enriched = recommendations.map(rec => {
+            const petData = petsMap.get(rec.pet_id);
 
-        res.json({ status: 'success', recommendations: rankedPets });
+            if (!petData) {
+                console.warn(`⚠️  Mascota ${rec.pet_id} no encontrada en BD`);
+                return null;
+            }
 
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error procesando cuestionario' });
-    }
-};
+            return {
+                ...petData,
+                match_score: rec.hybrid_score,
+                match_percentage: rec.match_percentage,
+                ml_scores: {
+                    hybrid: rec.hybrid_score,
+                    content: rec.content_score,
+                    collaborative: rec.collab_score
+                }
+            };
+        }).filter(pet => pet !== null);
 
-// B. OBTENER RECOMENDACIONES GUARDADAS AL ENTRAR (GET)
-exports.getSavedRecommendations = async (req, res) => {
-    const userId = req.user.id;
-    try {
-        // 1. Buscar si el usuario tiene vector guardado (Preferencias Explícitas)
-        const userRes = await pool.query(
-            'SELECT vector_preferencias FROM usuarios WHERE idxxxx_usuari = $1',
-            [userId]
-        );
-
-        const explicitVector = userRes.rows[0]?.vector_preferencias;
-
-        // Si no tiene vector explícito, devolvemos array vacío (el front mostrará el botón "Hacer Test")
-        // OPCIONAL: Podríamos recomendar solo por interacción si existe, pero por regla de negocio
-        // asumimos que el test es el punto de partida.
-        if (!explicitVector) {
-            return res.json({ status: 'no_data', recommendations: [] });
+        const notFound = petIds.length - enriched.length;
+        if (notFound > 0) {
+            console.log(`⚠️  ${notFound} mascotas ML no existen en BD (modelos entrenados con datos sintéticos)`);
         }
+        console.log(`📊 Retornando ${enriched.length} recomendaciones finales`);
 
-        // 2. Obtener Vector Implícito (Interacciones)
-        // Esto aprende del comportamiento real del usuario
-        const implicitVector = await mlService.getImplicitUserVector(userId);
+        return enriched;
 
-        // 3. Combinar vectores (Híbrido)
-        // Alpha 0.7 = 70% peso al cuestionario, 30% al comportamiento
-        const finalVector = mlService.mergeUserVectors(explicitVector, implicitVector, 0.7);
+    } catch (error) {
+        console.error("Error enriqueciendo datos:", error);
+        throw error;
+    }
+}
 
-        // 4. Calcular matches con el vector final
-        const rankedPets = await calculateMatchesForVector(finalVector);
+/**
+ * Health check para verificar que la API de ML está disponible
+ */
+exports.checkMLHealth = async (req, res) => {
+    try {
+        const response = await axios.get(`${ML_API_URL}/api/ml/health`, {
+            timeout: 5000
+        });
 
         res.json({
             status: 'success',
-            recommendations: rankedPets,
-            debug: {
-                used_implicit: !!implicitVector // Para saber si se usó ML
+            ml_api_status: response.data
+        });
+
+    } catch (error) {
+        res.status(503).json({
+            status: 'error',
+            message: 'ML API no disponible',
+            details: error.message
+        });
+    }
+};
+
+/**
+ * Guardar cuestionario del usuario (mantener funcionalidad existente)
+ */
+exports.submitQuestionnaire = async (req, res) => {
+    const userId = req.user.id;
+
+    try {
+        // 1. Guardar respuestas del cuestionario como JSON
+        const questionnaireData = {
+            ...req.body,
+            timestamp: new Date().toISOString()
+        };
+
+        await pool.query(
+            'UPDATE usuarios SET vector_preferencias = $1 WHERE idxxxx_usuari = $2',
+            [JSON.stringify(questionnaireData), userId]
+        );
+
+        console.log(`💾 Cuestionario guardado para usuario ${userId}`);
+
+        // 2. Generar recomendaciones usando ML API
+        const mlPayload = {
+            user_profile: req.body,
+            user_id: userId,
+            n_recommendations: 10
+        };
+
+        const mlResponse = await axios.post(
+            `${ML_API_URL}/api/ml/recommend`,
+            mlPayload,
+            {
+                headers: { 'Content-Type': 'application/json' },
+                timeout: 10000
             }
+        );
+
+        const recommendations = mlResponse.data.recommendations;
+        const enriched = await enrichWithDatabaseData(recommendations);
+
+        res.json({
+            status: 'success',
+            recommendations: enriched,
+            saved: true
+        });
+
+    } catch (error) {
+        console.error("❌ Error en submitQuestionnaire:", error);
+        res.status(500).json({
+            status: 'error',
+            message: 'Error procesando cuestionario'
+        });
+    }
+};
+
+/**
+ * Obtener recomendaciones guardadas para un usuario
+ */
+exports.getSavedRecommendations = async (req, res) => {
+    const userId = req.user.id;
+
+    try {
+        // 1. Leer cuestionario guardado
+        const result = await pool.query(
+            `SELECT vector_preferencias 
+             FROM usuarios 
+             WHERE idxxxx_usuari = $1`,
+            [userId]
+        );
+
+        const savedQuestionnaire = result.rows[0]?.vector_preferencias;
+
+        if (!savedQuestionnaire) {
+            return res.json({
+                status: 'no_data',
+                recommendations: [],
+                message: 'No hay cuestionario guardado'
+            });
+        }
+
+        console.log(`📖 Leyendo cuestionario de usuario ${userId}`);
+
+        // Extraer solo campos del cuestionario (sin timestamp/version)
+        const { timestamp, version, ...questionnaireResponses } = savedQuestionnaire;
+
+        // 2. Generar recomendaciones con datos guardados  
+        const mlPayload = {
+            user_profile: questionnaireResponses,
+            user_id: userId,
+            n_recommendations: 10
+        };
+
+        const mlResponse = await axios.post(
+            `${ML_API_URL}/api/ml/recommend`,
+            mlPayload,
+            {
+                headers: { 'Content-Type': 'application/json' },
+                timeout: 10000
+            }
+        );
+
+        const recommendations = mlResponse.data.recommendations;
+        const enriched = await enrichWithDatabaseData(recommendations);
+
+        res.json({
+            status: 'success',
+            recommendations: enriched,
+            from_saved: true
         });
 
     } catch (error) {
         console.error("Error en getSavedRecommendations:", error);
-        res.status(500).json({ message: 'Error obteniendo recomendaciones' });
+        res.status(500).json({
+            status: 'error',
+            message: 'Error obteniendo recomendaciones'
+        });
     }
 };
 
-// --- Función Auxiliar para no repetir código ---
-async function calculateMatchesForVector(userVector) {
-    const allPets = await mascotaModel.obtenerMascotasParaRecomendacion();
-
-    const rankedPets = allPets.map(pet => {
-        const petVector = pet.vector_caracteristicas || mlService.createPetVector(pet);
-        const score = mlService.cosineSimilarity(userVector, petVector);
-        return { ...pet, match_score: score };
+// DEPRECATED: Mantener por compatibilidad pero loggear advertencia
+exports.recalculateAllVectors = async (req, res) => {
+    console.warn("⚠️  recalculateAllVectors está deprecado. Los vectores ahora se manejan en Python.");
+    res.json({
+        status: 'deprecated',
+        message: 'Esta función ya no es necesaria. Los modelos ML se entrenan en Python.'
     });
-
-    return rankedPets.sort((a, b) => b.match_score - a.match_score).slice(0, 10);
-}
+};

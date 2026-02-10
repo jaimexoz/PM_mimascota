@@ -1,0 +1,24 @@
+# Machine Learning
+numpy
+pandas
+scikit-learn
+scikit-surprise
+
+# Visualización
+matplotlib
+seaborn
+
+# API
+flask
+flask-cors
+
+# Utilidades
+joblib
+scipy
+jupyter
+
+# Database
+psycopg2-binary
+
+# HTTP requests
+requests
