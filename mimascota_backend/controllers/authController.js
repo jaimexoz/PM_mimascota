@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 const { v4: uuidv4 } = require('uuid');
 const cloudinary = require('../config/cloudinaryConfig');
 const fs = require('fs');
@@ -28,22 +28,18 @@ const isValidEmailDomain = (email) => {
     return allowedDomains.includes(domain);
 };
 
-// Configuración de Nodemailer con timeout extendido y SSL
-const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465, // Puerto SSL (más confiable que 587 en Render)
-    secure: true, // true para puerto 465
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-    },
-    connectionTimeout: 10000, // 10 segundos
-    greetingTimeout: 10000,
-    socketTimeout: 10000,
-    pool: true, // Usar pool de conexiones
-    maxConnections: 5,
-    maxMessages: 10,
-});
+// Configuración de Resend (reemplaza Nodemailer)
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+// Función wrapper para mantener compatibilidad con código existente
+const sendMail = async (mailOptions) => {
+    return await resend.emails.send({
+        from: 'MiMascota <onboarding@resend.dev>', // Usar dominio verificado de Resend
+        to: mailOptions.to,
+        subject: mailOptions.subject,
+        html: mailOptions.html,
+    });
+};
 
 // --- Controladores ---
 
@@ -137,7 +133,7 @@ const registerUser = async (req, res) => {
         let emailError = null;
         
         try {
-            await transporter.sendMail(mailOptions);
+            await sendMail(mailOptions);
             emailSent = true;
             console.log(`✅ Email de verificación enviado exitosamente a: ${emailx_usuari}`);
         } catch (emailErr) {
@@ -391,7 +387,7 @@ const resendVerificationEmail = async (req, res) => {
             subject: 'Verifica tu correo electrónico - Mi Mascota App',
             html: `<p>Hola ${user.nombre_usuari},</p><p>Has solicitado un nuevo enlace de verificación. Por favor, verifica tu correo electrónico haciendo clic en el siguiente enlace:</p><p><a href="${verificationUrl}">Verificar Correo Electrónico</a></p><p>Este enlace expirará en 1 hora.</p><p>Si no solicitaste esto, por favor ignora este correo.</p>`,
         };
-        await transporter.sendMail(mailOptions);
+        await sendMail(mailOptions);
 
         res.status(200).json({ message: 'Se ha enviado un nuevo correo de verificación. Por favor, revisa tu bandeja de entrada.' });
 
@@ -433,7 +429,7 @@ const requestPasswordReset = async (req, res) => {
             subject: 'Restablecer contraseña - Mi Mascota App',
             html: `<p>Hola ${user.nombre_usuari},</p><p>Has solicitado restablecer tu contraseña. Haz clic en el siguiente enlace:</p><p><a href="${resetUrl}">Restablecer Contraseña</a></p><p>Este enlace expirará en 1 hora.</p><p>Si no solicitaste esto, por favor ignora este correo.</p>`,
         };
-        await transporter.sendMail(mailOptions);
+        await sendMail(mailOptions);
 
         // 4. Respuesta
         res.status(200).json({ message: 'Si el correo electrónico existe, se ha enviado un enlace para restablecer la contraseña.' });
