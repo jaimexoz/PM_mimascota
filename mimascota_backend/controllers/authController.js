@@ -28,17 +28,32 @@ const isValidEmailDomain = (email) => {
     return allowedDomains.includes(domain);
 };
 
-// Configuración de Resend (reemplaza Nodemailer)
-const resend = new Resend(process.env.RESEND_API_KEY);
+// ============================================
+// CONFIGURACIÓN DE SENDGRID SMTP (Servicio de Email)
+// ============================================
+const nodemailer = require('nodemailer');
 
-// Función wrapper para mantener compatibilidad con código existente
+const transporter = nodemailer.createTransport({
+    host: 'smtp.sendgrid.net',
+    port: 587,
+    secure: false, // true para puerto 465, false para otros puertos
+    auth: {
+        user: 'apikey', // Siempre es 'apikey' para SendGrid
+        pass: process.env.SENDGRID_API_KEY, // Tu API Key de SendGrid
+    },
+});
+
+// Función para enviar emails
 const sendMail = async (mailOptions) => {
-    return await resend.emails.send({
-        from: 'Adopciones MiMascota <onboarding@resend.dev>', // Nombre visible para usuarios
+    // Agregar remitente por defecto si no se especifica
+    const options = {
+        from: mailOptions.from || `Adopciones MiMascota <${process.env.EMAIL_USER || 'noreply@mimascota.app'}>`,
         to: mailOptions.to,
         subject: mailOptions.subject,
         html: mailOptions.html,
-    });
+    };
+    
+    return await transporter.sendMail(options);
 };
 
 // --- Controladores ---
