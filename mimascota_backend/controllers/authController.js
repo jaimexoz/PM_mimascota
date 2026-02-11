@@ -34,7 +34,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 // Función wrapper para mantener compatibilidad con código existente
 const sendMail = async (mailOptions) => {
     return await resend.emails.send({
-        from: 'MiMascota <onboarding@resend.dev>', // Usar dominio verificado de Resend
+        from: 'Adopciones MiMascota <onboarding@resend.dev>', // Nombre visible para usuarios
         to: mailOptions.to,
         subject: mailOptions.subject,
         html: mailOptions.html,
