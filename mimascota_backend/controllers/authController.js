@@ -29,38 +29,34 @@ const isValidEmailDomain = (email) => {
 };
 
 // ============================================
-// CONFIGURACIÓN DE EMAIL (SendGrid / Nodemailer)
+// CONFIGURACIÓN DE EMAIL (SendGrid - Web API)
 // ============================================
-const nodemailer = require("nodemailer");
+// Usamos la Web API de SendGrid porque Render bloquea puertos SMTP (25, 465, 587)
+const sgMail = require("@sendgrid/mail");
 
-// Configuración del transporter para SendGrid
-const transporter = nodemailer.createTransport({
-  host: "smtp.sendgrid.net",
-  port: 587,
-  secure: false, // true para 465, false para otros puertos
-  auth: {
-    user: "apikey", // SIEMPRE es "apikey" para SendGrid
-    pass: process.env.SENDGRID_API_KEY, // Tu API Key de SendGrid
-  },
-});
+// Configurar API Key
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 // Función para enviar emails
 const sendMail = async (mailOptions) => {
-  const options = {
+  const msg = {
+    to: mailOptions.to,
     from:
       mailOptions.from ||
-      `Adopciones MiMascota <${process.env.EMAIL_USER || "noreply@mimascota.app"}>`,
-    to: mailOptions.to,
+      `Adopciones MiMascota <${process.env.EMAIL_USER || "noreply@mimascotitacfg.com"}>`, // Use the verified sender
     subject: mailOptions.subject,
     html: mailOptions.html,
   };
 
   try {
-    const info = await transporter.sendMail(options);
-    console.log("Email enviado: %s", info.messageId);
+    const info = await sgMail.send(msg);
+    console.log("Email enviaedo (SendGrid API):", info[0].statusCode);
     return info;
   } catch (err) {
-    console.error("Error sending email (SendGrid):", err);
+    console.error("Error sending email (SendGrid API):", err);
+    if (err.response) {
+      console.error(err.response.body); // Log detailed SendGrid errors
+    }
     throw err;
   }
 };
