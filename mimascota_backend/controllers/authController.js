@@ -1,6 +1,6 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { Resend } = require("resend");
+// const { Resend } = require("resend"); // Eliminado tras desinstalación
 const { v4: uuidv4 } = require("uuid");
 const cloudinary = require("../config/cloudinaryConfig");
 const fs = require("fs");
@@ -29,23 +29,40 @@ const isValidEmailDomain = (email) => {
 };
 
 // ============================================
-// CONFIGURACIÓN DE RESEND (Servicio de Email)
+// CONFIGURACIÓN DE EMAIL (SendGrid / Nodemailer)
 // ============================================
-// Inicializar Resend con API Key
-const resend = new Resend(process.env.RESEND_API_KEY);
+const nodemailer = require("nodemailer");
 
-// Función para enviar emails con Resend
+// Configuración del transporter para SendGrid
+const transporter = nodemailer.createTransport({
+  host: "smtp.sendgrid.net",
+  port: 587,
+  secure: false, // true para 465, false para otros puertos
+  auth: {
+    user: "apikey", // SIEMPRE es "apikey" para SendGrid
+    pass: process.env.SENDGRID_API_KEY, // Tu API Key de SendGrid
+  },
+});
+
+// Función para enviar emails
 const sendMail = async (mailOptions) => {
   const options = {
     from:
       mailOptions.from ||
-      "Adopciones MiMascota <noreply@adopciones-mimascota.site>",
+      `Adopciones MiMascota <${process.env.EMAIL_USER || "noreply@mimascota.app"}>`,
     to: mailOptions.to,
     subject: mailOptions.subject,
     html: mailOptions.html,
   };
 
-  return await resend.emails.send(options);
+  try {
+    const info = await transporter.sendMail(options);
+    console.log("Email enviado: %s", info.messageId);
+    return info;
+  } catch (err) {
+    console.error("Error sending email (SendGrid):", err);
+    throw err;
+  }
 };
 
 // --- Controladores ---
