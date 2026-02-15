@@ -73,7 +73,7 @@ def load_models():
         
         print("   OK - Content-Based Enhanced cargado (NLP + size=1.5x)")
         print("   OK - Collaborative cargado")
-        print("   OK - Hybrid Enhanced inicializado (60/40)")
+        print("   OK - Hybrid Enhanced inicializado (70/30)")
         
         print("\n" + "="*70)
         print("SERVIDOR LISTO - MODELO MEJORADO ACTIVO")
@@ -81,7 +81,7 @@ def load_models():
         print("\nCaracterísticas:")
         print("  ✓ NLP con TF-IDF (ngrams 1-2)")
         print("  ✓ Pesos balanceados: texto 2x, tamaño 1.5x")
-        print("  ✓ Híbrido: 60% content + 40% collaborative")
+        print("  ✓ Híbrido: 70% content + 30% collaborative")
         print("  ✓ Consulta PostgreSQL en tiempo real")
         print("  ✓ Scores detallados (hybrid, content, collab)")
         
@@ -201,6 +201,9 @@ def recommend():
         
         print(f"[REQUEST] OK - {len(recommendations_array)} recomendaciones generadas")
         
+        print(f"\n✅ RESPUESTA EXITOSA (200 OK)")
+        print("Recomendaciones recibidas:")
+        
         # Consultar mascotas para enriquecer
         pets_df = db.get_available_pets()
         
@@ -212,6 +215,12 @@ def recommend():
             content_score = float(row[2])
             collab_score = float(row[3])
             
+            # Verificar si es Cold Start (para loguear)
+            is_cold_start_str = "❄️ COLD START" if collab_score == 0.5 and hybrid_score > 0.6 else "👤 USER HISTORY"
+            if hybrid_score == 0.5: is_cold_start_str = "⚠️ FALLBACK"
+            
+            print(f" - Pet {pet_id}: Hybrid={hybrid_score:.3f} | Content={content_score:.3f} | Collab={collab_score:.3f} [{is_cold_start_str}]")
+            
             pet = pets_df[pets_df['pet_id'] == pet_id]
             
             if len(pet) > 0:
@@ -222,6 +231,7 @@ def recommend():
                     "content_score": content_score,
                     "collab_score": collab_score,
                     "match_percentage": int(hybrid_score * 100),
+                    "is_cold_start": True if "COLD START" in is_cold_start_str else False,
                     "pet_details": {
                         "nombre": pet['nombre'],
                         "especie": pet['especie'],

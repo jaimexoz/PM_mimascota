@@ -41,12 +41,14 @@ def main():
         # Seleccionar solo columnas necesarias
         interactions_df = interactions_df[['user_id', 'pet_id', 'rating']]
         print(f"✓ Datos preprocesados: rating calculado desde interacciones")
+        print(interactions_df['rating'].describe())
         
     except FileNotFoundError:
         print("❌ ERROR: No se encontró synthetic_interactions.csv")
         print("   Ejecuta primero: python src/data/generate_synthetic_data.py")
         return
     
+        
     # 2. Crear y entrenar modelo
     print("\nEntrenando modelo SVD...")
     model = CollaborativeRecommender(
