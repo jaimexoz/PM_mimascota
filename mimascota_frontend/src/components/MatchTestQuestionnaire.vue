@@ -267,14 +267,15 @@ const options = {
     { value: 'energetico', label: 'Energético (me gusta jugar y hacer ejercicio con mi mascota)' }
   ],
   personalidad: [
-    { value: 'amigable', label: 'Amigable/Sociable' },
-    { value: 'independiente', label: 'Independiente' },
-    { value: 'jugueton', label: 'Juguetón/Energético' },
-    { value: 'tranquilo', label: 'Tranquilo/Relajado' },
-    { value: 'protector', label: 'Protector/Guardián' },
-    { value: 'cariñoso', label: 'Cariñoso/Apegado' },
-    { value: 'inteligente', label: 'Inteligente/Fácil de entrenar' },
-    { value: 'curioso', label: 'Curioso/Explorador' }
+    { value: 'Juguetón', label: 'Juguetón' },
+    { value: 'Tranquilo', label: 'Tranquilo' },
+    { value: 'Tímido', label: 'Tímido' },
+    { value: 'Energético', label: 'Energético' },
+    { value: 'Amigable', label: 'Amigable' },
+    { value: 'Cariñoso', label: 'Cariñoso' },
+    { value: 'Leal', label: 'Leal' },
+    { value: 'Protector', label: 'Protector' },
+    { value: 'Inteligente', label: 'Inteligente' }
   ],
   ninosEnCasa: [
     { value: 'no', label: 'No' },

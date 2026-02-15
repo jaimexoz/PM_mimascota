@@ -12,24 +12,30 @@ const DATA_DIR = path.join(__dirname, '../mimascota_ml/data/raw');
 async function exportPets() {
     console.log('📦 Exportando mascotas reales de PostgreSQL...\n');
 
-    // Query para obtener mascotas en formato compatible con ML
+    // Query con JOIN para obtener características (personalidad)
     const query = `
         SELECT 
-            idxxxx_mascot as pet_id,
-            namexx_mascot as nombre,
+            m.idxxxx_mascot as pet_id,
+            m.nombre_mascot as nombre,
             CASE 
-                WHEN LOWER(especie) LIKE '%perro%' THEN 'Perro'
-                WHEN LOWER(especie) LIKE '%gato%' THEN 'Gato'
-                ELSE especie
+                WHEN LOWER(m.especi_mascot) LIKE '%perro%' THEN 'Perro'
+                WHEN LOWER(m.especi_mascot) LIKE '%gato%' THEN 'Gato'
+                ELSE m.especi_mascot
             END as especie,
-            COALESCE(LOWER(tamano), 'mediano') as tamano,
-            COALESCE(edad_meses, 24) as edad_meses,
-            COALESCE(LOWER(nivel_energia), 'moderado') as nivel_energia,
-            COALESCE(personalidad, 'amigable') as personalidad,
-            COALESCE(descripcion, '') as descripcion
-        FROM mascotas
-        WHERE estado = 'Disponible'
-        ORDER BY idxxxx_mascot
+            COALESCE(LOWER(m.tamano_mascot), 'mediano') as tamano,
+            COALESCE(m.edadme_mascot, 24) as edad_meses,
+            COALESCE(LOWER(m.nenerg_mascot), 'moderado') as nivel_energia,
+            STRING_AGG(LOWER(c.nombre_caract), ',') as personalidad,
+            COALESCE(m.infoad_mascot, '') as descripcion
+        FROM mascotas m
+        LEFT JOIN mascota_caracteristicas mc ON m.idxxxx_mascot = mc.forane_mascot_id
+        LEFT JOIN caracteristicas c ON mc.forane_caract_id = c.idxxxx_caract
+
+        
+        WHERE (m.eliminado_logico IS NULL OR m.eliminado_logico = false)
+        GROUP BY m.idxxxx_mascot, m.nombre_mascot, m.especi_mascot, 
+                 m.tamano_mascot, m.edadme_mascot, m.nenerg_mascot, m.infoad_mascot
+        ORDER BY m.idxxxx_mascot
     `;
 
     const result = await pool.query(query);
@@ -42,9 +48,21 @@ async function exportPets() {
     console.log(`✅ Encontradas ${result.rows.length} mascotas disponibles`);
     console.log(`   Especies: ${result.rows.filter(r => r.especie === 'Perro').length} perros, ${result.rows.filter(r => r.especie === 'Gato').length} gatos\n`);
 
+    // Limpiar datos y asegurar valores por defecto
+    const cleanedRows = result.rows.map(row => ({
+        pet_id: row.pet_id,
+        nombre: row.nombre || 'Sin nombre',
+        especie: row.especie || 'Perro',
+        tamano: row.tamano || 'mediano',
+        edad_meses: row.edad_meses || 24,
+        nivel_energia: row.nivel_energia || 'moderado',
+        personalidad: row.personalidad || 'amigable',
+        descripcion: row.descripcion || ''
+    }));
+
     // Convertir a CSV
-    const headers = Object.keys(result.rows[0]).join(',');
-    const rows = result.rows.map(row =>
+    const headers = Object.keys(cleanedRows[0]).join(',');
+    const rows = cleanedRows.map(row =>
         Object.values(row).map(val =>
             typeof val === 'string' && val.includes(',') ? `"${val}"` : val
         ).join(',')
@@ -65,19 +83,19 @@ async function exportInteractions() {
 
     const query = `
         SELECT 
-            idxxxx_intera as interaction_id,
+            id as interaction_id,
             forane_idxxxx_usuari as user_id,
             forane_idxxxx_mascot as pet_id,
-            tipo_interaccion as interaction_type,
-            createxx_at as timestamp,
-            CASE tipo_interaccion
+            typexx_intera as interaction_type,
+            created_at as timestamp,
+            CASE typexx_intera
                 WHEN 'click' THEN 2
                 WHEN 'favorito' THEN 4
                 WHEN 'contacto' THEN 5
                 ELSE 3
             END as rating
-        FROM interacciones
-        ORDER BY createxx_at DESC
+        FROM usuario_interacciones
+        ORDER BY created_at DESC
         LIMIT 10000
     `;
 
@@ -88,7 +106,7 @@ async function exportInteractions() {
         console.log('   Generando datos mínimos para entrenamiento...\n');
 
         // Crear interacciones sintéticas mínimas
-        const petsResult = await pool.query('SELECT idxxxx_mascot FROM mascotas WHERE estado = \'Disponible\' LIMIT 20');
+        const petsResult = await pool.query('SELECT idxxxx_mascot FROM mascotas WHERE status_mascot = \'Disponible\' LIMIT 20');
         const usersResult = await pool.query('SELECT idxxxx_usuari FROM usuarios LIMIT 5');
 
         if (petsResult.rows.length === 0 || usersResult.rows.length === 0) {
@@ -149,7 +167,7 @@ async function exportUsers() {
     const query = `
         SELECT 
             idxxxx_usuari as user_id,
-            namexx_usuari as nombre,
+            nombre_usuari as nombre,
             vector_preferencias as questionnaire_data
         FROM usuarios
         WHERE vector_preferencias IS NOT NULL
@@ -196,9 +214,16 @@ async function exportUsers() {
 
     console.log(`✅ Encontrados ${result.rows.length} usuarios con cuestionarios\n`);
 
-    // Expandir cuestionarios de JSONB a columnas
+    //Expandir cuestionarios de JSONB a columnas
     const expandedUsers = result.rows.map(user => {
         const q = user.questionnaire_data || {};
+
+        // Convertir personalidad (puede ser array o string)
+        let personalidad = q.personalidad || 'amigable';
+        if (Array.isArray(personalidad)) {
+            personalidad = personalidad.join(',');
+        }
+
         return {
             user_id: user.user_id,
             nombre: user.nombre,
@@ -210,7 +235,7 @@ async function exportUsers() {
             edadPreferida: q.edadPreferida || 'adulto',
             perroOGato: q.perroOGato || 'ambos',
             nivelEnergia: q.nivelEnergia || 'moderado',
-            personalidad: q.personalidad || 'amigable',
+            personalidad: personalidad,
             ninosEnCasa: q.ninosEnCasa || 'no',
             otrasMascotas: q.otrasMascotas || 'no',
             tiempoCuidado: q.tiempoCuidado || '1_2',

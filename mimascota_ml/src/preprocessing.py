@@ -15,10 +15,10 @@ class FeatureEngineer:
     Transforma características crudas del cuestionario en vectores numéricos
     optimizados para modelos de ML
     
-    Estrategia: 14 preguntas → 18 features
+    Estrategia: 14 preguntas → 23 features
     - 8 features numéricas agrupadas
     - 2 features categóricas (especie: perro/gato)
-    - 8 features categóricas (personalidad: one-hot encoding)
+    - 13 features categóricas (personalidad: one-hot encoding)
     """
     
     def __init__(self):
@@ -100,10 +100,11 @@ class FeatureEngineer:
             }
         }
         
-        # Rasgos de personalidad (8 opciones)
+        # Rasgos de personalidad (13 opciones)
         self.personality_traits = [
-            'amigable', 'independiente', 'jugueton', 'tranquilo',
-            'protector', 'cariñoso', 'inteligente', 'curioso'
+            'jugueton', 'tranquilo', 'timido', 'energetico',
+            'ruidoso', 'amigable', 'carinoso', 'agresivo',
+            'leal', 'protector', 'inteligente', 'temeroso', 'arisco'
         ]
     
     def _map_value(self, col, value):
@@ -134,7 +135,7 @@ class FeatureEngineer:
         Transforma DataFrame de usuarios a matriz de features
         
         Returns:
-            numpy array de shape (n_users, 18)
+            numpy array de shape (n_users, 23)
         """
         features_list = []
         
@@ -177,7 +178,7 @@ class FeatureEngineer:
             wants_dog = 1.0 if especie in ['solo_perros', 'ambos'] else 0.0
             wants_cat = 1.0 if especie in ['solo_gatos', 'ambos'] else 0.0
             
-            # Features 11-18: Personalidad (one-hot, 8 traits)
+            # Features 11-23: Personalidad (one-hot, 13 traits)
             personality_vector = self._encode_personality(user.get('personalidad', ''))
             
             # Combinar todas las features
@@ -192,7 +193,7 @@ class FeatureEngineer:
                 compatibility_needs,  # 7
                 wants_dog,            # 8
                 wants_cat             # 9
-            ] + personality_vector    # 10-17
+            ] + personality_vector    # 10-22 (13 traits)
             
             features_list.append(feature_vector)
         
@@ -203,7 +204,7 @@ class FeatureEngineer:
         Transforma DataFrame de mascotas a matriz de features
         
         Returns:
-            numpy array de shape (n_pets, 18)
+            numpy array de shape (n_pets, 23)
         """
         features_list = []
         
@@ -251,7 +252,7 @@ class FeatureEngineer:
             is_dog = 1.0 if 'perro' in especie.lower() else 0.0
             is_cat = 1.0 if 'gato' in especie.lower() else 0.0
             
-            # Features 10-17: Personalidad
+            # Features 10-22: Personalidad (13 traits)
             personality_vector = self._encode_personality(pet.get('personalidad', ''))
             
             feature_vector = [
