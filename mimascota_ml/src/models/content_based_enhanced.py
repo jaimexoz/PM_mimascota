@@ -93,7 +93,31 @@ class EnhancedDynamicRecommender:
         
         self.tfidf = TfidfVectorizer(
             max_features=50,           # 50 features más importantes
-            stop_words='english',      # Configurable para español
+            stop_words=[
+                'de', 'la', 'que', 'el', 'en', 'y', 'a', 'los', 'del', 'se', 'las', 'por', 'un', 'para', 
+                'con', 'no', 'una', 'su', 'al', 'lo', 'como', 'más', 'pero', 'sus', 'le', 'ya', 'o', 
+                'este', 'sí', 'porque', 'esta', 'entre', 'cuando', 'muy', 'sin', 'sobre', 'también', 
+                'me', 'hasta', 'hay', 'donde', 'quien', 'desde', 'todo', 'nos', 'durante', 'todos', 
+                'uno', 'les', 'ni', 'contra', 'otros', 'ese', 'eso', 'ante', 'ellos', 'e', 'esto', 'mí', 
+                'antes', 'algunos', 'qué', 'unos', 'yo', 'otro', 'otras', 'otra', 'él', 'tanto', 'esa', 
+                'estos', 'mucho', 'quienes', 'nada', 'muchos', 'cual', 'poco', 'ella', 'estar', 'estas', 
+                'algunas', 'algo', 'nosotros', 'mi', 'mis', 'tú', 'te', 'ti', 'tu', 'tus', 'ellas', 
+                'nosotras', 'vosotros', 'vosotras', 'os', 'mío', 'mía', 'míos', 'mías', 'tuyo', 'tuya', 
+                'tuyos', 'tuyas', 'suyo', 'suya', 'suyos', 'suyas', 'nuestro', 'nuestra', 'nuestros', 
+                'nuestras', 'vuestro', 'vuestra', 'vuestros', 'vuestras', 'es', 'son', 'fue', 'era', 
+                'eran', 'ser', 'soy', 'eres', 'somos', 'sois', 'fui', 'fuiste', 'fue', 'fuimos', 
+                'fuisteis', 'fueron', 'estoy', 'estás', 'está', 'estamos', 'estáis', 'están', 'esté', 
+                'estés', 'estemos', 'estéis', 'estén', 'estaré', 'estarás', 'estará', 'estaremos', 
+                'estaréis', 'estarán', 'estaría', 'estarías', 'estaríamos', 'estaríais', 'estarían', 
+                'estaba', 'estabas', 'estábamos', 'estabais', 'estaban', 'estuve', 'estuviste', 'estuvo', 
+                'estuvimos', 'estuvisteis', 'estuvieron', 'hubiera', 'hubieras', 'hubiéramos', 
+                'hubierais', 'hubieran', 'hubiese', 'hubieses', 'hubiésemos', 'hubieseis', 'hubiesen', 
+                'habiendo', 'habido', 'habida', 'habidos', 'habidas', 'tengo', 'tienes', 'tiene', 
+                'tenemos', 'tenéis', 'tienen', 'tenga', 'tengas', 'tengamos', 'tengáis', 'tengan', 
+                'tendré', 'tendrás', 'tendrá', 'tendremos', 'tendréis', 'tendrán', 'tendría', 'tendrías', 
+                'tendríamos', 'tendríais', 'tendrían', 'tenía', 'tenías', 'teníamos', 'teníais', 'tenían', 
+                'tuve', 'tuviste', 'tuvo', 'tuvimos', 'tuvisteis', 'tuvieron'
+            ],
             ngram_range=(1, 2),
             min_df=1,
             max_df=0.8
@@ -121,7 +145,7 @@ class EnhancedDynamicRecommender:
         print("\n" + "="*70)
         print("PONDERACIÓN DE CARACTERÍSTICAS")
         print("="*70)
-        print(f"  Descripción:   {self.text_weight}x  ⭐ MÁS IMPORTANTE")
+        print(f"  Descripción:   {self.text_weight}x ")
         print(f"  Tamaño:        {self.size_weight}x")
         print(f"  Energía:       {self.energy_weight}x")
         print(f"  Personalidad:  {self.personality_weight}x")

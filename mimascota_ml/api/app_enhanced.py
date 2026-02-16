@@ -201,7 +201,7 @@ def recommend():
         
         print(f"[REQUEST] OK - {len(recommendations_array)} recomendaciones generadas")
         
-        print(f"\n✅ RESPUESTA EXITOSA (200 OK)")
+        print(f"\nRESPUESTA EXITOSA (200 OK)")
         print("Recomendaciones recibidas:")
         
         # Consultar mascotas para enriquecer

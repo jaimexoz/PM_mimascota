@@ -231,7 +231,7 @@ class EnhancedHybridRecommender:
             
             # ================= DEBUG =================
             print("\n   [DEBUG COLLABORATIVE]")
-            print("   Latent vector:", latent_vector[:20] if latent_vector is not None else None)
+            print("   Latent vector:", latent_vector[:10] if latent_vector is not None else None)
             print("   Varianza collab_scores:", np.var(list(collab_scores.values())))
             print("========================================\n")
             # =========================================
@@ -304,7 +304,7 @@ class EnhancedHybridRecommender:
             for item in top_n
         ])
         
-        print(f"   ✅ {len(result)} recomendaciones generadas")
+        print(f"{len(result)} recomendaciones generadas")
         return result
     
     def explain_recommendation(self, pet_id, hybrid_result):

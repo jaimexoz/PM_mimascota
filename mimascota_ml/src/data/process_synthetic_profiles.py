@@ -100,7 +100,7 @@ def train_svd(df):
     )
     
     trainset = data.build_full_trainset()
-    algo = SVD(n_factors=20, random_state=42)
+    algo = SVD(n_factors=10, random_state=42) # Changed n_factors from 10 to 10
     algo.fit(trainset)
     
     return algo, trainset

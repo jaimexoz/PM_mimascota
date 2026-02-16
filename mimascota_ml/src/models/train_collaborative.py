@@ -50,14 +50,14 @@ def main():
         print(f"✓ Datos preprocesados: rating calculado desde interacciones")
         
     except FileNotFoundError:
-        print("❌ ERROR: No se encontró synthetic_interactions.csv")
-        print("   Ejecuta primero: python src/data/generate_synthetic_data.py")
+        print("ERROR: No se encontró synthetic_interactions.csv")
+        print("  Ejecuta primero: python src/data/generate_synthetic_data.py")
         return
     
     # 2. Crear y entrenar modelo
     print("\nEntrenando modelo SVD...")
     model = CollaborativeRecommender(
-        n_factors=20  # 20 factores latentes
+        n_factors=10  # 10 factores latentes
     )
     
     # Train con 80% de los datos

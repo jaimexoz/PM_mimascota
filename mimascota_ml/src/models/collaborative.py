@@ -26,7 +26,7 @@ class CollaborativeRecommender:
     Compatible con Python 3.12+
     """
     
-    def __init__(self, n_factors=20, n_epochs=50, lr=0.01, reg=0.02):
+    def __init__(self, n_factors=10, n_epochs=20, lr=0.005, reg=0.1):
         """
         Args:
             n_factors: Número de factores latentes
@@ -422,10 +422,10 @@ def main():
     # 2. Entrenar modelo
     print("\n[2] Entrenando modelo Collaborative Filtering...")
     model = CollaborativeRecommender(
-        n_factors=20,
-        n_epochs=50,
+        n_factors=10,
+        n_epochs=30,
         lr=0.01,
-        reg=0.02
+        reg=0.1
     )
     
     metrics = model.fit(interactions_df, test_size=0.2)
