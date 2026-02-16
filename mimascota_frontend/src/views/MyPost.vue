@@ -72,6 +72,7 @@
   import { ref, onMounted, computed, reactive, h } from 'vue';
   import { PawPrint, Search, Loader } from 'lucide-vue-next';
   import { useRouter } from 'vue-router'; 
+  import { apiUrl } from '@/config/api';
 
   import { useAuthStore } from "@/stores/authStore";
 
@@ -108,7 +109,7 @@ const authStore = useAuthStore();
     try {
         // ✅ CORRECCIÓN: Llama a la ruta que devuelve la lista de favoritos del usuario.
         // No necesitas pasar un ID de mascota.
-        const response = await fetch(`http://localhost:3000/api/mascotas/MypostUser`, { 
+        const response = await fetch(apiUrl('/mascotas/MypostUser'), { 
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${userToken}`,

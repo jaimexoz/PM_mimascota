@@ -215,10 +215,12 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'; // Importamos 'ref' para dragActivo y 'reactive' para mascota
-import Navbar from '../components/Navbar.vue';
-import Footer from '@/components/Footer.vue';
+import { ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import Navbar from '../components/Navbar.vue';
+import Footer from '../components/Footer.vue';
+import { getToken } from '../utils/auth';
+import { apiUrl } from '@/config/api';
 
 // =================================================================
 // 1. ESTADO REACTIVO Y VARIABLES (REEMPLAZA 'data')
@@ -426,7 +428,7 @@ function eliminarArchivo(id) {
     }));
 
     try {
-        const response = await fetch('http://localhost:3000/api/mascotas', {
+        const response = await fetch(apiUrl('/mascotas'), {
             method: 'POST',
             // ⭐️ 4. AÑADIR LA CABECERA DE AUTORIZACIÓN
             headers: {

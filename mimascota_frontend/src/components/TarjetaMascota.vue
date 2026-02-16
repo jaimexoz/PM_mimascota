@@ -144,6 +144,7 @@ import { useRouter } from 'vue-router';
 import Navbar from '../components/Navbar.vue';
 import Footer from './Footer.vue';
 import { useAuthStore } from "@/stores/authStore";
+import { apiUrl } from '@/config/api';
 
 // NO es necesario importar FontAwesomeIcon aquí si ya está registrado GLOBALMENTE en main.js
 
@@ -324,7 +325,7 @@ const checkFavoriteStatus = async (petId) => {
     }
 
     try {
-        const response = await fetch(`http://localhost:3000/api/favorites/status/${petId}`, {
+        const response = await fetch(apiUrl(`/favorites/status/${petId}`), {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${userToken}`,
@@ -363,7 +364,7 @@ const toggleFavorite = async () => {
     const previousStatus = isFavorite.value;
     isFavorite.value = !isFavorite.value; 
 
-    const url = `http://localhost:3000/api/favorites/${petId}`;
+    const url = apiUrl(`/favorites/${petId}`);
 
     try {
         // 3. ⭐️ ENVIAR SIEMPRE POST para alternar el estado en el backend ⭐️
@@ -409,7 +410,7 @@ const checkAdoptionStatus = async (petId) => {
     }
     
     try {
-        const response = await fetch(`http://localhost:3000/api/adoptions/check/${petId}`, {
+        const response = await fetch(apiUrl(`/adoptions/check/${petId}`), {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${userToken}`,
@@ -441,7 +442,7 @@ const fetchPetData = async () => {
   }
 
   try {
-    const response = await fetch(`http://localhost:3000/api/mascotas/card/${petId}`);
+     const response = await fetch(apiUrl(`/mascotas/card/${petId}`));
     
     if (!response.ok) {
       const errData = await response.json();

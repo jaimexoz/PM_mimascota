@@ -7,6 +7,7 @@ const {
     loginUser,
     updateUserInfo, 
     verifyEmail,
+    resendVerificationEmail,
     requestPasswordReset,
     resetPassword,
     getAllUsers,
@@ -60,6 +61,9 @@ router.post('/register', upload.single('imagep_usuari'), registerUser); // <-- �
 router.post('/login', loginUser);
 
 router.get('/verify-email', verifyEmail);
+
+// Ruta para reenviar correo de verificación
+router.post('/resend-verification', resendVerificationEmail);
 
 // Opcional: Rutas para restablecimiento de contraseña
 router.post('/request-password-reset', requestPasswordReset);

@@ -77,6 +77,8 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { getToken } from '../utils/auth';
+import { apiUrl } from '@/config/api'; 
 import { useRouter } from 'vue-router'; 
 import Navbar from '@/components/Navbar.vue'; 
 import Footer from './Footer.vue';
@@ -145,7 +147,7 @@ const fetchUserSolicitudes = async () => {
     try {
         // ⭐️ Importante: Este endpoint debe ser implementado en Express. 
         // La ruta asume que el backend usa el token para obtener las solicitudes del usuario.
-        const response = await fetch('http://localhost:3000/api/adoptions/user', {
+        const response = await fetch(apiUrl('/adoptions/user'), {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${userToken}`,

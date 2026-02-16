@@ -64,6 +64,7 @@
 import Navbar from '../components/Navbar.vue';
 import Footer from '@/components/Footer.vue';
 import EditPostModal from '../components/EditPostModal.vue'; // Mantenemos la modal
+import { apiUrl } from '@/config/api';
 import { ref, onMounted, computed, reactive, h } from 'vue'; // Importamos 'h'
 import { PawPrint, Search, Loader } from 'lucide-vue-next';
 import { useRouter } from 'vue-router'; 
@@ -106,7 +107,7 @@ async function getMascotas() {
     }
 
     try {
-        const response = await fetch(`http://localhost:3000/api/mascotas/MypostUser`, { 
+        const response = await fetch(apiUrl('/mascotas/MypostUser'), { 
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${userToken}`,

@@ -176,8 +176,9 @@
 </template>
 
 <script setup>
-import { ref, watch, reactive } from 'vue';
+import { ref, watch, reactive, onMounted } from 'vue';
 import { PawPrint, Loader } from 'lucide-vue-next';
+import { apiUrl } from '@/config/api';
 import { useAuthStore } from "@/stores/authStore";
 
 const authStore = useAuthStore();
@@ -240,7 +241,7 @@ async function fetchMascotaData(id) {
     const userToken = authStore.token;
     
     try {
-        const response = await fetch(`http://localhost:3000/api/mascotas/editar/${id}`, {
+        const response = await fetch(apiUrl(`/mascotas/editar/${id}`), {
             headers: { 'Authorization': `Bearer ${userToken}` }
         });
         
@@ -398,7 +399,7 @@ async function saveChanges() {
     form.append('datos', JSON.stringify(dataToSend));
 
     try {
-        const response = await fetch(`http://localhost:3000/api/mascotas/actualizar/${formData.idxxxx_mascot}`, {
+        const response = await fetch(apiUrl(`/mascotas/actualizar/${formData.idxxxx_mascot}`), {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${userToken}`,

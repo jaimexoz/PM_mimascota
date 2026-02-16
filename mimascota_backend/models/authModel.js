@@ -233,6 +233,17 @@ const softDeleteUser = async (userId) => {
     );
 }
 
+/**
+ * Elimina un usuario no verificado (para limpiar usuarios zombie con tokens expirados).
+ * @param {number} userId - ID del usuario a eliminar.
+ */
+const deleteUnverifiedUserDB = async (userId) => {
+    return pool.query(
+        'DELETE FROM usuarios WHERE idxxxx_usuari = $1 AND mailve_usuari = FALSE',
+        [userId]
+    );
+};
+
 module.exports = {
     findUserByEmailDB,
     createNewUserDB,
@@ -249,5 +260,6 @@ module.exports = {
     changeUserPasswordDB,
     getCurrentHashDB,
     changeRoleDB,
-    softDeleteUser
+    softDeleteUser,
+    deleteUnverifiedUserDB
 };

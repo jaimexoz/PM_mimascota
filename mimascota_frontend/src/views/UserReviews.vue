@@ -146,12 +146,14 @@
 </template>
 
 <script setup>
-import Navbar from '@/components/Navbar.vue'; 
-import Footer from '@/components/Footer.vue';
-import { ref, onMounted, reactive, computed } from 'vue'; // Importar 'computed'
+import { ref, onMounted, computed, reactive } from 'vue';
+import Navbar from '../components/Navbar.vue';
+import Footer from '../components/Footer.vue';
+import { getToken } from '../utils/auth';
+import { apiUrl } from '@/config/api';
 import { useRouter } from 'vue-router'; 
 
-const API_BASE_URL = 'http://localhost:3000/api/reviews';
+const API_BASE_URL = apiUrl('/reviews');
 const router = useRouter(); 
 
 // --- ESTADO DEL MODAL ---
@@ -354,7 +356,7 @@ async function deleteReview(reviewId) {
   }
 
   try {
-      const response = await fetch(`http://localhost:3000/api/reviews/${reviewId}`, {
+      const response = await fetch(apiUrl(`/reviews/${reviewId}`), {
           method: 'DELETE',
           headers: {
               // El servidor usará este token para verificar el rol/permisos (aunque el cliente ya filtró)

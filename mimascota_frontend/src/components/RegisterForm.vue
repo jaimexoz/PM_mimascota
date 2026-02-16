@@ -1,6 +1,7 @@
 <script setup>
 import { ref, defineEmits, nextTick } from 'vue';
 import axios from 'axios';
+import { apiUrl } from '@/config/api';
 
 const emit = defineEmits(['toggle-form', 'registration-success']);
 
@@ -44,7 +45,7 @@ const register = async () => {
     }
 
     try {
-        const response = await axios.post('http://localhost:3000/api/auth/register', formData, {
+        const response = await axios.post(apiUrl('/auth/register'), formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
             }

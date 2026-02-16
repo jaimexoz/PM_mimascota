@@ -4,10 +4,11 @@ import { getToken } from './utils/auth';
 // 🔥 IMPORTACIONES NECESARIAS
 import { useAuthStore } from './stores/authStore';
 import router from './router'; // Asume que tienes un archivo de configuración del router (src/router/index.js o similar)
+import { API_BASE_URL } from './config/api';
 
 const apiClient = axios.create({
-  baseURL: 'http://localhost:3000/api', // Tu servidor Express
-  headers: { 'Content-Type': 'application/json' },
+  baseURL: API_BASE_URL, // Usa la configuración centralizada
+  headers: { 'Content-Type': 'application/json' },
 });
 
 export function setAuthHeader(token) {

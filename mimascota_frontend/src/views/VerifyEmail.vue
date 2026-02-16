@@ -25,6 +25,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { apiUrl } from '@/config/api';
 
 const route = useRoute();
 const router = useRouter();
@@ -35,7 +36,7 @@ const verificationComplete = ref(false);
 
 const verifyToken = async (token) => {
     try {
-        const response = await fetch(`http://localhost:3000/api/auth/verify-email?token=${token}`, {
+        const response = await fetch(apiUrl(`/auth/verify-email?token=${token}`), {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
         });

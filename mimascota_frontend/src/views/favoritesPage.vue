@@ -78,17 +78,20 @@
     </div>
     
    
-  </div> <Footer/>
-  </template>
-  
-  <script setup>
-  import Navbar from '../components/Navbar.vue';
-  import Footer from '@/components/Footer.vue';
-  import { ref, onMounted, computed, reactive, h } from 'vue';
-  import { PawPrint, Search, Loader } from 'lucide-vue-next';
-  import { useRouter } from 'vue-router'; 
+  </div>
+  <Footer/>
+</template>
 
-  import { useAuthStore } from "@/stores/authStore";
+<script setup>
+import { ref, onMounted, computed, reactive, h } from 'vue';
+import TarjetaMascota from '../components/TarjetaMascota.vue';
+import Navbar from '../components/Navbar.vue';
+import Footer from '../components/Footer.vue';
+import { PawPrint, Search, Loader } from 'lucide-vue-next';
+import { useRouter } from 'vue-router'; 
+
+import { useAuthStore } from "@/stores/authStore";
+import { apiUrl } from '@/config/api';
 
 const authStore = useAuthStore();
   
@@ -141,7 +144,7 @@ const authStore = useAuthStore();
     try {
         // ✅ CORRECCIÓN: Llama a la ruta que devuelve la lista de favoritos del usuario.
         // No necesitas pasar un ID de mascota.
-        const response = await fetch(`http://localhost:3000/api/favorites/favorites`, { 
+        const response = await fetch(apiUrl('/favorites/favorites'), { 
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${userToken}`,

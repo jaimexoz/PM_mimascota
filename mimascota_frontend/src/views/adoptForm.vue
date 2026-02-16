@@ -209,10 +209,13 @@
 </template>
 
 <script setup>
-import Navbar from '../components/Navbar.vue'; // Ajusta la ruta si es necesario
-import { ref, onMounted, reactive } from 'vue';
+import Navbar from '../components/Navbar.vue';
+import Footer from '../components/Footer.vue';
+import { ref, onMounted, computed, reactive } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { PawPrint, Loader } from 'lucide-vue-next';
+import { getToken } from '../utils/auth';
+import { apiUrl } from '@/config/api';
 import { useAuthStore } from "@/stores/authStore"; // Asumiendo que tienes un store de autenticación
 
 const route = useRoute();
@@ -300,7 +303,7 @@ async function getMascotaDetails() {
   }
 
   try {
-    const response = await fetch(`http://localhost:3000/api/mascotas/shortcard/${mascotId.value}`); // Endpoint para una sola mascota
+    const response = await fetch(apiUrl(`/mascotas/shortcard/${mascotId.value}`)); // Endpoint para una sola mascota
     if (!response.ok) {
       throw new Error('Error al cargar la mascota: ' + response.statusText);
     }
@@ -359,7 +362,7 @@ async function submitForm() {
       };
 
     console.log("User ID (Valor):", userId); 
-    const response = await fetch('http://localhost:3000/api/adoptions', { // Nuevo endpoint para enviar formularios
+    const response = await fetch(apiUrl('/adoptions'), { // Nuevo endpoint para enviar formularios
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

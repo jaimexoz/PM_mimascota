@@ -40,8 +40,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { apiUrl } from '@/config/api';
 
 const route = useRoute();
 const router = useRouter();
@@ -80,7 +81,7 @@ const handleResetPassword = async () => {
     if (!token.value) {
         // Solicitar enlace de restablecimiento
         try {
-            const response = await fetch('http://localhost:3000/api/auth/request-password-reset', {
+            const response = await fetch(apiUrl('/auth/request-password-reset'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ emailx_usuari: email.value }),
@@ -109,7 +110,7 @@ const handleResetPassword = async () => {
             return;
         }
         try {
-            const response = await fetch('http://localhost:3000/api/auth/reset-password', {
+            const response = await fetch(apiUrl('/auth/reset-password'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

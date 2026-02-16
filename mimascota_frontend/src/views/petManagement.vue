@@ -87,6 +87,7 @@ import { useRouter } from 'vue-router';
 import Navbar from '@/components/Navbar.vue'; 
 import Footer from '@/components/Footer.vue';
 import { useAuthStore } from "@/stores/authStore";
+import { apiUrl } from '@/config/api';
 import { PawPrint, Loader } from 'lucide-vue-next';
 
 
@@ -133,7 +134,7 @@ const fetchAllMascotaPosts = async () => {
     try {
         // ⭐️ Importante: Este endpoint debe obtener TODOS los posts de mascotas ⭐️
         // y debe estar protegido en el backend para solo permitir Admin/Empleado.
-        const response = await fetch('http://localhost:3000/api/mascotas/AllPost', {
+        const response = await fetch(apiUrl('/mascotas/AllPost'), {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${userToken}`,
@@ -197,7 +198,7 @@ const updateApprovalStatus = async (mascotId, newStatus) => {
     try {
         // ⭐️ Endpoint: Usaremos un PUT para actualizar el recurso completo.
         // Necesitas crear este endpoint en Express (PUT /api/mascotas/approval/:mascotId)
-        const response = await fetch(`http://localhost:3000/api/mascotas/approval/${mascotId}`, {
+        const response = await fetch(apiUrl(`/mascotas/approval/${mascotId}`), {
             method: 'PUT', // Usamos PUT como se sugirió en el ejemplo anterior.
             headers: {
                 'Content-Type': 'application/json',

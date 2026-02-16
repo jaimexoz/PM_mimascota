@@ -106,8 +106,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router'; 
+import { getToken } from '../utils/auth';
+import { apiUrl } from '@/config/api'; 
 import Navbar from '@/components/Navbar.vue'; 
 import Footer from './Footer.vue';
 import { useAuthStore } from "@/stores/authStore";
@@ -167,7 +169,7 @@ const verFormularioAdopcion = (formId) => {
 
     try {
         // ⭐️ IMPORTANTE: Necesitas crear este endpoint en Express (PATCH /api/adoptions/:formId/status)
-        const response = await fetch(`http://localhost:3000/api/adoptions/${formId}/status`, {
+        const response = await fetch(apiUrl(`/adoptions/${formId}/status`), {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -220,7 +222,7 @@ const updateMascotStatus = async (mascotId, newStatus) => {
 
     try {
         // Debes implementar esta nueva ruta en tu backend de Express/Node.js
-        const response = await fetch(`http://localhost:3000/api/adoptions/${mascotId}/statusM`, {
+        const response = await fetch(apiUrl(`/adoptions/${mascotId}/statusM`), {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -273,7 +275,7 @@ const fetchUserSolicitudes = async () => {
 
     try {
         // ⭐️ CAMBIO CLAVE: Usar la nueva URL
-        const response = await fetch('http://localhost:3000/api/adoptions/received', { 
+        const response = await fetch(apiUrl('/adoptions/received'), { 
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${userToken}`,
@@ -375,7 +377,7 @@ const formatDate = (dateString) => {
 
     try {
         // 2. Llama al nuevo endpoint del backend
-        const response = await fetch(`http://localhost:3000/api/adoptions/${solicitudId}/confirm-adoption`, {
+        const response = await fetch(apiUrl(`/adoptions/${solicitudId}/confirm-adoption`), {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',

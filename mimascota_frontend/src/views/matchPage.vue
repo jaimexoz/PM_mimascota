@@ -89,8 +89,10 @@ import Footer from '@/components/Footer.vue';
 import { ref, onMounted, computed, h } from 'vue';
 import { PawPrint, Search, Loader } from 'lucide-vue-next';
 import { useRouter } from 'vue-router'; 
-import axios from 'axios';
-import { useAuthStore } from '@/stores/authStore';
+import Footer from '@/components/Footer.vue';
+import TarjetaMascota from '../components/TarjetaMascota.vue';
+import { getToken } from '../utils/auth';
+import { apiUrl } from '@/config/api';
 
 // --- ESTADOS ---
 const router = useRouter();

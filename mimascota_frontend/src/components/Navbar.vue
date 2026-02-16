@@ -80,7 +80,14 @@
           <div class="user-profile-container">
             <div class="user-profile" @click="toggleDropdown">
               <div class="user-avatar">
+                <!-- Mostrar SVG placeholder si no hay imagen -->
+                <svg v-if="!userImageUrl" width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="8" r="4" fill="#ff9595"/>
+                  <path d="M12 14c-4 0-7 2-7 4v2h14v-2c0-2-3-4-7-4z" fill="#ff9595"/>
+                </svg>
+                <!-- Mostrar imagen si existe -->
                 <img 
+                  v-else
                   :src="userImageUrl" 
                   :alt="userName"
                   @error="handleImageError"
@@ -171,8 +178,9 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { logout, onUserDataChange } from '../utils/auth';
+import { logout, onUserDataChange, getToken } from '../utils/auth';
 import { useAuthStore } from '@/stores/authStore';
+import { apiUrl, backendUrl, BACKEND_URL } from '@/config/api';
 import { PawPrint } from 'lucide-vue-next';
 import { mdiCat } from '@mdi/js';
 import { mdiTrashCanOutline } from '@mdi/js';
@@ -209,9 +217,9 @@ const userImageUrl = computed(() => {
   if (user?.imageUrl) {
     return user.imageUrl.startsWith('http') 
       ? user.imageUrl 
-      : `http://localhost:3000${user.imageUrl}`;
+      : backendUrl(user.imageUrl);
   }
-  return '/default-avatar.png';
+  return null;
 });
 
 const isAdmin = computed(() => {
@@ -277,13 +285,8 @@ const connectSocket = () => {
         return;
     }
 
-    // Desconectar socket anterior si existe
-    if (socket && socket.connected) {
-        socket.disconnect();
-    }
-
-    // ⚠️ AJUSTA ESTA URL a la de tu backend si no es http://localhost:3000
-    socket = io('http://localhost:3000', {
+    // Socket.IO usa la URL del backend desde la configuración
+    socket = io(BACKEND_URL, {
         query: {
             userId: userId // ⭐️ Enviar el ID de usuario para la autenticación y unión al "room"
         },
@@ -390,7 +393,7 @@ const connectSocket = () => {
 
     try {
         // ⚠️ AJUSTA ESTA RUTA a la de tu endpoint de notificaciones
-        const response = await fetch('http://localhost:3000/api/adoptions/notificaciones', { 
+        const response = await fetch(apiUrl('/adoptions/notificaciones'), { 
             headers: {
                 'Authorization': `Bearer ${token}`
             }
@@ -422,7 +425,7 @@ const markAllAsRead = async () => {
         if (unreadCount.value === 0) return;
 
         // ⚠️ AJUSTA ESTA RUTA a la de tu endpoint de marcar como leídas
-        const response = await fetch('http://localhost:3000/api/adoptions/readnotifi', { 
+        const response = await fetch(apiUrl('/adoptions/readnotifi'), { 
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -536,7 +539,7 @@ const handleDeleteAccount = async () => {
 
     try {
         // ⚠️ AJUSTA ESTA RUTA a tu backend
-        const response = await fetch('http://localhost:3000/api/auth/delete-account', {
+        const response = await fetch(apiUrl('/auth/delete-account'), {
             method: 'PUT', // Usamos PATCH para una actualización parcial (cambiar un campo)
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -860,6 +863,13 @@ button.view-more-button {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.user-avatar svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  background: #f5f5f5;
 }
 
 .user-name {
