@@ -216,10 +216,10 @@ def recommend():
             collab_score = float(row[3])
             
             # Verificar si es Cold Start (para loguear)
-            is_cold_start_str = "❄️ COLD START" if collab_score == 0.5 and hybrid_score > 0.6 else "👤 USER HISTORY"
+            is_cold_start_str = "❄️ COLD START" if collab_score == 0.5 and hybrid_score > 0.6 else " "
             if hybrid_score == 0.5: is_cold_start_str = "⚠️ FALLBACK"
             
-            print(f" - Pet {pet_id}: Hybrid={hybrid_score:.3f} | Content={content_score:.3f} | Collab={collab_score:.3f} [{is_cold_start_str}]")
+            print(f" - Pet {pet_id}: Hybrid={hybrid_score:.3f} | Content={content_score:.3f} | Collab={collab_score:.3f}")
             
             pet = pets_df[pets_df['pet_id'] == pet_id]
             

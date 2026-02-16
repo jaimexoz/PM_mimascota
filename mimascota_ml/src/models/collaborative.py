@@ -4,11 +4,19 @@ Recomienda mascotas basándose en patrones de interacciones de usuarios similare
 COMPATIBLE CON PYTHON 3.12 (sin scikit-surprise)
 """
 
+import sys
 import numpy as np
 import pandas as pd
 import joblib
 from pathlib import Path
 from collections import defaultdict
+
+sys.path.append(str(Path(__file__).parent.parent.parent))  # mimascota_ml root
+sys.path.append(str(Path(__file__).parent.parent))         # src folder
+sys.path.append(str(Path(__file__).parent.parent.parent / 'api')) # api folder
+
+from database import PetDatabase
+
 
 
 class CollaborativeRecommender:
@@ -44,6 +52,8 @@ class CollaborativeRecommender:
         self.item_mapping = {}
         self.reverse_user_mapping = {}
         self.reverse_item_mapping = {}
+
+        self.db = PetDatabase()
         
         self.is_fitted = False
     
@@ -91,6 +101,8 @@ class CollaborativeRecommender:
         
         # Crear mapeos
         self._create_mappings(interactions_df)
+        self.interactions_df = interactions_df.copy()
+    
         n_users = len(self.user_mapping)
         n_items = len(self.item_mapping)
         
@@ -181,48 +193,123 @@ class CollaborativeRecommender:
         return metrics
     
     def predict_rating(self, user_id, pet_id, latent_vector=None):
-        """
-        Predice el rating que un usuario daría a una mascota
-        
-        Args:
-            user_id: ID del usuario
-            pet_id: ID de la mascota
-            latent_vector: (Opcional) Vector latente pre-calculado para cold start
-        
-        Returns:
-            float: Rating predicho (1-5)
-        """
+
         if not self.is_fitted:
             raise ValueError("Model must be fitted before predicting")
-        
+
         try:
-            # Caso 1: Usuario y mascota conocidos (Normal)
-            if user_id in self.user_mapping and pet_id in self.item_mapping:
-                u_idx = self.user_mapping[user_id]
-                i_idx = self.item_mapping[pet_id]
-                return self._predict_single(u_idx, i_idx)
-            
-            # Caso 2: Cold Start con Vector Latente Prestado
+            # PRIORIDAD: si me pasan latent_vector, lo uso
             if latent_vector is not None and pet_id in self.item_mapping:
                 i_idx = self.item_mapping[pet_id]
                 item_vector = self.item_factors[i_idx]
                 item_bias = self.item_bias[i_idx]
-                global_mean = self.global_mean
-                
-                # Predicción SVD manual: global_mean + user_bias(0) + item_bias + dot(Pu, Qi)
-                # Asumimos user_bias = 0 para nuevo usuario
+
                 dot_product = np.dot(latent_vector, item_vector)
-                prediction = global_mean + item_bias + dot_product
-                
-                # Clip al rango 1-5
+                prediction = self.global_mean + item_bias + dot_product
+
                 return np.clip(prediction, self.min_rating, self.max_rating)
-            
-            # Caso 3: Fallback (lo que teníamos antes)
-            return 2.5  # Neutral
-            
+
+            # Caso normal (usuario conocido sin vector nuevo)
+            if user_id in self.user_mapping and pet_id in self.item_mapping:
+                u_idx = self.user_mapping[user_id]
+                i_idx = self.item_mapping[pet_id]
+                return self._predict_single(u_idx, i_idx)
+
+            return self.global_mean
+
         except Exception as e:
             print(f"Error predicting rating: {e}")
             return self.global_mean
+
+    def get_user_interactions(self, user_id):
+        """
+        Obtiene interacciones reales del usuario desde la base de datos PostgreSQL
+        """
+
+        if not self.is_fitted:
+            raise ValueError("Model must be fitted before retrieving interactions")
+
+        try:
+            # Método que debes tener implementado en PetDatabase
+            interactions = self.db.get_user_interactions(user_id)
+
+            if interactions is None or len(interactions) == 0:
+                return []
+
+            # Esperamos lista de dicts:
+            # [{'pet_id': 10, 'rating': 4.5}, ...]
+
+            result = [
+                (row['pet_id'], row['rating'])
+                for row in interactions
+            ]
+
+            return result
+
+        except Exception as e:
+            print(f"Error retrieving user interactions: {e}")
+            return []
+
+    def compute_user_vector_closed_form(self, user_interactions, reg=0.1):
+        """
+        Calcula el vector latente de un usuario nuevo usando solución cerrada
+        (Least Squares con regularización tipo Ridge).
+
+        Args:
+            user_interactions: lista de tuplas [(pet_id, rating), ...]
+            reg: lambda de regularización (default 0.1)
+
+        Returns:
+            numpy array (n_factors,) o None si no hay suficientes datos
+        """
+
+        if not self.is_fitted:
+            raise ValueError("Model must be fitted before computing user vector")
+
+        if user_interactions is None or len(user_interactions) == 0:
+            return None
+
+        Q_list = []
+        r_list = []
+
+        # Construir matriz Q y vector r'
+        for pet_id, rating in user_interactions:
+
+            if pet_id not in self.item_mapping:
+                continue  # ignorar items desconocidos
+
+            i_idx = self.item_mapping[pet_id]
+
+            Q_i = self.item_factors[i_idx]   # vector del item
+            b_i = self.item_bias[i_idx]      # bias del item
+
+            # r' = r - μ - b_i
+            r_prime = rating - self.global_mean - b_i
+
+            Q_list.append(Q_i)
+            r_list.append(r_prime)
+
+        if len(Q_list) == 0:
+            return None
+
+        # Convertir a matrices numpy
+        Q = np.vstack(Q_list)         # shape: (N, n_factors)
+        r = np.array(r_list)          # shape: (N,)
+
+        # Resolver sistema:
+        # Pu = (Q^T Q + λI)^(-1) Q^T r
+
+        A = Q.T @ Q + reg * np.eye(self.n_factors)
+        b = Q.T @ r
+
+        try:
+            user_vector = np.linalg.solve(A, b)
+        except np.linalg.LinAlgError:
+            # fallback si matriz es singular
+            user_vector = np.linalg.pinv(A) @ b
+
+        return user_vector
+
     
     def recommend(self, user_id, pet_candidates, n_recommendations=10):
         """

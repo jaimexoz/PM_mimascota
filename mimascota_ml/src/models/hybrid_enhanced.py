@@ -24,8 +24,8 @@ from database import PetDatabase
 class EnhancedHybridRecommender:
     """
     Sistema híbrido mejorado que combina:
-    - Content-Based Enhanced (60%): Con NLP y feature weighting
-    - Collaborative (40%): Basado en patrones de interacciones
+    - Content-Based Enhanced (70%): Con NLP y feature weighting
+    - Collaborative (30%): Basado en patrones de interacciones
     
     Características:
     - Consulta mascotas reales de PostgreSQL
@@ -71,6 +71,7 @@ class EnhancedHybridRecommender:
         
         # Cargar Collaborative
         print("\n[2] Cargando Collaborative Filtering...")
+        
         self.collaborative_model = CollaborativeRecommender()
         self.collaborative_model.load(collaborative_model_path)
         print(f"   ✅ Collaborative cargado")
@@ -160,38 +161,81 @@ class EnhancedHybridRecommender:
         # 2. Obtener scores de Collaborative
         print(f"[2/3] Generando scores Collaborative (peso {self.collaborative_weight})...")
         try:
-            # Estrategia Cold Start:
-            # Si el usuario es nuevo (no esta en mapping), buscar perfil sintetico similar
             latent_vector = None
             is_cold_start = False
-            
-            if self.collaborative_model.is_fitted and user_id not in self.collaborative_model.user_mapping:
-                print(f"   ❄️ [ANÁLISIS DE PERFIL] Usuario nuevo detectado (ID: {user_id})")
+
+            # ========================================
+            # CASO 1: Usuario existe en el modelo
+            # ========================================
+            if self.collaborative_model.is_fitted and user_id in self.collaborative_model.user_mapping:
+
+                # Obtener interacciones reales
+                real_interactions = self.collaborative_model.get_user_interactions(user_id)
+
+                print(f"   🔎 Usuario encontrado. Interacciones: {len(real_interactions)}")
+
+                if len(real_interactions) >= 5:
+                    print("Interacciones reales:", real_interactions)
+
+                    print("   🧠 Construyendo vector real (Closed-Form)...")
+
+                    latent_vector = self.collaborative_model.compute_user_vector_closed_form(
+                        real_interactions
+                    )
+
+
+                else:
+                    print("   ❄️ Pocas interacciones. Activando Cold Start.")
+                    is_cold_start = True
+
+            # ========================================
+            # CASO 2: Usuario no existe
+            # ========================================
+            else:
+                print(f"   ❄️ Usuario nuevo detectado (ID: {user_id})")
                 is_cold_start = True
-                
-                # Extraer preferencias del user_profile
+
+
+            # ========================================
+            # SI ES COLD START → PERFIL SINTÉTICO
+            # ========================================
+            if is_cold_start:
+
                 prefs = {
                     'especie': user_profile.get('preference_specie', 'Perro'),
                     'tamano': user_profile.get('preference_size', 'mediano'),
                     'energia': user_profile.get('preference_energy', 2)
                 }
-                print(f"   🔍 Buscando perfiles sintéticos similares en DB...")
-                print(f"      Criterios: {prefs}")
-                
-                latent_vector = get_similar_synthetic_profile(prefs)
-                
-                if latent_vector is not None:
-                     print(f"   ✨ [ÉXITO] Perfil sintético encontrado. Vector de dimensión {len(latent_vector)}")
-                     print(f"      > Usando este 'cerebro prestado' para calcular afinidad colaborativa...")
-                else:
-                     print(f"   ⚠️ [INFO] No se encontraron perfiles similares. Usando fallback neutral.")
 
+                print("   🔍 Buscando perfil sintético similar...")
+                latent_vector = get_similar_synthetic_profile(prefs)
+
+                if latent_vector is not None:
+                    print(f"   ✨ Perfil sintético encontrado.")
+                else:
+                    print(f"   ⚠️ Fallback neutral.")
+
+
+            # ========================================
+            # GENERAR SCORES COLLABORATIVE
+            # ========================================
             collab_scores = {}
+
             for pid in pet_candidates:
-                # Si tenemos vector latente, lo usamos. Si no, el modelo usa su logica interna (neutral)
-                score = self.collaborative_model.predict_rating(user_id, pid, latent_vector=latent_vector)
+                score = self.collaborative_model.predict_rating(
+                    user_id,
+                    pid,
+                    latent_vector=latent_vector
+                )
                 collab_scores[int(pid)] = score
-                
+            
+            # ================= DEBUG =================
+            print("\n   [DEBUG COLLABORATIVE]")
+            print("   Latent vector:", latent_vector[:20] if latent_vector is not None else None)
+            print("   Varianza collab_scores:", np.var(list(collab_scores.values())))
+            print("========================================\n")
+            # =========================================
+
         except Exception as e:
             print(f"   ⚠️ Error en collaborative: {e}")
             collab_scores = {pet_id: 2.5 for pet_id in pet_candidates}
@@ -213,10 +257,15 @@ class EnhancedHybridRecommender:
         min_r = self.collaborative_model.min_rating
         max_r = self.collaborative_model.max_rating
 
-        collab_scores_normalized = {
-            pid: (score - min_r) / (max_r - min_r)
-            for pid, score in collab_scores.items()
-        }
+        den = max_r - min_r
+        if den < 1e-6:
+            collab_scores_normalized = {pid: 0.5 for pid in collab_scores}
+        else:
+            collab_scores_normalized = {
+                pid: (score - min_r) / den
+                for pid, score in collab_scores.items()
+            }
+
         
         hybrid_scores = []
         
@@ -292,8 +341,7 @@ class EnhancedHybridRecommender:
         print(f"  Collaborative (Similaridad):     {collab_score:.3f} × {self.collaborative_weight} = {collab_contribution:.3f}")
         print("-" * 70)
         print(f"  TOTAL:                           {hybrid_score:.3f}")
-        print("=" * 70 + "\n")
-        print(self.collaborative_model.predict_rating(user_id, pet_id, latent_vector=latent_vector))
+        print("=" * 70 + "\n")        
     
     def save(self, path):
         """Guarda configuración del híbrido (los modelos individuales ya están guardados)"""

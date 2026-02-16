@@ -8,7 +8,14 @@ from pathlib import Path
 import sys
 
 # Agregar paths
-sys.path.append(str(Path(__file__).parent.parent))
+
+sys.path.append(str(Path(__file__).parent.parent.parent))  # mimascota_ml root
+sys.path.append(str(Path(__file__).parent.parent))         # src folder
+sys.path.append(str(Path(__file__).parent.parent.parent / 'api')) # api folder
+
+from src.models.collaborative import CollaborativeRecommender
+from api.database import PetDatabase
+
 
 from models.collaborative import CollaborativeRecommender
 
@@ -41,14 +48,12 @@ def main():
         # Seleccionar solo columnas necesarias
         interactions_df = interactions_df[['user_id', 'pet_id', 'rating']]
         print(f"✓ Datos preprocesados: rating calculado desde interacciones")
-        print(interactions_df['rating'].describe())
         
     except FileNotFoundError:
         print("❌ ERROR: No se encontró synthetic_interactions.csv")
         print("   Ejecuta primero: python src/data/generate_synthetic_data.py")
         return
     
-        
     # 2. Crear y entrenar modelo
     print("\nEntrenando modelo SVD...")
     model = CollaborativeRecommender(

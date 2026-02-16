@@ -84,6 +84,65 @@ class PetDatabase:
         finally:
             if conn:
                 conn.close()
+
+    def get_user_interactions(self, user_id):
+        """
+        Obtiene interacciones del usuario y las transforma en rating numérico
+        """
+
+        conn = None
+        try:
+            conn = psycopg2.connect(**self.config)
+
+            query = """
+                SELECT 
+                    forane_idxxxx_mascot,
+                    clicks_intera,
+                    favori_intera,
+                    adopti_intera
+                FROM interacciones
+                WHERE forane_idxxxx_usuari = %s
+            """
+
+            with conn.cursor() as cursor:
+                cursor.execute(query, (user_id,))
+                rows = cursor.fetchall()
+
+            interactions = []
+
+            for row in rows:
+                pet_id = row[0]
+                clicks = row[1] or 0
+                favoritos = row[2] or 0
+                adoptado = row[3] or 0
+
+                # Convertir a rating ponderado
+                rating = 0
+
+                if clicks > 0:
+                    rating += 1
+
+                if favoritos > 0:
+                    rating += 3
+
+                if adoptado > 0:
+                    rating += 5
+
+                # Solo agregar si hay señal real
+                if rating > 0:
+                    interactions.append({
+                        'pet_id': int(pet_id),
+                        'rating': float(rating)
+                    })
+
+            return interactions
+
+        except Exception as e:
+            raise Exception(f"Error obteniendo interacciones del usuario: {e}")
+
+        finally:
+            if conn:
+                conn.close()
     
     def test_connection(self):
         """
