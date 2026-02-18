@@ -198,13 +198,13 @@ async function getMascotasRecientes() {
         if (Array.isArray(data) && data.length > 0) {
             mascotas.value = data;
         } else {
-            console.warn("Backend no retornó mascotas, usando datos de ejemplo.");
-            mascotas.value = createMockMascotas(4); 
+            console.warn("Backend no retornó mascotas.");
+            mascotas.value = []; 
         }
         
     } catch (error) {
-        console.error("Error al obtener las mascotas, activando fallback:", error);
-        mascotas.value = createMockMascotas(4); 
+        console.error("Error al obtener las mascotas:", error);
+        mascotas.value = []; 
     } finally {
         isLoading.value = false;
     }
@@ -223,33 +223,6 @@ onMounted(() => {
 // UTILIDADES DE VISUALIZACIÓN
 // ==============================================
 
-/**
-* Función para simular datos de mascotas si la base de datos no funciona.
-*/
-function createMockMascotas(count) {
-    const mockData = [];
-    const names = ["Max", "Luna", "Rocky", "Bella"];
-    const breeds = ["Labrador", "Mestizo", "Poodle", "Pastor Alemán"];
-    const sizes = ["Pequeño", "Mediano", "Grande"];
-    const imageBaseUrl = 'https://placehold.co/400x400/FF9933/FFFFFF/png?text=';
-
-    for (let i = 0; i < count; i++) {
-        const name = names[i % names.length];
-        const ageMonths = (i + 1) * 6; // Edad de ejemplo
-        
-        mockData.push({
-            idxxxx_mascot: i + 1, // Usando la columna de tu consulta SQL
-            nombre_mascot: name,
-            especi_mascot: i % 2 === 0 ? 'Perro' : 'Gato',
-            sexoxx_mascot: i % 4 < 2 ? 'Macho' : 'Hembra',
-            edadme_mascot: ageMonths, 
-            razaxx_mascot: breeds[i % breeds.length], // Usando la columna de tu consulta SQL
-            tamano_mascot: sizes[i % sizes.length],
-            image1_mascot: `${imageBaseUrl}${name.replace(' ', '+')}`,
-        });
-    }
-    return mockData;
-}
 
 /**
 * Convierte edad en meses a formato legible (años y meses).
@@ -276,7 +249,7 @@ function formatAge(months) {
 */
 const PetCard = ({ mascota }) => {
     const ageDisplay = formatAge(mascota.edadme_mascot);
-    const imageUrl = mascota.image1_mascot || `https://placehold.co/400x400/9933FF/FFFFFF/png?text=Sin+Foto`;
+    const imageUrl = mascota.image1_mascot || null;
 
     // NOTA: Se mantienen las clases genéricas 'pet-card-*' para que uses tu propio CSS/
     const navigateToProfile = () => {
@@ -289,12 +262,23 @@ const PetCard = ({ mascota }) => {
     return h('div', { class: 'pet-card' }, [
         // Imagen
         h('div', { class: 'pet-card-image-container' }, [
-            h('img', { 
-                src: imageUrl, 
-                alt: `Foto de ${mascota.nombre_mascot}`, 
-                class: 'pet-card-image',
-                onerror: (e) => e.target.src = `https://placehold.co/400x400/9933FF/FFFFFF/png?text=Sin+Foto`
-            })
+            imageUrl 
+              ? h('img', { 
+                    src: imageUrl, 
+                    alt: `Foto de ${mascota.nombre_mascot}`, 
+                    class: 'pet-card-image',
+                    onerror: (e) => { e.target.style.display = 'none'; e.target.nextElementSibling && (e.target.nextElementSibling.style.display = 'flex'); }
+                })
+              : null,
+            h('div', { 
+                class: 'pet-card-placeholder',
+                style: !imageUrl ? 'display:flex' : 'display:none'
+            }, [
+                h('svg', { viewBox: '0 0 24 24', width: '64', height: '64', fill: 'none' }, [
+                    h('path', { d: 'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z', fill: '#ff9595' })
+                ]),
+                h('span', { style: 'color:#999;font-size:0.85rem;margin-top:4px' }, 'Sin foto')
+            ])
         ]),
         
         // Contenido
@@ -747,6 +731,16 @@ const handleGetStarted = () => {
 /* El :deep() aplica a los selectores hijos, por lo que este :hover también funcionará */
 :deep(.pet-card-image:hover) {
     transform: scale(1.05); /* hover:scale-105 */
+}
+
+:deep(.pet-card-placeholder) {
+    width: 100%;
+    height: 100%;
+    background: #f5f5f5;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 
