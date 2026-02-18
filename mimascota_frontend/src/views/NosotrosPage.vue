@@ -1,6 +1,10 @@
 <template>
   <div class="veterinaria-container">
     <Navbar />
+    
+    <div v-if="isLoading" class="loading-message">
+        <span class="loader"></span>
+    </div>
 
     <main class="veterinaria-content">
       <section class="hero-section-nos">
@@ -36,7 +40,7 @@
 
           <div class="image-column-nos">
             <img 
-              src="../assets/dog-nosotros.jpg" 
+              src="https://res.cloudinary.com/dxf384txl/image/upload/v1769999851/dog-nosotros_gd3fam.jpg" 
               alt="Cachorro blanco acostado, emblema de la Veterinaria Mi Mascota"
               class="puppy-image"
             />
@@ -49,22 +53,18 @@
   </div>
 </template>
 
-<script>
-// NOTA: En Vue 3 con Composition API, no necesitas importar nada si usas
-// <Navbar> y <Footer> como componentes globales o los registras localmente.
-
-// Ejemplo de registro local (si no son globales):
+<script setup>
 import Navbar from '@/components/Navbar.vue';
-import Footer from '@/components/Footer.vue'; 
+import Footer from '@/components/Footer.vue';
+import { ref, onMounted } from 'vue';
 
-export default {
-  name: 'VeterinariaPage',
-  components: {
-    Navbar,
-    Footer,
-  },
-  
-};
+const isLoading = ref(true);
+
+onMounted(() => {
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 500);
+});
 </script>
 
 <style scoped>
@@ -188,5 +188,42 @@ export default {
     .title {
         font-size: 2rem;
     }
+}
+
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 5px solid;
+  border-color: #ff99a2 transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+} 
+
+.loading-message {
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Centrado del contenido (spinner y texto) */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centrado vertical */
+    align-items: center;    /* Centrado horizontal */
+    background-color: white;
+    z-index: 999; 
+    color: #333;
+    font-size: 1.2em;
 }
 </style>

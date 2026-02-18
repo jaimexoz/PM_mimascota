@@ -71,7 +71,7 @@ const handleRegistrationSuccess = (message) => {
 
     /* ¡CAMBIOS CLAVE AQUÍ! */
     /* La imagen de fondo ahora va aquí */
-    background-image: url('../assets/cat.jpeg');
+    background-image: url('https://res.cloudinary.com/dxf384txl/image/upload/v1770000848/cat_pghsw7.jpg');
     background-position: center; /* Centramos la imagen */
     background-size: cover; /* Cubre todo el contenedor */
     background-repeat: no-repeat; /* No repite la imagen */
@@ -179,7 +179,7 @@ const handleRegistrationSuccess = (message) => {
 }
 
 .back-link:hover {
-    background-color: #ffbdbd;
+   background-color: #ff9595;
     color: white;
     transform: translateX(-5px);
 }

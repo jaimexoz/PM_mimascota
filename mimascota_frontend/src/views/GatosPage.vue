@@ -77,7 +77,7 @@
             <h2 class="no-results-title">¡Vaya! No encontramos mascotas con esos filtros.</h2>
             <p class="no-results-text">Intenta ajustar tus criterios de búsqueda o limpiar los filtros.</p>
             <button @click="clearFilters" class="show-all-button">
-                Mostrar todas las mascotas
+                Limpiar filtros
             </button>
         </div>
     </div>
@@ -259,16 +259,36 @@ function formatAge(months) {
 * Componente funcional para renderizar una tarjeta de mascota.
 * Se han movido las clases de Tailwind a PetCard classes y chips.
 */
+// ⚠️ NO OLVIDAR IMPORTAR useAuthStore AL PRINCIPIO
+import { useAuthStore } from "@/stores/authStore";
+
+const authStore = useAuthStore();
+
+const registerInteraction = (petId, type) => {
+    if (!authStore.isAuthenticated) return;
+
+    fetch('http://localhost:3000/api/interactions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authStore.token}`
+        },
+        body: JSON.stringify({ petId, type })
+    }).catch(err => console.error("Error background interaction:", err));
+};
+
 const PetCard = ({ mascota }) => {
   const ageDisplay = formatAge(mascota.edadme_mascot);
   const imageUrl = mascota.image1_mascot || `https://placehold.co/400x400/9933FF/FFFFFF/png?text=Sin+Foto`;
 
-  
-  // ⚠️ ERROR CORREGIDO: navigateToProfile NO DEBE SER UNA FUNCIÓN NUEVA DENTRO DE ESTA FUNCIÓN. 
-  // DEBE SER UNA FUNCIÓN QUE RETORNA OTRA FUNCIÓN PARA EL ONCLICK.
   const navigateToProfile = () => {
-      // Utilizamos el router del componente padre
-      router.push(`/card/${mascota.id || mascota.idxxxx_mascot}`);
+    // ⭐️ REGISTRAR CLICK
+    const petId = mascota.id || mascota.idxxxx_mascot;
+    if (petId) {
+        registerInteraction(petId, 'click');
+    }
+
+      router.push(`/card/${petId}`);
   };
   
   return h('div', { class: 'pet-card' }, [
@@ -299,7 +319,6 @@ const PetCard = ({ mascota }) => {
           // Botón Ver Perfil
           h('button', { 
             class: 'pet-card-button',
-            // ⚠️ CORRECCIÓN CLAVE: Pasamos la referencia a la función, no la LLAMAMOS inmediatamente.
             onClick: navigateToProfile 
           }, 'Ver más')
         ])
@@ -313,7 +332,7 @@ const PetCard = ({ mascota }) => {
   width: 48px;
   height: 48px;
   border: 5px solid;
-  border-color: #FF3D00 transparent;
+  border-color: #ff99a2 transparent;
   border-radius: 50%;
   display: inline-block;
   box-sizing: border-box;
@@ -721,15 +740,16 @@ const PetCard = ({ mascota }) => {
   .show-all-button {
     margin-top: 1rem;
     padding: 0.5rem 1.5rem;
+    border: #111827;
     border-radius: 9999px; /* rounded-full */
     color: #ffffff; /* text-white */
     font-weight: 700; /* font-bold */
-    background-color: #4f46e5; /* indigo-600 */
+    background-color: #ff9595;
     transition: background-color 200ms ease;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); /* shadow-lg */
+    box-shadow: 0 4px 6px -1px rgb(195, 195, 195); /* shadow-lg */
   }
   .show-all-button:hover {
-    background-color: #4338ca; /* hover:bg-indigo-700 */
+    background-color: #ff6060; /* hover:bg-indigo-700 */
   }
   
   

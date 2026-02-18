@@ -180,16 +180,19 @@
     <div v-if="modal.visible" class="modal-overlay">
     <div class="modal-content" :class="modal.tipo">
         <div class="modal-x">
-            <button @click="cerrarModal" class="btn-x">
-                X
+            <button @click="cerrarModal" class="close-button">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
             </button>
         </div>
         <div class="modal-header">
+                <h2>Formulario</h2>
                 <template v-if="modal.tipo === 'success'">
-                    <h2>Su mascota ha sido añadida correctamente</h2>
+                    <p>Su formulario de adopción ha sido enviado correctamente</p>
                 </template>
                 <template v-if="modal.tipo === 'error'">
-                    <h2>El archivo excede el tamaño (5MB)</h2>
+                    <h2>Su formulario no ha podido ser enviado. Intentelo de nuevo</h2>
                 </template>
             
             
@@ -399,7 +402,7 @@ onMounted(() => {
   width: 48px;
   height: 48px;
   border: 5px solid;
-  border-color: #ff6060 transparent;
+  border-color: #ff99a2 transparent;
   border-radius: 50%;
   display: inline-block;
   box-sizing: border-box;
@@ -570,8 +573,8 @@ onMounted(() => {
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #ff9933;
-  box-shadow: 0 0 0 2px rgba(255, 153, 51, 0.2);
+  border-color: #ff9c9c;
+  box-shadow: 0 0 0 2px rgba(255, 128, 128, 0.664);
 }
 
 .form-group input[disabled] {
@@ -710,14 +713,14 @@ onMounted(() => {
 }
 
 .modal-content {
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-    width: 90%;
-    max-width: 400px;
+    position: relative;
+    background-color: #ffffff; 
+    border-radius: 1rem; /* Borde ligeramente más suave */
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35); 
+    width: 100%; 
+    max-width: 500px; /* Tamaño típico para modales de confirmación */
+    padding: 2.5rem 1.5rem; /* Ajuste del padding */
     text-align: center;
-    animation: fadeIn 0.3s ease-out;
-    justify-items: center;
 }
 
 .modal-header {
@@ -732,8 +735,16 @@ onMounted(() => {
     font-weight: 700;
 }
 
+.modal-header p{
+    font-size: 1.2rem;
+    color: #4b5563;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+    padding: 0 1.8rem;
+}
+
 .modal-icon {
-    font-size: 3rem;
+  font-size: 3rem;
     display: inline-block;
     width: 60px;
     height: 60px;
@@ -764,49 +775,55 @@ onMounted(() => {
 }
 
 .modal-actions {
-    width: 40%;
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 0 1rem;
 }
 
 .btn-primary {
-    margin-top: 20px;
-    background: #FF9933;
-    border-radius: 25px;
-    margin-bottom: 10px;
-    padding: 10px 25px;
-    color: white;
+    color: #ffffff;
+    width: 100%;
+    padding: 0.75rem 1.5rem;
     border: none;
-    cursor: pointer;
+    border-radius: 25px; /* Bordes redondeados */
     font-size: 1rem;
-    font-weight: 500;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    max-width: 150px;
+    background-color: #ff9595; 
+    font-weight: 700;
 }
 
 .btn-primary:hover{
-    background: #f47004;
+    background: #ff6060;
 }
 
 .modal-x{
   display: flex;
   width: 100%;
   justify-content: right;
-  border-bottom: 1px solid #dbdbdb; 
   
 }
 
-
-.btn-x{
-  color: #adadad;
-  background: none;
-  font-weight: 700;
-  font-size: 1.5rem;
-  border: none;
-  margin-top: 5px;
-  margin-right: 10px;
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: #495057;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    transition: color 0.2s;
 }
 
-
-.btn-x:hover {
-    color: #4f4f4f;
-   
+.close-button:hover {
+    color: #ff6060;
 }
 
 </style>

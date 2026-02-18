@@ -56,10 +56,9 @@
     <!-- 2. CONTENIDO PRINCIPAL (FEED DE MASCOTAS) -->
     <div class="content-wrapper feed-content">
     
-        <!-- Estado de Carga -->
-        <div v-if="isLoading" class="loading-state">
-            <Loader class="loading-icon animate-spin" />
-            <p class="loading-text">Cargando mascotas...</p>
+        <!-- Estado de Carga (Overlay) -->
+        <div v-if="isLoading" class="loading-message">
+            <div class="loader"></div>
         </div>
   
         <!-- Resultados del Filtro -->
@@ -130,6 +129,7 @@ const authStore = useAuthStore();
   */
   async function getMascotas() {
     isLoading.value = true;
+    const startTime = Date.now();
     const userToken = authStore.token;
     
     if (!userToken) {
@@ -170,7 +170,13 @@ const authStore = useAuthStore();
         // Fallback a datos simulados o mostrar error
         mascotas.value = createMockMascotas(0); // Pasa 0 para mostrar "no results"
     } finally {
-        isLoading.value = false;
+        const elapsedTime = Date.now() - startTime;
+        const minLoadingTime = 1000; 
+        const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+        
+        setTimeout(() => {
+            isLoading.value = false;
+        }, remainingTime);
     }
 }
   
@@ -742,3 +748,39 @@ const authStore = useAuthStore();
   }
 
   </style>
+
+<style scoped>
+/* Loader Global */
+.loading-message {
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Centrado del contenido (spinner y texto) */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centrado vertical */
+    align-items: center;    /* Centrado horizontal */
+    background-color: white;
+    z-index: 999; 
+    color: #333;
+    font-size: 1.2em;
+}
+
+.loader {
+     width: 48px;
+    height: 48px;
+    border: 5px solid;
+    border-color: #ff99a2 transparent;
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>

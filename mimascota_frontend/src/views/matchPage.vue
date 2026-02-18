@@ -1,312 +1,279 @@
 <template>
-    <div class="adoption-feed-container">
-  
-    <Navbar /> 
-    
-    <div v-if="isLoading" class="loading-message">
-        <span class="loader"></span>
-    </div>
-    <!-- 1. ENCABEZADO Y FILTROS -->
+  <div class="adoption-feed-container">
+
+    <Navbar />
+
     <div class="content-wrapper">
-        <h1 class="main-title">
-            <PawPrint class="paw-icon-main" />
-            ¡Adopta con Amor!
-            <PawPrint class="paw-icon-main" />
-        </h1>
-        <p class="subtitle">Encuentra a tu nuevo mejor amigo entre miles de mascotas.</p>
-  
-        <!-- BARRA DE FILTROS -->
-        <div class="filter-bar"> 
-            <span class="filter-label">Filtrar por:</span>
-  
-            <!-- Filtros Select -->
-            <select v-model="filters.edad" class="filter-select">
-                <option value="">Edad</option>
-                <option v-for="option in filterOptions.edad" :key="option" :value="option">{{ option }}</option>
-            </select>
-  
-            <select v-model="filters.sexo" class="filter-select">
-                <option value="">Sexo</option>
-                <option v-for="option in filterOptions.sexo" :key="option" :value="option">{{ option }}</option>
-            </select>
-  
-            <select v-model="filters.tamano" class="filter-select">
-                <option value="">Tamaño</option>
-                <option v-for="option in filterOptions.tamano" :key="option" :value="option">{{ option }}</option>
-            </select>
-            
-            <select v-model="filters.orden" class="filter-select">
-                <option v-for="option in filterOptions.orden" :key="option.value" :value="option.value">{{ option.label }}</option>
-            </select>
-  
-  
-            <!-- Barra de Búsqueda -->
-            <div class="search-input-container">
-                <input type="text" v-model="filters.busqueda"
-                    placeholder="Buscar por nombre..."
-                    class="search-input">
-                <Search class="search-icon" />
-            </div>
-            
-            <!-- Botón Limpiar Filtros -->
-            <button @click="clearFilters" class="clear-filters-button">
-                Limpiar
-            </button>
-        </div>
-        <!-- FIN BARRA DE FILTROS -->
+      <h1 class="main-title">
+        <PawPrint class="paw-icon-main" />
+        ¡Tu Match Perfecto!
+        <PawPrint class="paw-icon-main" />
+      </h1>
+      <p class="subtitle">
+        {{ hasSavedPreferences 
+           ? 'Estas son las mascotas más compatibles contigo según nuestro Sistema de Match.' 
+           : 'Responde unas preguntas y nuestro Sistema de Match encontrará a tu compañero ideal.' }}
+      </p>
     </div>
-  
-    <!-- 2. CONTENIDO PRINCIPAL (FEED DE MASCOTAS) -->
+
     <div class="content-wrapper feed-content">
-    
-        <!-- Estado de Carga -->
-        <div v-if="isLoading" class="loading-state">
-            <Loader class="loading-icon animate-spin" />
-            <p class="loading-text">Cargando mascotas...</p>
+
+      <div v-if="isLoading" class="loading-message">
+        <div class="loader"></div>
+      </div>
+
+      <div v-else-if="!hasSavedPreferences && !isLoading" class="cta-container">
+        <div class="match-test-cta">
+          <p class="cta-text">Aún no sabemos qué buscas. ¡Cuéntanos!</p>
+          <button type="button" class="match-test-button" @click="showQuestionnaire = true">
+            <Search class="icon-small" /> Iniciar Test de Compatibilidad
+          </button>
         </div>
-  
-        <!-- Resultados del Filtro -->
-        <div v-else-if="applyFilters.length > 0" class="pet-card-grid">
-            
-            <!-- Componente dinámico de tarjeta de mascota -->
-            <PetCard v-for="mascota in applyFilters" :key="mascota.id" :mascota="mascota" />
+      </div>
+
+      <div v-else-if="hasSavedPreferences && !isLoading" class="match-results-section">
+        
+        <div class="match-results-header">
+          <div class="header-text">
+            <h2 class="match-results-title">Tus Recomendaciones</h2>
+            <p class="match-results-subtitle">Ordenadas por % de compatibilidad</p>
+          </div>
+          
+          <button @click="retakeTest" class="btn-retake">
+            <img src="https://res.cloudinary.com/dxf384txl/image/upload/v1770000809/refresh_qvgihy.png" alt="refresh" style="width: 25px;"> Cambiar mis preferencias
+          </button>
         </div>
-  
-        <!-- Sin Resultados -->
-        <div v-else class="no-results-state">
-            <h2 class="no-results-title">¡Vaya! No encontramos mascotas con esos filtros.</h2>
-            <p class="no-results-text">Intenta ajustar tus criterios de búsqueda o limpiar los filtros.</p>
-            <button @click="clearFilters" class="show-all-button">
-                Mostrar todas las mascotas
-            </button>
+
+        <div v-if="matchResults.length > 0" class="pet-card-grid">
+          <PetCard 
+            v-for="mascota in matchResults" 
+            :key="mascota.idxxxx_mascot || mascota.id" 
+            :mascota="mascota" 
+          />
         </div>
+
+        <div v-else class="empty-state">
+          <p>No encontramos mascotas exactas para tus filtros actuales, pero ¡intenta ajustar tus preferencias!</p>
+          <button @click="retakeTest" class="btn-link">Ajustar preferencias</button>
+        </div>
+      </div>
+
+      <div v-if="matchError" class="match-error-state">
+        <p class="match-error-text">{{ matchError }}</p>
+        <button type="button" class="show-all-button" @click="matchError = null">Cerrar</button>
+      </div>
+
     </div>
+
+    <div v-if="showQuestionnaire" class="questionnaire-modal-overlay" @click.self="showQuestionnaire = false">
+      <div class="questionnaire-modal-content">
+        <button type="button" class="questionnaire-modal-close" @click="showQuestionnaire = false" aria-label="Cerrar">
+          ×
+        </button>
+        <MatchTestQuestionnaire
+          @close="showQuestionnaire = false"
+          @submit="onQuestionnaireSubmit"
+        />
+      </div>
+    </div>
+
     <Footer/>
   </div>
-  </template>
+</template>
 
 <script setup>
 import Navbar from '../components/Navbar.vue';
-import { ref, onMounted, computed, reactive, h } from 'vue';
+import MatchTestQuestionnaire from '@/components/MatchTestQuestionnaire.vue';
+import Footer from '@/components/Footer.vue';
+import { ref, onMounted, computed, h } from 'vue';
 import { PawPrint, Search, Loader } from 'lucide-vue-next';
 import { useRouter } from 'vue-router'; 
-import Footer from '@/components/Footer.vue';
 import TarjetaMascota from '../components/TarjetaMascota.vue';
 import { getToken } from '../utils/auth';
 import { apiUrl } from '@/config/api';
+import axios from 'axios';
+import { useAuthStore } from '@/stores/authStore';
 
-// Inicialización
-const router = useRouter(); 
-const mascotas = ref([]);
+// --- ESTADOS ---
+const router = useRouter();
+const authStore = useAuthStore();
+const showQuestionnaire = ref(false);
 const isLoading = ref(true);
+const matchError = ref(null);
 
-// Estado de los filtros y búsqueda
-const filters = reactive({
-  edad: '',
-  sexo: '',
-  tamano: '',
-  orden: 'mas_recientes', 
-  busqueda: ''
+const matchResults = ref([]);
+const hasSavedPreferences = ref(false); // Determina si mostramos el botón o la lista
+
+// ==============================================
+// 1. CARGA INICIAL (RECUPERAR VECTOR GUARDADO)
+// ==============================================
+onMounted(async () => {
+  await fetchSavedRecommendations();
 });
 
-// Opciones de filtro
-const filterOptions = {
-  edad: ['Cachorro (0-12m)', 'Joven (1-3a)', 'Adulto (+3a)'],
-  sexo: ['Macho', 'Hembra'],
-  tamano: ['Pequeño', 'Mediano', 'Grande'],
-  orden: [
-      { value: 'mas_recientes', label: 'Más recientes' },
-      { value: 'mas_antiguos', label: 'Más antiguos' },
-      { value: 'alfabetico', label: 'A-Z' }
-  ]
-};
-
-// ==============================================
-// 1. OBTENCIÓN DE DATOS DEL BACKEND (Simulación)
-// ==============================================
-
-/**
-* Función para obtener TODAS las mascotas de la base de datos.
-*/
-async function getMascotas() {
+async function fetchSavedRecommendations() {
   isLoading.value = true;
+  const startTime = Date.now();
+  const token = authStore.token || localStorage.getItem('authToken');
+
+  if (!token) {
+    // Si no hay token, forzamos a mostrar el botón de inicio (o redirigir a login)
+    isLoading.value = false;
+    hasSavedPreferences.value = false;
+    return;
+  }
+
   try {
-      // NOTA: Asegúrate de que tu backend tenga un endpoint que devuelva todas las mascotas
-      const response = await fetch(apiUrl('/mascotas/match'), { 
-          method: 'GET',
-          headers: {
-              'Content-Type': 'application/json'
-          },
-      });
+    // Usamos GET para consultar si ya existen preferencias
+    const response = await axios.get('http://localhost:3000/api/recommendations/getSavedRecommendations', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
 
-      if (!response.ok) {
-          throw new Error('Error al cargar las mascotas: ' + response.statusText);
-      }
-
-      const data = await response.json();
-      
-      if (data.length === 0) {
-          mascotas.value = [];
-      } else {
-          mascotas.value = data;
-      }
-      
-  } catch (error) {
-      console.error("Error al obtener las mascotas:", error);
-      mascotas.value = [];
-  } finally {
-      const minimumLoadingTime = 500; // Define el tiempo mínimo en milisegundos (ej: 500ms o 1000ms)
-        
-        setTimeout(() => {
-          isLoading.value = false; // El spinner se oculta después de este tiempo
-        }, minimumLoadingTime);
-  }
-}
-
-/**
-* Función de filtrado y ordenamiento principal.
-* Se ejecuta automáticamente cuando cambian los filtros.
-*/
-const applyFilters = computed(() => {
-  let results = [...mascotas.value];
-
-  // 1. FILTRADO POR BÚSQUEDA (Nombre o Raza)
-  if (filters.busqueda) {
-      const busquedaLower = filters.busqueda.toLowerCase();
-      results = results.filter(m => 
-          (m.nombre_mascot && m.nombre_mascot.toLowerCase().includes(busquedaLower)) ||
-          (m.raza_mascot && m.raza_mascot.toLowerCase().includes(busquedaLower))
-      );
-  }
-  
-  // 2. FILTRADO POR SEXO
-  if (filters.sexo) {
-      results = results.filter(m => m.sexoxx_mascot === filters.sexo);
-  }
-
-  // 3. FILTRADO POR TAMAÑO
-  if (filters.tamano) {
-      results = results.filter(m => m.tamano_mascot === filters.tamano);
-  }
-
-  // 4. FILTRADO POR EDAD (Asume 'edadme_mascot' está en meses)
-  if (filters.edad) {
-      results = results.filter(m => {
-          const edadMeses = m.edadme_mascot; 
-          switch (filters.edad) {
-              case 'Cachorro (0-12m)': return edadMeses >= 0 && edadMeses <= 12;
-              case 'Joven (1-3a)': return edadMeses > 12 && edadMeses <= 36;
-              case 'Adulto (+3a)': return edadMeses > 36;
-              default: return true;
-          }
-      });
-  }
-
-  // 5. ORDENAMIENTO
-  switch (filters.orden) {
-        case 'alfabetico':
-            results.sort((a, b) => (a.nombre_mascot || '').localeCompare(b.nombre_mascot || ''));
-            break;
-            
-        case 'mas_antiguos':
-            // Orden Ascendente (ID más bajo = más antiguo)
-            results.sort((a, b) => (a.idxxxx_mascot || 0) - (b.idxxxx_mascot || 0)); 
-            break;
-            
-        case 'mas_recientes':
-        default:
-            // Orden Descendente (ID más alto = más reciente) - El valor por defecto
-            results.sort((a, b) => (b.idxxxx_mascot|| 0) - (a.idxxxx_mascot || 0)); 
-            break;
+    if (response.data.status === 'success') {
+      matchResults.value = response.data.recommendations;
+      hasSavedPreferences.value = true;
+    } else if (response.data.status === 'no_data') {
+      // El usuario existe pero nunca ha hecho el test
+      matchResults.value = [];
+      hasSavedPreferences.value = false;
     }
 
-  return results;
-  });
-
-/**
-* Función para limpiar todos los filtros
-*/
-function clearFilters() {
-  Object.assign(filters, {
-      edad: '',
-      sexo: '',
-      tamano: '',
-      orden: 'mas_recientes',
-      busqueda: ''
-  });
+  } catch (error) {
+    console.error("Error obteniendo perfil match:", error);
+    matchError.value = "Hubo un problema cargando tu perfil de match.";
+  } finally {
+        const elapsedTime = Date.now() - startTime;
+        const minLoadingTime = 1000; 
+        const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+        
+        setTimeout(() => {
+            isLoading.value = false;
+        }, remainingTime);
+  }
 }
 
-// Llama a la función al cargar el componente
-onMounted(() => {
-  getMascotas();
-});
+// ==============================================
+// 2. ENVÍO DEL CUESTIONARIO (CREAR/ACTUALIZAR)
+// ==============================================
+async function onQuestionnaireSubmit(answers) {
+  showQuestionnaire.value = false;
+  isLoading.value = true;
+  const startTime = Date.now();
+  matchError.value = null;
 
-
-/**
-* Convierte edad en meses a formato legible (años y meses).
-*/
-function formatAge(months) {
-  if (months < 12) {
-      return `${months} meses`;
+  const token = authStore.token || localStorage.getItem('authToken');
+  
+  if (!token) {
+    matchError.value = 'Tu sesión ha expirado. Por favor inicia sesión.';
+    isLoading.value = false;
+    return;
   }
+
+  try {
+    // Usamos POST para guardar/actualizar el vector y recibir nuevos resultados
+    const response = await axios.post(
+      'http://localhost:3000/api/recommendations/submitQuestionnaire',
+      answers,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      }
+    );
+
+    if (response.data.status === 'success') {
+      matchResults.value = response.data.recommendations;
+      hasSavedPreferences.value = true; // Activamos la vista de resultados
+    } else {
+      matchError.value = 'No se pudieron calcular las recomendaciones.';
+    }
+  } catch (error) {
+    console.error('Error enviando test:', error);
+    matchError.value = error.response?.data?.message || 'Error al procesar tus respuestas.';
+  } finally {
+        const elapsedTime = Date.now() - startTime;
+        const minLoadingTime = 1000; 
+        const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+        
+        setTimeout(() => {
+            isLoading.value = false;
+        }, remainingTime);
+  }
+}
+
+// ==============================================
+// 3. REINICIAR / VOLVER A HACER EL TEST
+// ==============================================
+function retakeTest() {
+  // Simplemente abrimos el modal. Al enviar, el backend hará UPDATE sobre el vector viejo.
+  showQuestionnaire.value = true;
+}
+
+// ==============================================
+// 4. UTILIDADES Y COMPONENTES VISUALES
+// ==============================================
+
+function formatAge(months) {
+  if (months < 12) return `${months} m`;
   const years = Math.floor(months / 12);
   const remainingMonths = months % 12;
-  if (remainingMonths === 0) {
-      return `${years} años`;
-  }
-  return `${years} a ${remainingMonths} m`;
+  return remainingMonths === 0 ? `${years} años` : `${years}a ${remainingMonths}m`;
 }
 
-/**
-* Componente funcional para renderizar una tarjeta de mascota.
-* Se han movido las clases de Tailwind a PetCard classes y chips.
-*/
-const PetCard = ({ mascota }) => {
-  const ageDisplay = formatAge(mascota.edadme_mascot);
-  const imageUrl = mascota.image1_mascot || `https://placehold.co/400x400/9933FF/FFFFFF/png?text=Sin+Foto`;
+// COMPONENTE TARJETA (Render Function)
 
-  
-  // ⚠️ ERROR CORREGIDO: navigateToProfile NO DEBE SER UNA FUNCIÓN NUEVA DENTRO DE ESTA FUNCIÓN. 
-  // DEBE SER UNA FUNCIÓN QUE RETORNA OTRA FUNCIÓN PARA EL ONCLICK.
-  const navigateToProfile = () => {
-      // Utilizamos el router del componente padre
-      router.push(`/card/${mascota.id || mascota.idxxxx_mascot}`);
-  };
-  
-  return h('div', { class: 'pet-card' }, [
-      // Imagen
-      h('div', { class: 'pet-card-image-container' }, [
-          h('img', { 
-              src: imageUrl, 
-              alt: `Foto de ${mascota.nombre_mascot}`, 
-              class: 'pet-card-image',
-              onerror: (e) => e.target.src = `https://placehold.co/400x400/9933FF/FFFFFF/png?text=Sin+Foto`
-          })
-      ]),
-      
-      // Contenido
-      h('div', { class: 'pet-card-content' }, [
-          h('h3', { class: 'pet-card-name' }, mascota.nombre_mascot),
-          
-          // Detalles (Chips)
-          h('div', { class: 'pet-card-chips' }, [
-              h('span', { class: 'chip chip-grey' }, mascota.sexoxx_mascot),
-              h('span', { class: 'chip chip-grey' }, ageDisplay),
-              h('span', { class: 'chip chip-grey' }, mascota.razaxx_mascot || 'Mestizo'),
-          ])
-          
-      ]),
-          
-      h('div', { class: 'pet-card-content-button' }, [
-          // Botón Ver Perfil
-          h('button', { 
-            class: 'pet-card-button',
-            // ⚠️ CORRECCIÓN CLAVE: Pasamos la referencia a la función, no la LLAMAMOS inmediatamente.
-            onClick: navigateToProfile 
-          }, 'Ver más')
-        ])
-  
-  ]);
+const PetCard = ({ mascota }) => {
+const ageDisplay = formatAge(mascota.edadme_mascot);
+const imageUrl = mascota.image1_mascot || `https://placehold.co/400x400/9933FF/FFFFFF/png?text=Sin+Foto`;
+
+const matchPct = mascota.match_percentage 
+    ? mascota.match_percentage 
+    : (mascota.match_score ? Math.round(mascota.match_score * 100) + '%' : null);
+
+const navigateToProfile = () => {
+
+    router.push(`/card/${mascota.id || mascota.idxxxx_mascot}`);
+
+};
+
+const chips = [
+    h('span', { class: 'chip chip-grey' }, mascota.sexoxx_mascot),
+    h('span', { class: 'chip chip-grey' }, ageDisplay),
+    h('span', { class: 'chip chip-grey' }, mascota.razaxx_mascot || 'Mestizo'),
+
+];
+
+if (matchPct) {
+    chips.push(h('span', { class: 'chip chip-match' }, `${matchPct}% Match`));
+}
+
+return h('div', { class: 'pet-card' }, [
+    h('div', { class: 'pet-card-image-container' }, [
+        h('img', {
+            src: imageUrl,
+            alt: `Foto de ${mascota.nombre_mascot}`,
+            class: 'pet-card-image',
+            onerror: (e) => e.target.src = `https://placehold.co/400x400/9933FF/FFFFFF/png?text=Sin+Foto`
+        })
+    ]),
+
+    h('div', { class: 'pet-card-content' }, [
+
+        h('h3', { class: 'pet-card-name' }, mascota.nombre_mascot),
+
+        h('div', { class: 'pet-card-chips' }, chips)
+
+    ]),
+
+    h('div', { class: 'pet-card-content-button' }, [
+
+        h('button', { class: 'pet-card-button', onClick: navigateToProfile }, 'Ver más')
+
+    ])
+
+]);
+
 };
 </script>
 
@@ -315,7 +282,7 @@ const PetCard = ({ mascota }) => {
   width: 48px;
   height: 48px;
   border: 5px solid;
-  border-color: #FF3D00 transparent;
+  border-color: #ff99a2 transparent;
   border-radius: 50%;
   display: inline-block;
   box-sizing: border-box;
@@ -407,109 +374,218 @@ const PetCard = ({ mascota }) => {
     line-height: 1.75rem;
     color: #4b5563; /* gray-600 */
     text-align: center;
+    margin-bottom: 1rem;
+  }
+
+  .cta-container {
+  text-align: center;
+  padding: 3rem 1rem;
+  background-color: #f9fafb;
+  border-radius: 1rem;
+  border: 2px dashed #e5e7eb;
+  margin-top: 2rem;
+}
+
+  .cta-text {
+  font-size: 1.1rem;
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+}
+
+.match-results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #f3f4f6;
+  padding-bottom: 1rem;
+}
+
+.match-results-title {
+  font-size: 1.5rem;
+  color: #111827;
+  font-weight: 700;
+  margin: 0;
+}
+
+.match-results-subtitle {
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.btn-retake {
+  background-color: #fff;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  padding: 0.6rem 1.2rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-retake:hover {
+  background-color: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: #6b7280;
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: #ff9595;
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* Chip de Match */
+.chip-match {
+  background-color: #ff9595 !important;
+  color: white !important;
+  font-weight: bold;
+}
+
+.icon-small {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+/* Reutilizando tus estilos base */
+.match-test-button {
+  background-color: #ff9595;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 9999px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.3s;
+}
+
+.match-test-button:hover {
+  background-color: #ff7070;
+}
+
+  .match-test-cta {
+    text-align: center;
     margin-bottom: 2rem;
   }
-  
-  /* ==============================================
-    2. BARRA DE FILTROS (Filter Bar)
-    ============================================== */
-  
-  .filter-bar {
-    background-color: #ffffff; /* bg-white */
-    padding: 1rem;
-    border-radius: 1rem; /* rounded-2xl */
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); /* shadow-xl */
+
+  .match-test-button {
+    padding: 0.75rem 1.5rem;
+    border-radius: 9999px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    background-color: #ff9595;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.2s, transform 0.15s;
+  }
+
+  .match-test-button:hover {
+    background-color: #ff6060;
+    transform: scale(1.02);
+  }
+
+  /* Resultados del match (recomendaciones) */
+  .match-results-section {
+    margin-top: 1rem;
+  }
+  .match-results-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+  .match-results-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 0.25rem;
+  }
+  .match-results-subtitle {
+    color: #6b7280;
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+  }
+  .match-results-clear {
+    margin-top: 0.5rem;
+  }
+
+  .match-error-state {
+    text-align: center;
+    padding: 2rem;
+    background-color: #fef2f2;
+    border-radius: 0.75rem;
+    border: 1px solid #fecaca;
+  }
+  .match-error-text {
+    color: #b91c1c;
+    font-weight: 500;
+    margin-bottom: 1rem;
+  }
+
+  /* Modal del cuestionario de match */
+  .questionnaire-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    gap: 1rem;
-    border-bottom: 1px solid #e0e7ff; /* border-indigo-100 */
-    margin-bottom: 2rem;
+    z-index: 1000;
+    padding: 1rem;
   }
-  
-  .filter-label {
-    font-size: 1.125rem; /* text-lg */
-    font-weight: 600; /* font-semibold */
-    color: #374151; /* gray-700 */
-    display: none;
-  }
-  @media (min-width: 640px) { /* sm */
-    .filter-label {
-        display: block;
-    }
-  }
-  
-  .filter-select {
-    padding: 0.5rem 1rem;
-    border-radius: 9999px; /* rounded-full */
-    border: 2px solid #d1d5db; /* border-gray-300 */
-    background-color: #ffffff; /* bg-white */
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
-    transition: all 200ms ease;
-    cursor: pointer;
-    font-size: 0.875rem; /* text-sm */
-    width: 12.2%;
-    appearance: base-select;
-    
-  }
-  
-  
-  
-  .filter-select:focus {
-    border-color: #ff9595; 
-    box-shadow: 0 0 0 1px #ff9595; 
-    outline: none;
-  }
-  
-  .search-input-container {
+
+  .questionnaire-modal-content {
     position: relative;
-    flex-grow: 1;
-    max-width: 18rem; /* max-w-sm */
     width: 100%;
+    max-width: 44rem;
+    max-height: 90vh;
+    overflow: hidden;
   }
-  
-  .search-input {
-    width: 100%;
-    padding: 0.5rem 1rem 0.5rem 2.5rem; /* py-2 pl-10 pr-4 */
-    border-radius: 9999px; /* rounded-full */
-    border: 2px solid #d1d5db; /* border-gray-300 */
-    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); /* shadow-inner */
-    transition: all 200ms ease;
-  }
-  
-  .search-input:focus {
-    border-color: #ff9595;  /* focus:border-indigo-500 */
-    box-shadow: 0 0 0 1px #ff9595;  /* focus:ring-indigo-500 */
-    outline: none;
-  }
-  
-  .search-icon {
+
+  .questionnaire-modal-close {
     position: absolute;
-    left: 0.75rem; /* left-3 */
-    top: 50%;
-    transform: translateY(-50%);
-    width: 1.25rem;
-    height: 1.25rem;
-    color: #9ca3af; /* text-gray-400 */
-  }
-  
-  .clear-filters-button {
-    padding: 0.5rem 1rem;
-    border-radius: 9999px; /* rounded-full */
-    font-size: 0.875rem; /* text-sm */
-    font-weight: 600; /* font-semibold */
-    color: #374151; /* text-gray-700 */
-    border: 1px solid #d1d5db; /* border-gray-300 */
-    transition: all 200ms ease;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    border: none;
+    background: #ff9595;
+    color: #ffffff;
+    font-size: 1.5rem;
+    line-height: 1;
     cursor: pointer;
-    background-color: transparent;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
   }
-  
-  .clear-filters-button:hover {
-    background-color: #f3f4f6; /* hover:bg-gray-100 */
+
+  .questionnaire-modal-close:hover {
+    background: #ff6060;
   }
-  
+
   /* ==============================================
     3. FEED Y TARJETAS (Pet Card)
     ============================================== */
@@ -633,6 +709,7 @@ const PetCard = ({ mascota }) => {
   :deep(.pet-card-chips) {
     display: flex;
     align-items: center;
+    justify-content: center;
     font-size: 0.875rem; /* text-sm */
     color: #4b5563; /* text-gray-600 */
     margin-bottom: 0.75rem;
@@ -663,6 +740,11 @@ const PetCard = ({ mascota }) => {
   :deep(.chip-grey) {
     background-color: #c8c7c7;
   color: #ffffff; 
+  }
+
+  :deep(.chip-match) {
+    background-color: #c195ff;
+    color: #ffffff;
   }
   
   :deep(.pet-card-content-button){

@@ -15,10 +15,6 @@
           
       </div>
         
-        <div class="image-section" id="loquis">
-            <img src="../assets/inip.png" alt="Perro y Gato" class="mascot-image" />
-          
-        </div>
       </div>
 
       <!-- Contenido de la Página -->
@@ -36,9 +32,9 @@
         <div class="pet-card-grid"> 
             
 
-            <span v-if="isLoading || isNavigating" class="loader">
-                Cargando las mascotas...
-            </span>
+            <div v-if="isLoading || isNavigating" class="loading-message">
+                <span class="loader"></span>
+            </div>
             <div v-else-if="mascotas.length === 0">
                 <p>
                     Aún no hay mascotas disponibles. ¡Vuelve pronto!
@@ -68,11 +64,10 @@
         <div class="adopcion-grid">
             
             <div class="adopcion-imagen-container">
-                <img 
-                    src="../assets/cat1.jpg" 
-                    alt="Un gato sentado, listo para ser adoptado" 
-                    class="adopcion-imagen"
-                />
+                <figure>
+                    <img src="https://res.cloudinary.com/dxf384txl/image/upload/v1769999776/steps-to-follow-process_zuqxdm.jpg" alt="Un gato sentado" class="adopcion-imagen">
+                    <figcaption class="adopcion-foto">Designed by <a href="https://pixabay.com/">Pixabay</a></figcaption>
+                </figure>
             </div>
 
             <div class="adopcion-pasos-container">
@@ -180,6 +175,7 @@ const scrollToSection = (selector) => {
 
 async function getMascotasRecientes() {
     isLoading.value = true;
+    const startTime = Date.now();
     try {
         console.log("Intentando obtener mascotas del backend...");
         const response = await fetch(apiUrl('/mascotas/home2nd'), { 
@@ -206,7 +202,13 @@ async function getMascotasRecientes() {
         console.error("Error al obtener las mascotas:", error);
         mascotas.value = []; 
     } finally {
-        isLoading.value = false;
+        const elapsedTime = Date.now() - startTime;
+        const minLoadingTime = 1000; 
+        const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+        
+        setTimeout(() => {
+            isLoading.value = false;
+        }, remainingTime);
     }
 }
 
@@ -240,6 +242,38 @@ function formatAge(months) {
 }
 
 // ==============================================
+// REGISTRO DE INTERACCIONES (Behavioral Data)
+// ==============================================
+
+async function registerInteraction(petId, type) {
+    if (!authStore.isAuthenticated) return; // Solo registramos si está logueado
+
+    try {
+        // Fire and forget: No esperamos a que termine para navegar
+        fetch('http://localhost:3000/api/interactions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authStore.token}`
+            },
+            body: JSON.stringify({ petId, type })
+        }).catch(err => console.error("Error background interaction:", err));
+        
+    } catch (e) {
+        console.error("Error intentando registrar interacción", e);
+    }
+}
+
+const handleGetStarted = () => {
+    if (!authStore.isAuthenticated) {
+        router.push('/auth');
+    } else {
+        // Si ya está logueado, se queda en la misma página
+        console.log("Usuario ya autenticado. Permaneciendo en Home.");
+    }
+};
+
+// ==============================================
 // COMPONENTE DE TARJETA (PetCard)
 // ==============================================
 
@@ -254,8 +288,16 @@ const PetCard = ({ mascota }) => {
     // NOTA: Se mantienen las clases genéricas 'pet-card-*' para que uses tu propio CSS/
     const navigateToProfile = () => {
         isNavigating.value = true; 
+        
+        // ⭐️ REGISTRAR INTERACCIÓN 'CLICK'
+        // Usamos el ID correcto (idxxxx_mascot según tu DB)
+        const petId = mascota.idxxxx_mascot || mascota.id;
+        if (petId) {
+            registerInteraction(petId, 'click');
+        }
+
         // Utilizamos el router del componente padre
-        router.push(`/card/${mascota.id || mascota.idxxxx_mascot}`);
+        router.push(`/card/${petId}`);
     };
 
 
@@ -306,14 +348,6 @@ const PetCard = ({ mascota }) => {
     ]);
 };
 
-const handleGetStarted = () => {
-    if (!authStore.isAuthenticated) {
-        router.push('/auth');
-    } else {
-        // Si ya está logueado, se queda en la misma página
-        console.log("Usuario ya autenticado. Permaneciendo en Home.");
-    }
-};
 </script>
 
 <style scoped>
@@ -321,7 +355,7 @@ const handleGetStarted = () => {
   width: 48px;
   height: 48px;
   border: 5px solid;
-  border-color: #FF3D00 transparent;
+  border-color: #ff99a2 transparent;
   border-radius: 50%;
   display: inline-block;
   box-sizing: border-box;
@@ -335,7 +369,27 @@ const handleGetStarted = () => {
   100% {
     transform: rotate(360deg);
   }
+  100% {
+    transform: rotate(360deg);
+  }
 } 
+
+.loading-message {
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Centrado del contenido (spinner y texto) */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centrado vertical */
+    align-items: center;    /* Centrado horizontal */
+    background-color: white;
+    z-index: 999; 
+    color: #333;
+    font-size: 1.2em;
+}
 
 .home-page {
   min-height: 100vh;
@@ -349,9 +403,13 @@ const handleGetStarted = () => {
 }
 
 .page-header {
-  padding: 2.5rem 0;
+  padding: 7.7rem 0;
   margin-bottom: 2rem;
   display: flex;
+  background-image: url('https://res.cloudinary.com/dxf384txl/image/upload/v1769999674/login-register_ryood1.jpg');
+  background-size: cover;
+  background-position: center;
+  mask-image: linear-gradient(0deg, rgba(0,0,0,0) 5%, rgba(0,0,0,1) 18%);
 }
 
 .title-section{
@@ -396,7 +454,7 @@ const handleGetStarted = () => {
   border-radius: 50px; 
   margin-top: 25px;
   padding: 15px 40px; 
-  width: 40%;
+  width: 15%;
   font-family: sans-serif; 
   font-size: 30px; 
   font-weight: bold; 
@@ -909,7 +967,7 @@ const handleGetStarted = () => {
     display: flex;
     position: relative;
     min-height: 350px;
-    background-image: url('../assets/cat-and-dog-exp.jpg');
+    background-image: url('https://res.cloudinary.com/dxf384txl/image/upload/v1769999778/cat-and-dog-exp_md9tmr.jpg');
     background-size: cover;
     align-items: end;
 }
@@ -949,7 +1007,7 @@ const handleGetStarted = () => {
 
 
 .adopcion-imagen {
-    /* Clases equivalentes a: w-full h-full object-cover */
+    position: absolute;
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -970,6 +1028,19 @@ const handleGetStarted = () => {
     justify-content: center;
     min-height: 100px;
     max-height: 350px;
+}
+
+.adopcion-foto{
+    position: absolute;
+    bottom: 1px;
+    font-size: 6px;
+    text-decoration: none; /* Quita la línea */
+    color: black;  
+}
+
+.adopcion-foto a{
+    text-decoration: none; /* Quita la línea */
+    color: black;  
 }
 
 

@@ -3,11 +3,11 @@
     <!-- Componente de navegación (asumiendo que existe en la ruta) -->
     <Navbar /> 
     
-    <div v-if="isloading" class="loading-message">
+    <div v-if="isLoadingPage" class="loading-message">
             <span class="loader"></span>
     </div>
 
-    <div v-else="!isloading" class="perfil-fondo"> 
+    <div v-else="!isLoadingPage" class="perfil-fondo"> 
     
     <div class="perfil-contenido">
       
@@ -266,6 +266,7 @@ const userImageUrl = ref(userData.imageUrl && userData.imageUrl.startsWith('http
 
 // Variables de control
 const loading = ref(false);
+const isLoadingPage = ref(true); // Spinner de carga de página completa
 const isloading = ref(false); // Para subir foto
 const error = ref('');
 const success = ref('');
@@ -619,6 +620,11 @@ let unsubscribe = null;
 
 onMounted(() => {
   unsubscribe = onUserDataChange(updateUserInfo);
+  
+  // Simular carga inicial para consistencia con otras páginas
+  setTimeout(() => {
+      isLoadingPage.value = false;
+  }, 500);
 });
 
 onUnmounted(() => {
@@ -634,7 +640,7 @@ onUnmounted(() => {
   width: 48px;
   height: 48px;
   border: 5px solid;
-  border-color: #FF3D00 transparent;
+  border-color: #ff99a2 transparent;
   border-radius: 50%;
   display: inline-block;
   box-sizing: border-box;
@@ -662,7 +668,7 @@ onUnmounted(() => {
     justify-content: center; /* Centrado vertical */
     align-items: center;    /* Centrado horizontal */
     background-color: white;
-    z-index: 9999; 
+    z-index: 999; 
     color: #333;
     font-size: 1.2em;
 
@@ -1136,7 +1142,7 @@ onUnmounted(() => {
 }
 
 .close-button:hover {
-    color: #ff9900;
+    color: #ff9595;
     
 }
 .password-form {
@@ -1172,6 +1178,7 @@ onUnmounted(() => {
   color: #666;
   font-size: 0.8rem;
   margin-top: 0.2rem;
+  text-align: left;
 }
 
 .form-group {
@@ -1185,6 +1192,7 @@ onUnmounted(() => {
   font-weight: 600;
   color: #333;
   font-size: 0.9rem;
+  text-align: left;
 }
 
 .form-group input {

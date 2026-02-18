@@ -1,14 +1,14 @@
 const express = require('express');
     const router = express.Router();
-    const { protect } = require('../middleware/authMiddleware'); 
+    const { protect } = require('../middleware/authMiddleware');
 
 module.exports = (io) => { 
-    
-    // Asumiendo que tienes un middleware de autenticación
+
     const adoptionController = require('../controllers/adoptionController')(io);
-    // Ruta para obtener los detalles de una mascota específica
-    // (Asumo que ya tienes una ruta en 'mascotasRouter' para esto, si no, la añadiríamos aquí)
-    // Por ahora, solo necesitamos la ruta POST para el formulario de adopción
+    router.use((req, res, next) => {
+        req.io = io; 
+        next();
+    });
 
     // Ruta protegida para enviar el formulario de adopción
     router.post('/', protect, adoptionController.submitAdoptionForm);

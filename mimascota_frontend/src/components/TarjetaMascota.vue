@@ -164,6 +164,9 @@ const navigateToAdoptionForm = () => {
         console.error("ID de mascota no disponible para iniciar adopción.");
         return;
     }
+    
+    // ⭐️ REGISTRAR INTERACCIÓN 'CONTACT'
+    registerInteraction(mascotId, 'contact');
 
     // 2. Usamos 'router.push' para navegar a la ruta del formulario.
     // Importante: Verifica que tu ruta en Vue Router esté definida como '/adoptform/:mascotId'
@@ -284,9 +287,30 @@ const getTraitColor = (trait) => {
     return assignedColor;
 };
 
-const handleAdopcion = async (petId) => {
-    alert(`Iniciando proceso de adopción para: ${pet.value.nombre}`);
+const registerInteraction = (petId, type) => {
+    if (!authStore.isAuthenticated) return;
 
+    fetch('http://localhost:3000/api/interactions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authStore.token}`
+        },
+        body: JSON.stringify({ petId, type })
+    }).catch(err => console.error("Error background interaction:", err));
+};
+
+const handleAdopcion = async (petId) => {
+    // ⭐️ REGISTRAR CONTACTO/INTENTO
+    registerInteraction(petId, 'contact');
+    
+    alert(`Iniciando proceso de adopción para: ${pet.value.nombre}`);
+    
+    // Aquí tu lógica existente para redirigir si hiciera falta...
+    // Como el botón "ADOPTAR" original hace un router.push a /adoptform, 
+    // lo ideal sería que 'handleAdopcion' haga eso mismo o que el botón llame a navigateToAdoptionForm.
+    // Viendo el template, el botón ADOPTAR llama a 'navigateToAdoptionForm' directo, 
+    // así que meteremos el registro ALLÍ.
 };
 
 // --- NUEVA FUNCIÓN: Verificar el estado de favorito al cargar ---
@@ -357,6 +381,11 @@ const toggleFavorite = async () => {
             // 4. Confirmación: El backend nos devuelve el nuevo estado (data.newStatus)
             isFavorite.value = data.newStatus;
             console.log(data.message);
+            
+            // ⭐️ REGISTRAR INTERACCIÓN 'FAVORITE' (Solo si se activó, no si se quitó)
+            if (isFavorite.value) {
+                registerInteraction(petId, 'favorite');
+            }
         } else {
             // 5. Rollback: Si falla la llamada, revertir el estado visual
             isFavorite.value = previousStatus;
@@ -469,7 +498,7 @@ onMounted(() => {
   width: 48px;
   height: 48px;
   border: 5px solid;
-  border-color: #ff6060 transparent;
+  border-color: #ff99a2 transparent;
   border-radius: 50%;
   display: inline-block;
   box-sizing: border-box;
@@ -580,6 +609,7 @@ onMounted(() => {
     padding: 1rem;
     position: relative;
     z-index: 10;
+    height: 43rem;
 }
 
 .image-column {
@@ -619,7 +649,7 @@ onMounted(() => {
 }
 
 .section-title {
-    font-size: 1.55rem; /* text-xl */
+    font-size: 1.3rem; /* text-xl */
     font-weight: 700; /* font-bold */
     color: var(--gray-800);
     margin-bottom: 0.5rem; /* mb-2 */
@@ -631,8 +661,8 @@ onMounted(() => {
 .data-list {
     list-style: none;
     padding: 0;
-    margin-bottom: 1.5rem; /* mb-6 */
-    font-size: 1.125rem; /* text-lg */
+    margin-bottom: 0.5rem; /* mb-6 */
+    font-size: 1rem; /* text-lg */
     color: var(--gray-700);
     line-height: 1.5;
     color: #675e5e;
@@ -646,9 +676,10 @@ onMounted(() => {
 
 .info-text {
   color: #675e5e;
-    margin-bottom: 2rem; /* mb-8 */
+    margin-bottom: 0.5rem; /* mb-8 */
     line-height: 1.625; /* leading-relaxed */
     text-align: justify;
+    font-size: 1rem; /* text-lg */
 }
 
 /* ======================================= */
@@ -780,7 +811,7 @@ onMounted(() => {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.5rem;
 }
 
 .trait-chip {
@@ -929,14 +960,13 @@ onMounted(() => {
     left: 0;
     width: 100%;
     height: 100%;
-    
     /* Centrado del contenido (spinner y texto) */
     display: flex;
     flex-direction: column;
     justify-content: center; /* Centrado vertical */
     align-items: center;    /* Centrado horizontal */
-    
-    z-index: 9999; 
+    background-color: white;
+    z-index: 999; 
     color: #333;
     font-size: 1.2em;
 }

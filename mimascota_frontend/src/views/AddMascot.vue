@@ -1,6 +1,9 @@
 <template>
     <div class="AddMascot">
         <Navbar />
+        <div v-if="isLoading" class="loading-message">
+            <span class="loader"></span>
+        </div>
         
     <div class="contenedor-principal"> 
         <button @click="irAtras" class="back-button">
@@ -85,8 +88,18 @@
                                 <option value="Mediano">Mediano</option>
                                 <option value="Grande">Grande</option>
                             </select> 
-                        </div> 
+                        </div>
+                        <div class="fila4-col2">
+                            <label>Nivel de Energia:</label>
+                            <select v-model="mascota.energia">
+                                <option disabled value="">Selecciona</option>
+                                <option value="Tranquilo">Tranquilo</option>
+                                <option value="Moderado">Moderado</option>
+                                <option value="Energético">Energético</option>
+                            </select> 
+                        </div>
                     </div>
+                    
                 </div>
         
                 <h2>Personalidad y temperamento</h2>
@@ -117,7 +130,7 @@
 
         <div class="image-panel">
             <div class="pet-image-placeholder">
-                    <img src="../assets/fondoAgregar.png" alt="Mascotas" class="main-pet-image">
+                    <img src="https://res.cloudinary.com/dxf384txl/image/upload/v1770166857/fondoAgregar_ej0ka8.png" alt="Mascotas" class="main-pet-image">
             </div>
                 
             <div 
@@ -128,7 +141,7 @@
     @drop.prevent="manejarDrop">
 
     <div v-if="archivosSubidos.length === 0" class="upload-box">
-        <img src="../assets/upload.jpg" alt="Arrastrar y Soltar Ilustración" class="upload-illustration">
+        <img src="https://res.cloudinary.com/dxf384txl/image/upload/v1770167095/upload_oyn7pv.png" alt="Arrastrar y Soltar Ilustración" class="upload-illustration">
         <p>Drag & Drop here</p>
         <p>- or -</p>
         <label for="file-upload" class="upload-button">
@@ -212,6 +225,14 @@ import Footer from '../components/Footer.vue';
 import { getToken } from '../utils/auth';
 import { apiUrl } from '@/config/api';
 
+const isLoading = ref(true);
+
+onMounted(() => {
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 500);
+});
+
 // =================================================================
 // 1. ESTADO REACTIVO Y VARIABLES (REEMPLAZA 'data')
 // =================================================================
@@ -224,11 +245,9 @@ const mascota = reactive({
     raza: '',
     peso: null,
     tamano: '',
+    energia: '',
     personalidad: [],
     informacionAdicional: '',
-    // La foto principal (ya no es un solo archivo, lo manejamos en archivosSubidos)
-    // Dejamos esta línea si se planea enviar solo una, pero la ajustamos abajo.
-    // fotoArchivo: null, 
 });
 
 // NUEVOS ESTADOS para el Drag and Drop
@@ -388,6 +407,8 @@ function eliminarArchivo(id) {
  * Envía los datos del formulario, incluyendo los múltiples archivos, al servidor.
  */
  async function publicarMascota() {
+    isLoading.value = true;
+    const startTime = Date.now();
     const formData = new FormData();
     
     // 1. Obtener el token de autenticación
@@ -414,6 +435,7 @@ function eliminarArchivo(id) {
         raza: mascota.raza,
         peso: mascota.peso,
         tamano: mascota.tamano,
+        energia: mascota.energia,
         personalidad: mascota.personalidad,
         informacionAdicional: mascota.informacionAdicional,
     }));
@@ -445,11 +467,20 @@ function eliminarArchivo(id) {
             }
             
             /*alert('Error al publicar: El archivo excede el tamaño (5MB) ');*/
-            mostrarModal('El archivo excede el tamaño (5MB)', 'error');
+            /*alert('Error al publicar: El archivo excede el tamaño (5MB) ');*/
+            mostrarModal(mensajeError, 'error');
         }
     } catch (error) {
         console.error('Error de red al enviar el formulario:', error);
         alert('No se pudo conectar al servidor. Asegúrate de que Express esté corriendo.');
+    } finally {
+        const elapsedTime = Date.now() - startTime;
+        const minLoadingTime = 1000; 
+        const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+        
+        setTimeout(() => {
+            isLoading.value = false;
+        }, remainingTime);
     }
 }
 function irAtras() {
@@ -543,22 +574,18 @@ function irAtras() {
     color: #000000;
 }
 
-.fila-form-1st, .fila-form-2nd, .fila-form-3rd{
+.fila-form-1st, .fila-form-2nd, .fila-form-3rd, .fila-form-4th{
     display: flex;
     width: 100%;
 }
 
 
-.fila1-col1, .fila1-col2, .fila2-col1, .fila2-col2, .fila3-col1, .fila3-col2, .fila4-col1{
+.fila1-col1, .fila1-col2, .fila2-col1, .fila2-col2, .fila3-col1, .fila3-col2, .fila4-col1, .fila4-col2{
     width: 50%;
     margin: 8px;
 }
 
 
-
-.fila4-col1{
-    padding-right: 20px;
-}
 
 
 .image-panel {
@@ -1016,5 +1043,41 @@ textarea {
     font-weight: 300;
 }
 
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 5px solid;
+  border-color: #ff99a2 transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+} 
+
+.loading-message {
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Centrado del contenido (spinner y texto) */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centrado vertical */
+    align-items: center;    /* Centrado horizontal */
+    background-color: white;
+    z-index: 999; 
+    color: #333;
+    font-size: 1.2em;
+}
 </style>
 

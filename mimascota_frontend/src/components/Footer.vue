@@ -3,28 +3,28 @@
       <div class="footer-content">
         <div class="footer-logo">
           <div class="logo-text">
-            <img  src="/src/assets/LogoMiMascota.png" alt="logo-aplicación" style="width: 35%;">
+            <img  src="https://res.cloudinary.com/dxf384txl/image/upload/v1769999924/LogoMiMascota_hcfxly.png" alt="logo-aplicación" style="width: 35%;">
           </div>
         </div>
   
         <div class="footer-info">
           <div class="contact-item">
-            <img  src="/src/assets/ubicacion.png" alt="ubicacion" width="32px">
+            <img  src="https://res.cloudinary.com/dxf384txl/image/upload/v1770000809/ubicacion_q2eazi.png" alt="ubicacion" width="32px">
             <p>PRWH+RQJ Veterinaria Mi Mascota, C. Latacunga, Santo Domingo, Ecuador</p>
           </div>
           <div class="contact-item">
-            <img  src="/src/assets/llamar.png" alt="ubicacion" width="32px">
+            <img  src="https://res.cloudinary.com/dxf384txl/image/upload/v1770000813/llamar_nlwwwi.png" alt="contacto" width="32px">
             <p>+593 2-275-1631</p>
           </div>
           <div class="contact-item">
-            <img  src="/src/assets/correo.png" alt="ubicacion" width="32px">
-            <p>mimascolitacfg@gmail.com</p>
+            <img  src="https://res.cloudinary.com/dxf384txl/image/upload/v1770000820/correo_nwciej.png" alt="correo" width="32px">
+            <p>mimascotitacfg@gmail.com</p> 
           </div>
         </div>
       </div>
   
       <div class="footer-bar">
-        MI MASCOTA &copy; 2025 Todos los derechos reservado
+        MI MASCOTA &copy; 2025 Todos los derechos reservados
       </div>
     </footer>
   </template>

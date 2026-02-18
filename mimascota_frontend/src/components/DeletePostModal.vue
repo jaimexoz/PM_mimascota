@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, defineEmits, ref } from 'vue';
+import { defineProps, defineEmits } from 'vue';
 
 // 1. Definición de Propiedades y Eventos
 const emit = defineEmits(['close', 'confirm-delete']);
@@ -8,6 +8,11 @@ const props = defineProps({
     isOpen: Boolean,
     // Propiedad opcional para indicar si el proceso de eliminación está en curso
     isDeleting: {
+        type: Boolean,
+        default: false
+    },
+    // Nueva propiedad para controlar el estado de éxito
+    isSuccess: {
         type: Boolean,
         default: false
     }
@@ -35,21 +40,31 @@ const confirmDelete = () => {
                 </svg>
             </button>
 
-            <div class="modal-content">
-                <h2 class="modal-title">Eliminar publicación</h2>
+            <div class="delete-modal-content">
+                <h2 class="modal-title">
+                    {{ isSuccess ? '¡Éxito!' : 'Eliminar publicación' }}
+                </h2>
                 
                 <p class="modal-message">
-                    ¿Está seguro que quiere eliminar esta publicación? Esta acción no se podrá deshacer.
+                    <span v-if="isSuccess">¡Publicación eliminada con éxito!</span>
+                    <span v-else>¿Está seguro que quiere eliminar esta publicación? Esta acción no se podrá deshacer.</span>
                 </p>
 
                 <div class="button-actions">
-                    <button @click="emit('close')" class="cancel-button" :disabled="isDeleting">
-                        Cancelar
-                    </button>
-                    
-                    <button @click="confirmDelete" class="accept-button" :disabled="isDeleting">
-                        {{ isDeleting ? 'Eliminando...' : 'Aceptar' }}
-                    </button>
+                    <template v-if="!isSuccess">
+                        <button @click="emit('close')" class="cancel-button" :disabled="isDeleting">
+                            Cancelar
+                        </button>
+                        
+                        <button @click="confirmDelete" class="accept-button" :disabled="isDeleting">
+                            {{ isDeleting ? 'Eliminando...' : 'Aceptar' }}
+                        </button>
+                    </template>
+                    <template v-else>
+                         <button @click="emit('close')" class="accept-button">
+                            Aceptar
+                        </button>
+                    </template>
                 </div>
             </div>
 
@@ -71,6 +86,12 @@ const confirmDelete = () => {
     justify-content: center;
     align-items: center;
     z-index: 1000; 
+}
+
+.delete-modal-content {
+    border-radius: 1rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+    padding: 1.5rem 1.5rem;
 }
 
 /* Contenedor del Modal de Eliminación (Más pequeño que el de edición) */
@@ -109,6 +130,7 @@ const confirmDelete = () => {
     font-weight: 700; 
     color: #1f2937; 
     margin-bottom: 0.5rem;
+    margin-top: 1.5rem; /* Separación superior para el título */
 }
 
 /* Mensaje de Confirmación */
@@ -126,6 +148,7 @@ const confirmDelete = () => {
     justify-content: center;
     gap: 1.5rem; /* Espacio entre los botones */
     padding: 0 1rem;
+    margin-bottom: 0.5rem; /* Separación inferior */
 }
 
 .cancel-button, .accept-button {

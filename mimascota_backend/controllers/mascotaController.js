@@ -1,9 +1,12 @@
 // mi_mascota_backend/controllers/mascotaController.js
-const pool = require('../config/db'); 
+const pool = require('../config/db');
 const fs = require('fs').promises; // Usamos promesas para limpieza
 const path = require('path');
-const cloudinary = require('../config/cloudinaryConfig'); 
-const mascotaModel = require('../models/mascotaModel'); 
+const cloudinary = require('../config/cloudinaryConfig');
+const mascotaModel = require('../models/mascotaModel');
+const NotificationModel = require('../models/NotificationModel');
+// DEPRECATED: ML logic moved to Python API
+// const mlService = require('../services/mlService');
 
 // =================================================================
 // FUNCIONES DE UTILIDAD DEL CONTROLADOR (Archivos)
@@ -13,10 +16,10 @@ async function uploadToCloudinary(filePath, folderName) {
     if (!filePath) return null;
     try {
         const result = await cloudinary.uploader.upload(filePath, {
-            folder: folderName, 
-            transformation: [ { width: 800, height: 800, crop: "limit" } ]
+            folder: folderName,
+            transformation: [{ width: 2048, height: 2048, crop: "limit" }]
         });
-        return result.secure_url; 
+        return result.secure_url;
     } catch (error) {
         console.error('Error al subir a Cloudinary:', error);
         return null;
@@ -25,7 +28,7 @@ async function uploadToCloudinary(filePath, folderName) {
 
 const cleanupUploadedFiles = (filePaths) => {
     filePaths.forEach(filePath => {
-        const absolutePath = path.resolve(filePath); 
+        const absolutePath = path.resolve(filePath);
         fs.unlink(absolutePath).catch(err => {
             console.error(`Error al borrar el archivo local: ${absolutePath}`, err);
         });
@@ -39,7 +42,7 @@ const cleanupUploadedFiles = (filePaths) => {
 // GET /api/mascotas/editar/:id
 exports.getMascotaForEdit = async (req, res) => {
     const petId = req.params.id;
-    const userId = req.user.id; 
+    const userId = req.user.id;
 
     if (isNaN(petId)) {
         return res.status(400).json({ mensaje: 'ID de mascota inválido.' });
@@ -53,14 +56,10 @@ exports.getMascotaForEdit = async (req, res) => {
         if (result.rows.length === 0) {
             return res.status(404).json({ mensaje: 'Mascota no encontrada o no tienes permiso para editarla.' });
         }
-        // Validación adicional implícita: si la mascota existe, el modelo ya filtró por owner (m.forane_usuari_id = $2) en la versión anterior, 
-        // aquí se asume que el modelo/SQL maneja que solo el dueño acceda o el controller debe verificar el forane_usuari_id.
-        // **Nota**: El SQL en el modelo se simplificó para obtener detalles; se sugiere agregar la cláusula `AND m.forane_usuari_id = $2` si la protección de autoría es crucial aquí.
-        
         res.json(result.rows[0]);
 
     } catch (dbError) {
-        console.error('Error al consultar la BD para la edición de mascota:', dbError); 
+        console.error('Error al consultar la BD para la edición de mascota:', dbError);
         res.status(500).json({ mensaje: 'Error interno del servidor al obtener la mascota.' });
     } finally {
         client.release();
@@ -70,7 +69,7 @@ exports.getMascotaForEdit = async (req, res) => {
 // GET /api/mascotas/eliminar/:id
 exports.deleteMascota = async (req, res) => {
     const petId = req.params.id;
-    const userId = req.user.id; 
+    const userId = req.user.id;
 
     if (isNaN(petId)) {
         return res.status(400).json({ mensaje: 'ID de mascota inválido.' });
@@ -82,18 +81,18 @@ exports.deleteMascota = async (req, res) => {
         const result = await mascotaModel.softDeleteMascotaDB(client, petId, userId);
 
         if (result.rowCount === 0) {
-            return res.status(404).json({ 
-                mensaje: 'Mascota no encontrada, ya eliminada o no tienes permiso para realizar esta acción.' 
+            return res.status(404).json({
+                mensaje: 'Mascota no encontrada, ya eliminada o no tienes permiso para realizar esta acción.'
             });
         }
 
-        res.status(200).json({ 
+        res.status(200).json({
             mensaje: 'Publicación eliminada lógicamente con éxito.',
             id: result.rows[0].idxxxx_mascot
         });
 
     } catch (dbError) {
-        console.error('Error al realizar la eliminación lógica:', dbError); 
+        console.error('Error al realizar la eliminación lógica:', dbError);
         res.status(500).json({ mensaje: 'Error interno del servidor al procesar la eliminación.' });
     } finally {
         client.release();
@@ -145,13 +144,13 @@ exports.getMascotasForPerroFeed = async (req, res) => {
 
 // GET /api/mascotas/MypostUser
 exports.getMyPosts = async (req, res) => {
-    const userId = req.user.id; 
+    const userId = req.user.id;
     const client = await pool.connect();
     try {
         const result = await mascotaModel.getMyPostsByUserIdDB(client, userId);
         res.status(200).json(result.rows);
     } catch (dbError) {
-        console.error('Error al consultar la BD para las publicaciones del usuario:', dbError); 
+        console.error('Error al consultar la BD para las publicaciones del usuario:', dbError);
         res.status(500).json({ mensaje: 'Error interno del servidor al obtener las publicaciones.' });
     } finally {
         client.release();
@@ -194,9 +193,9 @@ exports.updateMascotaApprovalStatus = async (req, res) => {
             return res.status(404).json({ message: "Mascota no encontrada para actualizar." });
         }
 
-        res.status(200).json({ 
-            message: `Estado de aprobación actualizado a ${approv_mascot}`, 
-            mascota: updatedMascota 
+        res.status(200).json({
+            message: `Estado de aprobación actualizado a ${approv_mascot}`,
+            mascota: updatedMascota
         });
 
     } catch (error) {
@@ -206,7 +205,7 @@ exports.updateMascotaApprovalStatus = async (req, res) => {
 };
 
 // GET /api/mascotas/card/:id
-exports.getMascotaCardDetails = async (req, res) => { 
+exports.getMascotaCardDetails = async (req, res) => {
     const petId = req.params.id;
     if (isNaN(petId)) {
         return res.status(400).json({ mensaje: 'ID de mascota inválido.' });
@@ -221,7 +220,7 @@ exports.getMascotaCardDetails = async (req, res) => {
         }
         res.json(result.rows[0]);
     } catch (dbError) {
-        console.error('Error al consultar la BD para la mascota:', dbError); 
+        console.error('Error al consultar la BD para la mascota:', dbError);
         res.status(500).json({ mensaje: 'Error interno del servidor al obtener la mascota.' });
     } finally {
         client.release();
@@ -231,7 +230,7 @@ exports.getMascotaCardDetails = async (req, res) => {
 
 // POST /api/mascotas/
 exports.createMascota = async (req, res) => {
-    const forane_usuari_id = req.user.id; 
+    const forane_usuari_id = req.user.id;
     const localImagePaths = req.files ? req.files.map(file => file.path) : [];
     let datosMascota;
 
@@ -242,12 +241,12 @@ exports.createMascota = async (req, res) => {
         return res.status(400).json({ mensaje: 'Formato de datos de la mascota inválido (JSON no válido).' });
     }
 
-    // 1. Subir Imágenes
+    // 1. Subir Imágenes (Lógica intacta)
     let cloudinaryImageUrls = [];
     try {
         const uploadPromises = localImagePaths.map(path => uploadToCloudinary(path, 'mascotas_para_adopcion'));
         cloudinaryImageUrls = await Promise.all(uploadPromises);
-        
+
         if (cloudinaryImageUrls.includes(null)) {
             throw new Error("Una o más imágenes fallaron al subir a Cloudinary.");
         }
@@ -257,32 +256,60 @@ exports.createMascota = async (req, res) => {
     } finally {
         cleanupUploadedFiles(localImagePaths);
     }
-    
-    const client = await pool.connect(); 
-    
+
+    const client = await pool.connect();
+
     try {
-        await client.query('BEGIN'); 
+        await client.query('BEGIN');
 
-        // 2. Insertar Mascota
+        // 2. Insertar Mascota (Lógica intacta)
+        // NOTA: Asumo que 'caracteristicasNombres' es un array de strings ej: ['Juguetón', 'Amigable']
         const { mascotaId, caracteristicasNombres } = await mascotaModel.insertNewMascotaDB(
-            client, 
-            { ...datosMascota, forane_usuari_id }, 
+            client,
+            { ...datosMascota, forane_usuari_id },
             cloudinaryImageUrls
-        ); 
+        );
 
-        // 3. Sincronizar Características
+        // 3. Sincronizar Características (Lógica intacta)
         const caracteristicaIds = await mascotaModel.getCaracteristicaIds(client, caracteristicasNombres);
         await mascotaModel.insertMascotaCaracteristicasDB(client, mascotaId, caracteristicaIds);
 
-        await client.query('COMMIT'); 
+        // -----------------------------------------------------------------------
+        // 4. DEPRECATED: CÁLCULO DE MACHINE LEARNING
+        // ML logic moved to Python API - vectors no longer stored in PostgreSQL
+        // -----------------------------------------------------------------------
+        /* COMMENTED OUT - ML moved to Python
+        try {
+            const datosParaVector = {
+                especi_mascot: datosMascota.especie,
+                edadme_mascot: datosMascota.edad,
+                tamano_mascot: datosMascota.tamano,
+                nenerg_mascot: datosMascota.energia,
+                lista_personalidad: caracteristicasNombres || []
+            };
 
-        res.status(201).json({ 
+            const vectorCalculado = mlService.createPetVector(datosParaVector);
+
+            await client.query(
+                'UPDATE mascotas SET vector_caracteristicas = $1 WHERE idxxxx_mascot = $2',
+                [vectorCalculado, mascotaId]
+            );
+
+        } catch (mlError) {
+            console.error("Advertencia: No se pudo generar el vector ML para la mascota " + mascotaId, mlError);
+        }
+        */
+        // -----------------------------------------------------------------------
+
+        await client.query('COMMIT');
+
+        res.status(201).json({
             mensaje: 'Mascota y características publicadas con éxito.',
             mascota_id: mascotaId
         });
 
     } catch (dbError) {
-        await client.query('ROLLBACK'); 
+        await client.query('ROLLBACK');
         console.error('Error de base de datos en la transacción:', dbError);
         res.status(500).json({ mensaje: 'Error interno del servidor al guardar la mascota.', error: dbError.message });
     } finally {
@@ -291,6 +318,7 @@ exports.createMascota = async (req, res) => {
 };
 
 // PUT /api/mascotas/actualizar/:id
+
 exports.updateMascota = async (req, res) => {
     const petId = req.params.id;
     const localImagePaths = req.files ? req.files.map(file => file.path) : [];
@@ -302,8 +330,8 @@ exports.updateMascota = async (req, res) => {
         cleanupUploadedFiles(localImagePaths);
         return res.status(400).json({ mensaje: 'Formato de datos de la mascota inválido (JSON no válido).' });
     }
-    
-    // 1. Subir nuevas imágenes si existen
+
+    // 1. Subir nuevas imágenes si existen (Lógica intacta)
     let newCloudinaryUrls = [];
     if (localImagePaths.length > 0) {
         try {
@@ -314,45 +342,72 @@ exports.updateMascota = async (req, res) => {
                 throw new Error("Una o más imágenes fallaron al subir a Cloudinary.");
             }
         } catch (uploadError) {
-            cleanupUploadedFiles(localImagePaths); 
+            cleanupUploadedFiles(localImagePaths);
             console.error('Fallo durante la subida de imágenes para actualización:', uploadError);
             return res.status(500).json({ mensaje: 'Error al subir una o más imágenes nuevas.' });
         }
     }
-    
-    // Limpiar archivos locales después de procesar o fallar la subida
-    cleanupUploadedFiles(localImagePaths); 
 
-    const client = await pool.connect(); 
-    
+    cleanupUploadedFiles(localImagePaths);
+
+    const client = await pool.connect();
+
     try {
-        await client.query('BEGIN'); 
+        await client.query('BEGIN');
 
-        // 2. Actualizar datos principales (incluye lógica de URL old/new)
+        // 2. Actualizar datos principales (Lógica intacta)
         const updateResult = await mascotaModel.updateMascotaPrincipalDB(
-            client, 
-            petId, 
-            datosMascota, 
+            client,
+            petId,
+            datosMascota,
             newCloudinaryUrls
         );
 
         if (!updateResult.success) {
-            await client.query('ROLLBACK'); 
+            await client.query('ROLLBACK');
             return res.status(404).json({ mensaje: 'Mascota no encontrada o no se pudo actualizar.' });
         }
-        
-        // 3. Sincronizar características
-        console.log(`[updateMascota] Sincronizando características para mascota ${petId}:`, datosMascota.personalidad_array);
-        await mascotaModel.syncMascotaCaracteristicasDB(client, petId, datosMascota.personalidad_array);
 
-        await client.query('COMMIT'); 
-        
+        // 3. Sincronizar características (Lógica intacta)
+        await mascotaModel.syncMascotaCaracteristicasDB(client, petId, datosMascota.personalidad_array);
+        // -----------------------------------------------------------------------
+        // 4. DEPRECATED: RE-CALCULAR VECTOR DE MACHINE LEARNING
+        // ML logic moved to Python API - vectors no longer stored in PostgreSQL
+        // -----------------------------------------------------------------------
+        /* COMMENTED OUT - ML moved to Python
+        try {
+            const mascotaFresca = await mascotaModel.obtenerMascotaCompletaPorId(client, petId);
+
+            if (mascotaFresca) {
+                console.log("Datos para Vector ML:", {
+                    especie: mascotaFresca.especi_mascot,
+                    edad: mascotaFresca.edadme_mascot,
+                    tamano: mascotaFresca.tamano_mascot,
+                    energia: mascotaFresca.nenerg_mascot,
+                    personalidad: mascotaFresca.lista_personalidad
+                });
+
+                const vectorCalculado = mlService.createPetVector(mascotaFresca);
+
+                await client.query(
+                    'UPDATE mascotas SET vector_caracteristicas = $1 WHERE idxxxx_mascot = $2',
+                    [vectorCalculado, petId]
+                );
+            }
+
+        } catch (mlError) {
+            console.error(`Error generando vector ML:`, mlError);
+        }
+        */
+        // =====================================================================
+
+        await client.query('COMMIT');
         res.status(200).json({ mensaje: 'Mascota actualizada con éxito.' });
 
     } catch (dbError) {
-        await client.query('ROLLBACK'); 
-        console.error('Error de base de datos en la actualización:', dbError);
-        res.status(500).json({ mensaje: 'Error interno del servidor al actualizar la mascota.', error: dbError.message });
+        await client.query('ROLLBACK');
+        console.error('Error update:', dbError);
+        res.status(500).json({ mensaje: 'Error al actualizar.' });
     } finally {
         client.release();
     }
@@ -384,7 +439,7 @@ exports.getMascotaShortCard = async (req, res) => {
         }
         res.json(result.rows[0]);
     } catch (dbError) {
-        console.error('Error al consultar la BD para la tarjeta corta:', dbError); 
+        console.error('Error al consultar la BD para la tarjeta corta:', dbError);
         res.status(500).json({ mensaje: 'Error interno del servidor.' });
     } finally {
         client.release();

@@ -17,7 +17,21 @@ async function createAndEmitNotification(io, notificationData) {
         image_url = null 
     } = notificationData;
 
+    // Validar campos requeridos
+    if (!forane_usuari_id || !type || !message) {
+        console.error('Datos inválidos para notificación:', { forane_usuari_id, type, message });
+        throw new Error('Campos requeridos faltantes: forane_usuari_id, type, message son obligatorios.');
+    }
+
     try {
+        console.log('Intentando guardar notificación:', { 
+            forane_usuari_id, 
+            type, 
+            message: message.substring(0, 50) + '...',
+            forane_solici_id, 
+            related_user_id 
+        });
+
         // 1. Inserción en la tabla notifications
         const insertQuery = `
             INSERT INTO notifications (
@@ -30,25 +44,47 @@ async function createAndEmitNotification(io, notificationData) {
             forane_usuari_id, type, message, forane_solici_id, related_user_id, image_url
         ]);
 
+        if (!result.rows || result.rows.length === 0) {
+            throw new Error('La inserción no devolvió ningún resultado.');
+        }
+
         const newNotification = result.rows[0];
+        console.log('Notificación guardada exitosamente:', newNotification.idxxxx_notifi);
 
         // 2. Emisión en tiempo real usando Socket.io
         if (io) {
-            io.to(forane_usuari_id.toString()).emit('new_notification', { 
-                id: newNotification.idxxxx_notifi,
-                message: newNotification.message,
-                type: newNotification.type,
-                imageUrl: newNotification.image_url,
-                createdAt: newNotification.created_at
-            });
+            try {
+                io.to(forane_usuari_id.toString()).emit('new_notification', { 
+                    id: newNotification.idxxxx_notifi,
+                    message: newNotification.message,
+                    type: newNotification.type,
+                    image_url: newNotification.image_url, // Antes era imageUrl
+                    created_at: newNotification.created_at // Antes era createdAt
+                });
+                console.log("Emitido a room:", forane_usuari_id);
+            } catch (socketError) {
+                console.error('Error al emitir notificación por Socket.io (no crítico):', socketError);
+                // No lanzamos el error aquí porque la notificación ya se guardó en DB
+            }
         }
         
         return newNotification;
     } catch (error) {
-        console.error('Error al guardar y emitir notificación:', error);
-        // Devolvemos el error al controlador, o lo ignoramos si la falla no es crítica
-        // En este caso, lo propagamos.
-        throw new Error('Error en el modelo al guardar la notificación.');
+        // Preservar el error original de la base de datos
+        console.error('Error al guardar notificación:', {
+            error: error.message,
+            stack: error.stack,
+            code: error.code,
+            detail: error.detail,
+            constraint: error.constraint,
+            datos_intentados: { forane_usuari_id, type, message: message?.substring(0, 50) }
+        });
+        
+        // Propagar el error original con más contexto
+        const errorMessage = error.message || 'Error desconocido al guardar la notificación';
+        const enhancedError = new Error(`Error al guardar notificación en DB: ${errorMessage}`);
+        enhancedError.originalError = error;
+        throw enhancedError;
     }
 }
 

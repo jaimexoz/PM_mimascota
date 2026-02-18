@@ -17,9 +17,8 @@
                 </h1>
             </div>
 
-            <div v-if="loading" class="loading-state">
-                <Loader class="loading-icon animate-spin" />
-                <p>Cargando tus solicitudes...</p>
+            <div v-if="loading" class="loading-message">
+                <span class="loader"></span>
             </div>
 
             <div v-else-if="error" class="error-state">
@@ -27,7 +26,8 @@
             </div>
 
             <div v-else-if="solicitudes.length === 0" class="empty-state">
-                <p>No tienes solicitudes de adopción enviadas todavía. ¡Anímate a encontrar a tu nueva mascota!</p>
+                <h2 class="no-results-title">¡Vaya! No tienes solicitudes de adopción enviadas todavía.</h2>
+                <p class="no-results-text">¡Anímate a encontrar a tu nueva mascota!</p>
             </div>
 
             <div v-else class="table-container">
@@ -68,6 +68,7 @@
                 </table>
             </div>
         </div>
+        
       
     </div>
      <Footer/> 
@@ -121,30 +122,24 @@ const verFormularioAdopcion = (formId) => {
  */
 const fetchUserSolicitudes = async () => {
     loading.value = true;
+    const startTime = Date.now();
     error.value = null;
-    let userToken = authStore.token; // Intenta obtener el token de la tienda
+    let userToken = authStore.token; 
 
-    // ⭐️ VERIFICACIÓN ROBUSTA DEL TOKEN ⭐️
     if (!userToken) {
-        // Si no está en la tienda (aún no cargado), búscalo en localStorage
-        const storedToken = localStorage.getItem('authToken'); // Usa la clave correcta del token
+        const storedToken = localStorage.getItem('authToken');
         
         if (storedToken) {
-            userToken = storedToken; // Usa el token almacenado para el fetch
+            userToken = storedToken;
         } else {
-            // Si no hay token en la tienda ni en localStorage, forzamos la redirección
             error.value = "Debes iniciar sesión para ver tus solicitudes.";
             loading.value = false;
-            
-            // Usamos router.push({ name: 'auth' }) si tienes la ruta 'auth' en index.js
             router.push({ name: 'auth' }); 
             return;
         }
     }
 
     try {
-        // ⭐️ Importante: Este endpoint debe ser implementado en Express. 
-        // La ruta asume que el backend usa el token para obtener las solicitudes del usuario.
         const response = await fetch(apiUrl('/adoptions/user'), {
             headers: {
                 'Content-Type': 'application/json',
@@ -153,11 +148,9 @@ const fetchUserSolicitudes = async () => {
         });
 
         if (response.status === 401) {
-            // ERROR ESPECÍFICO DE TOKEN: CERRAR SESIÓN Y REDIRIGIR
-            // Esto solo debe ocurrir si el token es inválido o expirado.
             console.error('ERROR 401: Token expirado o inválido. Cerrando sesión.');
             authStore.logout();
-            router.push({ name: 'auth' }); // Redirigir al login por nombre
+            router.push({ name: 'auth' });
             return;
         }
 
@@ -173,7 +166,13 @@ const fetchUserSolicitudes = async () => {
         console.error('Fetch error:', err);
         error.value = `No se pudo obtener la lista de solicitudes: ${err.message}`;
     } finally {
-        loading.value = false;
+        const elapsedTime = Date.now() - startTime;
+        const minLoadingTime = 1000; 
+        const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+        
+        setTimeout(() => {
+            loading.value = false;
+        }, remainingTime);
     }
 };
 
@@ -411,6 +410,20 @@ tr {
 }
 
 /* Estilos para mensajes de estado */
+.empty-state{
+    text-align: center;
+    padding: 5rem 1.5rem;
+    background-color: #ffffff; /* bg-white */
+    border-radius: 0.75rem; /* rounded-xl */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); /* shadow-md */
+    margin-top: 2rem;
+  }
+  
+  .no-results-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #374151; /* gray-700 */
+  }
 .message {
     padding: 15px;
     margin: 20px auto;
@@ -429,5 +442,42 @@ tr {
     background-color: #f8d7da;
     color: #721c24;
     border: 1px solid #f5c6cb;
+}
+
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 5px solid;
+  border-color: #ff99a2 transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+} 
+
+.loading-message {
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Centrado del contenido (spinner y texto) */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centrado vertical */
+    align-items: center;    /* Centrado horizontal */
+    background-color: white;
+    z-index: 999; 
+    color: #333;
+    font-size: 1.2em;
 }
 </style>

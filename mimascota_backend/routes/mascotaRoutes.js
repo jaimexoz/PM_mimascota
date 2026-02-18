@@ -1,10 +1,10 @@
 // mi_mascota_backend/routes/mascotaRouter.js
 const express = require('express');
 const router = express.Router();
-const mascotaController = require('../controllers/mascotaController'); 
+const mascotaController = require('../controllers/mascotaController');
 
 // Importaciones necesarias para Multer y Autenticación
-const { protect } = require('../middleware/authMiddleware'); 
+const { protect } = require('../middleware/authMiddleware');
 const { uploadArrayMascota } = require('../config/multerConfig'); // Middleware para subir múltiples archivos
 
 // =================================================================
@@ -46,9 +46,9 @@ router.get('/shortcard/:mascotId', mascotaController.getMascotaShortCard);
 
 
 
-// GET /api/mascotas/ -> LISTAR TODAS (Con datos del dueño)
-router.get('/AllPost', mascotaController.getAllMascotas);
+// GET /api/mascotas/AllPost -> LISTAR TODAS (Con datos del dueño) - Requiere autenticación
+router.get('/AllPost', protect, mascotaController.getAllMascotas);
 
-router.put('/approval/:mascotId',protect, mascotaController.updateMascotaApprovalStatus);
+router.put('/approval/:mascotId', protect, mascotaController.updateMascotaApprovalStatus);
 
 module.exports = router;

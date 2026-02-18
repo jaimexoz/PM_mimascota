@@ -1,0 +1,2 @@
+# Archivo placeholder para asegurar que el directorio data/raw se mantenga en git
+# Los archivos CSV reales serán generados por src/data/generate_data.py
