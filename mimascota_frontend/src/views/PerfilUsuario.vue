@@ -751,8 +751,10 @@ onUnmounted(() => {
 }
 
 .perfil-foto-placeholder {
-  padding: 25px;
+  padding: 30px;
   display: block;
+  box-sizing: border-box;
+  background: #f5f5f5;
 }
 
 .subir-foto-btn {
