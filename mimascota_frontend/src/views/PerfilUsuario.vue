@@ -496,6 +496,13 @@ async function onFileChange(e) {
     // Actualizar variables reactivas localmente
     updateUserInfo(updatedUserData);
 
+    // Forzar la actualización directa de la imagen en la vista de perfil
+    userImageUrl.value = data.user.imageUrl;
+
+    // También actualizar el authStore para que el Navbar refleje el cambio inmediatamente
+    const authStore = useAuthStore();
+    authStore.setUser(updatedUserData);
+
     success.value = 'Foto de perfil actualizada exitosamente!';
     e.target.value = ''; // Limpiar el input de archivo
     autoHideSuccess(); 
