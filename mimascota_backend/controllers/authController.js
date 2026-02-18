@@ -29,34 +29,53 @@ const isValidEmailDomain = (email) => {
 };
 
 // ============================================
-// CONFIGURACIÓN DE EMAIL (SendGrid - Web API)
+// CONFIGURACIÓN DE EMAIL (Brevo - HTTP API)
 // ============================================
-// Usamos la Web API de SendGrid porque Render bloquea puertos SMTP (25, 465, 587)
-const sgMail = require("@sendgrid/mail");
+// Usamos la HTTP API de Brevo (ex-Sendinblue) - mejor reputación de IPs con Outlook
+// No requiere dependencias externas, usa fetch nativo de Node.js 18+
+const BREVO_API_URL = "https://api.brevo.com/v3/smtp/email";
 
-// Configurar API Key
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
-// Función para enviar emails
+// Función para enviar emails via Brevo API
 const sendMail = async (mailOptions) => {
-  const msg = {
-    to: mailOptions.to,
-    from:
-      mailOptions.from ||
-      `Adopciones MiMascota <${process.env.EMAIL_USER || "noreply@mimascotitacfg.com"}>`, // Use the verified sender
+  const senderEmail = process.env.EMAIL_USER || "noreply@adopciones-mimascota.site";
+  
+  const body = {
+    sender: {
+      name: "Adopciones MiMascota",
+      email: senderEmail,
+    },
+    to: [
+      {
+        email: mailOptions.to,
+        name: mailOptions.toName || mailOptions.to,
+      },
+    ],
     subject: mailOptions.subject,
-    html: mailOptions.html,
+    htmlContent: mailOptions.html,
   };
 
   try {
-    const info = await sgMail.send(msg);
-    console.log("Email enviaedo (SendGrid API):", info[0].statusCode);
-    return info;
-  } catch (err) {
-    console.error("Error sending email (SendGrid API):", err);
-    if (err.response) {
-      console.error(err.response.body); // Log detailed SendGrid errors
+    const response = await fetch(BREVO_API_URL, {
+      method: "POST",
+      headers: {
+        "accept": "application/json",
+        "api-key": process.env.BREVO_API_KEY,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error("❌ Error Brevo API:", response.status, data);
+      throw new Error(`Brevo API error: ${response.status} - ${JSON.stringify(data)}`);
     }
+
+    console.log("✅ Email enviado (Brevo API):", data.messageId);
+    return data;
+  } catch (err) {
+    console.error("❌ Error sending email (Brevo API):", err.message);
     throw err;
   }
 };
