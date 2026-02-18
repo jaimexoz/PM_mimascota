@@ -2,38 +2,44 @@
 const { Pool } = require('pg');
 require('dotenv').config(); // Carga las variables de entorno desde .env
 
-// Validar que las variables de entorno estén definidas
-if (!process.env.DB_USER || !process.env.DB_HOST || !process.env.DB_DATABASE || !process.env.DB_PASSWORD || !process.env.DB_PORT) {
+// Configuración de la Pool de conexiones a PostgreSQL
+// Soporta DATABASE_URL (Render/Supabase) y variables individuales (local)
+let poolConfig;
+
+if (process.env.DATABASE_URL) {
+    // Producción: usar DATABASE_URL (Render + Supabase)
+    console.log('Usando DATABASE_URL para la conexión');
+    poolConfig = {
+        connectionString: process.env.DATABASE_URL,
+        ssl: {
+            rejectUnauthorized: false
+        }
+    };
+} else if (process.env.DB_USER && process.env.DB_HOST && (process.env.DB_DATABASE || process.env.DB_NAME)) {
+    // Local: usar variables individuales
+    console.log('Usando variables individuales (DB_USER, DB_HOST, etc.) para la conexión');
+    poolConfig = {
+        user: String(process.env.DB_USER),
+        host: String(process.env.DB_HOST),
+        database: String(process.env.DB_NAME || process.env.DB_DATABASE),
+        password: String(process.env.DB_PASSWORD || ''),
+        port: parseInt(process.env.DB_PORT || '5432', 10),
+    };
+} else {
     console.error('Error: Faltan variables de entorno para la conexión a la base de datos');
-    console.error('Variables requeridas: DB_USER, DB_HOST, DB_DATABASE, DB_PASSWORD, DB_PORT');
+    console.error('Configura DATABASE_URL o las variables: DB_USER, DB_HOST, DB_DATABASE, DB_PASSWORD, DB_PORT');
 }
 
-// Configuración de la Pool de conexiones a PostgreSQL
-const pool = new Pool({
-    user: String(process.env.DB_USER || ''),
-    host: String(process.env.DB_HOST || 'localhost'),
-    database: String(process.env.DB_NAME || process.env.DB_DATABASE || ''), // Soporta ambos nombres
-    password: String(process.env.DB_PASSWORD || ''), // Asegurar que sea string
-    port: parseInt(process.env.DB_PORT || '5432', 10),
-    // Configuración SSL para entornos donde la base de datos requiere conexión segura (ej. Heroku Postgres)
-    // En desarrollo local (localhost), esto a menudo puede ser omitido o configurado como rejectUnauthorized: false
-    // Si tu base de datos local no usa SSL, puedes quitar este objeto 'ssl' o dejarlo así para futura compatibilidad.
-    /*ssl: {
-        rejectUnauthorized: false // Establece a 'true' en producción si tu certificado SSL es válido y lo usas
-    }*/
-});
+const pool = new Pool(poolConfig);
 
-// Prueba de conexión (opcional, pero buena para depurar)
-// Esto intentará conectar a la base de datos al iniciar el servidor
+// Prueba de conexión
 pool.connect((err, client, release) => {
     if (err) {
         console.error('Error al adquirir cliente de la pool:', err.stack);
-        // Dependiendo de la gravedad del error, podrías considerar terminar el proceso aquí:
-        // process.exit(1); 
     } else {
         console.log('Conexión exitosa a PostgreSQL');
         client.query('SELECT NOW()', (err, res) => {
-            release(); // Libera el cliente de vuelta a la pool después de la consulta
+            release();
             if (err) {
                 console.error('Error al ejecutar la consulta de prueba:', err.stack);
             } else {
