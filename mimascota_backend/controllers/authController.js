@@ -721,17 +721,18 @@ const updateProfileImage = async (req, res) => {
     );
     const updatedUser = updatedUserResult.rows[0];
 
-    // 6. Respuesta
+    // 6. Respuesta - usamos result.secure_url directamente de Cloudinary
+    // (pg convierte aliases SQL a minúsculas: AS imageUrl → imageurl, causando undefined)
     res.status(200).json({
       message: "Foto de perfil actualizada exitosamente.",
       user: {
         id: updatedUser.id,
         nombre: updatedUser.nombre,
-        apellido: updatedUser.apellido,
+        apellido: updatedUser.apellido || updatedUser.apelli,
         email: updatedUser.email,
         celular: updatedUser.celular,
         role: updatedUser.role,
-        imageUrl: updatedUser.imageUrl,
+        imageUrl: result.secure_url,
       },
     });
   } catch (error) {
