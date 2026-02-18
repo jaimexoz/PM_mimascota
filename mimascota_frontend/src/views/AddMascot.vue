@@ -1,6 +1,9 @@
 <template>
     <div class="AddMascot">
         <Navbar />
+        <div v-if="isLoading" class="loading-message">
+            <span class="loader"></span>
+        </div>
         
     <div class="contenedor-principal"> 
         <button @click="irAtras" class="back-button">
@@ -222,6 +225,14 @@ import Footer from '../components/Footer.vue';
 import { getToken } from '../utils/auth';
 import { apiUrl } from '@/config/api';
 
+const isLoading = ref(true);
+
+onMounted(() => {
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 500);
+});
+
 // =================================================================
 // 1. ESTADO REACTIVO Y VARIABLES (REEMPLAZA 'data')
 // =================================================================
@@ -396,6 +407,8 @@ function eliminarArchivo(id) {
  * Envía los datos del formulario, incluyendo los múltiples archivos, al servidor.
  */
  async function publicarMascota() {
+    isLoading.value = true;
+    const startTime = Date.now();
     const formData = new FormData();
     
     // 1. Obtener el token de autenticación
@@ -454,11 +467,20 @@ function eliminarArchivo(id) {
             }
             
             /*alert('Error al publicar: El archivo excede el tamaño (5MB) ');*/
-            mostrarModal('El archivo excede el tamaño (5MB)', 'error');
+            /*alert('Error al publicar: El archivo excede el tamaño (5MB) ');*/
+            mostrarModal(mensajeError, 'error');
         }
     } catch (error) {
         console.error('Error de red al enviar el formulario:', error);
         alert('No se pudo conectar al servidor. Asegúrate de que Express esté corriendo.');
+    } finally {
+        const elapsedTime = Date.now() - startTime;
+        const minLoadingTime = 1000; 
+        const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+        
+        setTimeout(() => {
+            isLoading.value = false;
+        }, remainingTime);
     }
 }
 function irAtras() {
@@ -1021,5 +1043,41 @@ textarea {
     font-weight: 300;
 }
 
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 5px solid;
+  border-color: #ff99a2 transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+} 
+
+.loading-message {
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Centrado del contenido (spinner y texto) */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centrado vertical */
+    align-items: center;    /* Centrado horizontal */
+    background-color: white;
+    z-index: 999; 
+    color: #333;
+    font-size: 1.2em;
+}
 </style>
 

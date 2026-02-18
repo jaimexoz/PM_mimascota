@@ -17,9 +17,8 @@
                 </h1>
             </div>
 
-            <div v-if="loading" class="loading-state">
-                <Loader class="loading-icon animate-spin" />
-                <p>Cargando tus solicitudes...</p>
+            <div v-if="loading" class="loading-message">
+                <span class="loader"></span>
             </div>
 
             <div v-else-if="error" class="error-state">
@@ -252,6 +251,7 @@ const updateMascotStatus = async (mascotId, newStatus) => {
  */
 const fetchUserSolicitudes = async () => {
     loading.value = true;
+    const startTime = Date.now();
     error.value = null;
     let userToken = authStore.token; // Intenta obtener el token de la tienda
 
@@ -303,7 +303,13 @@ const fetchUserSolicitudes = async () => {
         console.error('Fetch error:', err);
         error.value = `No se pudo obtener la lista de solicitudes: ${err.message}`;
     } finally {
-        loading.value = false;
+        const elapsedTime = Date.now() - startTime;
+        const minLoadingTime = 1000; 
+        const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+        
+        setTimeout(() => {
+            loading.value = false;
+        }, remainingTime);
     }
 };
 
@@ -755,5 +761,42 @@ select{
     background-color: #f8d7da;
     color: #721c24;
     border: 1px solid #f5c6cb;
+}
+
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 5px solid;
+  border-color: #ff99a2 transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+} 
+
+.loading-message {
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Centrado del contenido (spinner y texto) */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centrado vertical */
+    align-items: center;    /* Centrado horizontal */
+    background-color: white;
+    z-index: 999; 
+    color: #333;
+    font-size: 1.2em;
 }
 </style>

@@ -106,6 +106,4 @@ server.listen(PORT, () => {
 });
 
 // ⚠️ IMPORTANTE: El middleware 404 debe ir AL FINAL, después de todas las rutas
-app.use((req, res) => {
-    res.status(404).send('Ruta no encontrada');
-});
+// (Eliminado duplicado que causaba conflicto)

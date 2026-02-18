@@ -18,7 +18,7 @@
           </div>
           <div class="contact-item">
             <img  src="https://res.cloudinary.com/dxf384txl/image/upload/v1770000820/correo_nwciej.png" alt="correo" width="32px">
-            <p>mimascolitacfg@gmail.com</p> 
+            <p>mimascotitacfg@gmail.com</p> 
           </div>
         </div>
       </div>

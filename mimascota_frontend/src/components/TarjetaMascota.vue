@@ -498,7 +498,7 @@ onMounted(() => {
   width: 48px;
   height: 48px;
   border: 5px solid;
-  border-color: #ff6060 transparent;
+  border-color: #ff99a2 transparent;
   border-radius: 50%;
   display: inline-block;
   box-sizing: border-box;
@@ -960,14 +960,13 @@ onMounted(() => {
     left: 0;
     width: 100%;
     height: 100%;
-    
     /* Centrado del contenido (spinner y texto) */
     display: flex;
     flex-direction: column;
     justify-content: center; /* Centrado vertical */
     align-items: center;    /* Centrado horizontal */
-    
-    z-index: 9999; 
+    background-color: white;
+    z-index: 999; 
     color: #333;
     font-size: 1.2em;
 }

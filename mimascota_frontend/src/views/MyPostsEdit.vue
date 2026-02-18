@@ -31,9 +31,8 @@
         
         <div class="content-wrapper feed-content">
             
-            <div v-if="isLoading" class="loading-state">
-                <Loader class="loading-icon animate-spin" />
-                <p class="loading-text">Cargando publicaciones...</p>
+            <div v-if="isLoading" class="loading-message">
+                <span class="loader"></span>
             </div>
 
             <div v-else-if="applyFilters.length > 0" class="pet-card-grid">
@@ -98,6 +97,7 @@ function closeEditModal() {
 // Lógica de fetch a la BD (igual que antes)
 async function getMascotas() {
     isLoading.value = true;
+    const startTime = Date.now();
     const userToken = authStore.token;
     
     if (!userToken) {
@@ -125,7 +125,13 @@ async function getMascotas() {
         console.error("Error al obtener las mascotas:", error);
         mascotas.value = [];
     } finally {
-        isLoading.value = false;
+        const elapsedTime = Date.now() - startTime;
+        const minLoadingTime = 1000; 
+        const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+        
+        setTimeout(() => {
+            isLoading.value = false;
+        }, remainingTime);
     }
 }
 
@@ -475,4 +481,40 @@ funcionen con el componente funcional PetCard creado con h().
 
 :deep(.pet-card-button:hover) { background-color: #ff6060; }
 
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 5px solid;
+  border-color: #ff99a2 transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+} 
+
+.loading-message {
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Centrado del contenido (spinner y texto) */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centrado vertical */
+    align-items: center;    /* Centrado horizontal */
+    background-color: white;
+    z-index: 999; 
+    color: #333;
+    font-size: 1.2em;
+}
 </style>

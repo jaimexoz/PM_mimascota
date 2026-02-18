@@ -31,9 +31,8 @@
         
         <div class="content-wrapper feed-content">
             
-            <div v-if="isLoading" class="loading-state">
-                <Loader class="loading-icon animate-spin" />
-                <p class="loading-text">Cargando publicaciones...</p>
+            <div v-if="isLoading" class="loading-message">
+                <span class="loader"></span>
             </div>
 
             <div v-else-if="applyFilters.length > 0" class="pet-card-grid">
@@ -111,6 +110,7 @@ const executeDeletePost = async () => {
     if (!postIdToDelete.value || isDeletingPost.value) return;
 
     isDeletingPost.value = true; // 🚨 Activa el spinner en el botón
+    const startTime = Date.now();
     const token = authStore.token;
     
     if (!token) {
@@ -125,11 +125,17 @@ const executeDeletePost = async () => {
 
         // 6. Manejo de éxito
         // alert("¡Publicación eliminada con éxito!"); // REEMPLAZADO POR MODAL
-        isDeleteSuccess.value = true;
-        isDeletingPost.value = false; // Detener spinner, mostrar estado de éxito
+        const elapsedTime = Date.now() - startTime;
+        const minLoadingTime = 1000; 
+        const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
         
-        // 🔥 CRUCIAL: Vuelve a cargar la lista para reflejar el cambio
-        getMascotas(); 
+        setTimeout(() => {
+            isDeleteSuccess.value = true;
+            isDeletingPost.value = false; // Detener spinner, mostrar estado de éxito
+            
+            // 🔥 CRUCIAL: Vuelve a cargar la lista para reflejar el cambio
+            getMascotas();
+        }, remainingTime); 
 
     } catch (error) {
         // 7. Manejo de errores de Axios
@@ -159,6 +165,7 @@ const filters = reactive({
 // Lógica de fetch a la BD (MypostUser)
 async function getMascotas() {
     isLoading.value = true;
+    const startTime = Date.now();
     const userToken = authStore.token;
     
     // ... (El resto de tu lógica de fetch, sin cambios) ...
@@ -178,7 +185,13 @@ async function getMascotas() {
         console.error("Error al obtener las mascotas:", error);
         mascotas.value = [];
     } finally {
-        isLoading.value = false;
+        const elapsedTime = Date.now() - startTime;
+        const minLoadingTime = 1000; 
+        const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+        
+        setTimeout(() => {
+            isLoading.value = false;
+        }, remainingTime);
     }
 }
 
@@ -528,4 +541,40 @@ funcionen con el componente funcional PetCard creado con h().
 :deep(.pet-card-button:hover) { background-color: #ff6060; }
 
 
+.loader {
+  width: 48px;
+  height: 48px;
+  border: 5px solid;
+  border-color: #ff99a2 transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+} 
+
+.loading-message {
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Centrado del contenido (spinner y texto) */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centrado vertical */
+    align-items: center;    /* Centrado horizontal */
+    background-color: white;
+    z-index: 999; 
+    color: #333;
+    font-size: 1.2em;
+}
 </style>

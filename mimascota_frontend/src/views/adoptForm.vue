@@ -402,7 +402,7 @@ onMounted(() => {
   width: 48px;
   height: 48px;
   border: 5px solid;
-  border-color: #ff6060 transparent;
+  border-color: #ff99a2 transparent;
   border-radius: 50%;
   display: inline-block;
   box-sizing: border-box;
@@ -573,8 +573,8 @@ onMounted(() => {
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #ff9933;
-  box-shadow: 0 0 0 2px rgba(255, 153, 51, 0.2);
+  border-color: #ff9c9c;
+  box-shadow: 0 0 0 2px rgba(255, 128, 128, 0.664);
 }
 
 .form-group input[disabled] {

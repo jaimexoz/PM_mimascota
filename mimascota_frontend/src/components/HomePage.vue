@@ -32,9 +32,9 @@
         <div class="pet-card-grid"> 
             
 
-            <span v-if="isLoading || isNavigating" class="loader">
-                Cargando las mascotas...
-            </span>
+            <div v-if="isLoading || isNavigating" class="loading-message">
+                <span class="loader"></span>
+            </div>
             <div v-else-if="mascotas.length === 0">
                 <p>
                     Aún no hay mascotas disponibles. ¡Vuelve pronto!
@@ -175,6 +175,7 @@ const scrollToSection = (selector) => {
 
 async function getMascotasRecientes() {
     isLoading.value = true;
+    const startTime = Date.now();
     try {
         console.log("Intentando obtener mascotas del backend...");
         const response = await fetch(apiUrl('/mascotas/home2nd'), { 
@@ -201,7 +202,13 @@ async function getMascotasRecientes() {
         console.error("Error al obtener las mascotas, activando fallback:", error);
         mascotas.value = createMockMascotas(4); 
     } finally {
-        isLoading.value = false;
+        const elapsedTime = Date.now() - startTime;
+        const minLoadingTime = 1000; 
+        const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+        
+        setTimeout(() => {
+            isLoading.value = false;
+        }, remainingTime);
     }
 }
 
@@ -364,7 +371,7 @@ const PetCard = ({ mascota }) => {
   width: 48px;
   height: 48px;
   border: 5px solid;
-  border-color: #FF3D00 transparent;
+  border-color: #ff99a2 transparent;
   border-radius: 50%;
   display: inline-block;
   box-sizing: border-box;
@@ -378,7 +385,27 @@ const PetCard = ({ mascota }) => {
   100% {
     transform: rotate(360deg);
   }
+  100% {
+    transform: rotate(360deg);
+  }
 } 
+
+.loading-message {
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Centrado del contenido (spinner y texto) */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centrado vertical */
+    align-items: center;    /* Centrado horizontal */
+    background-color: white;
+    z-index: 999; 
+    color: #333;
+    font-size: 1.2em;
+}
 
 .home-page {
   min-height: 100vh;

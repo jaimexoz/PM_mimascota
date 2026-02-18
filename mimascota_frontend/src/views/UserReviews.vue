@@ -63,9 +63,11 @@
           </button>
       </div>
         
-        <p v-if="isLoadingReviews" class="loading-message">Cargando reseñas...</p>
+        <div v-if="isLoadingReviews || isLoading || isDeleting" class="loading-message">
+            <div class="loader"></div>
+        </div>
         
-        <div v-else>
+        <div v-if="!isLoadingReviews">
           <div
             v-for="review in reviews"
             :key="review.idxxxx_review"
@@ -246,6 +248,7 @@ const formatDate = (dateString) => {
 
 const fetchReviews = async (page = 1, sortOrder = 'DESC') => {
   isLoadingReviews.value = true;
+  const startTime = Date.now();
   currentSort.value = sortOrder;
   try {
       const response = await fetch(`${API_BASE_URL}?page=${page}&sortOrder=${sortOrder}`);
@@ -270,7 +273,13 @@ const fetchReviews = async (page = 1, sortOrder = 'DESC') => {
   } catch (error) {
       console.error('Error al cargar las reseñas:', error);
   } finally {
-      isLoadingReviews.value = false;
+      const elapsedTime = Date.now() - startTime;
+      const minLoadingTime = 1000; 
+      const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+      
+      setTimeout(() => {
+          isLoadingReviews.value = false;
+      }, remainingTime);
   }
 };
 
@@ -290,6 +299,7 @@ const submitReview = async () => {
   }
 
   isLoading.value = true;
+  const startTime = Date.now();
   
   const newReviewData = {
       stars: newRating.value,
@@ -333,7 +343,13 @@ const submitReview = async () => {
       console.error('Error de red al enviar el formulario:', error);
       mostrarModal('No se pudo conectar al servidor. Asegúrate de que Express esté corriendo.', 'error');
   } finally {
-      isLoading.value = false;
+      const elapsedTime = Date.now() - startTime;
+      const minLoadingTime = 1000; 
+      const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+      
+      setTimeout(() => {
+          isLoading.value = false;
+      }, remainingTime);
   }
 };
 
@@ -347,6 +363,7 @@ async function deleteReview(reviewId) {
   }
 
   isDeleting.value = true;
+  const startTime = Date.now();
   const token = localStorage.getItem('authToken');
 
   if (!token) {
@@ -380,7 +397,13 @@ async function deleteReview(reviewId) {
       console.error('Error de red al intentar eliminar:', error);
       alert('Error de conexión con el servidor.');
   } finally {
-      isDeleting.value = false;
+      const elapsedTime = Date.now() - startTime;
+      const minLoadingTime = 1000; 
+      const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+      
+      setTimeout(() => {
+          isDeleting.value = false;
+      }, remainingTime);
   }
 }
 
@@ -815,5 +838,38 @@ onMounted(() => {
     width: 20px;
     height: 20px;
     vertical-align: middle;
+}
+/* Loader Global */
+.loading-message {
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Centrado del contenido (spinner y texto) */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centrado vertical */
+    align-items: center;    /* Centrado horizontal */
+    background-color: white;
+    z-index: 999; 
+    color: #333;
+    font-size: 1.2em;
+}
+
+.loader {
+    width: 48px;
+    height: 48px;
+    border: 5px solid;
+    border-color: #ff99a2 transparent;
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
   </style>

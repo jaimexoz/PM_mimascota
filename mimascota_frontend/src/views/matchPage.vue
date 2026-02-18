@@ -18,9 +18,8 @@
 
     <div class="content-wrapper feed-content">
 
-      <div v-if="isLoading" class="loading-state">
-        <Loader class="loading-icon animate-spin" />
-        <p class="loading-text">Consultando tus preferencias...</p>
+      <div v-if="isLoading" class="loading-message">
+        <div class="loader"></div>
       </div>
 
       <div v-else-if="!hasSavedPreferences && !isLoading" class="cta-container">
@@ -89,10 +88,11 @@ import Footer from '@/components/Footer.vue';
 import { ref, onMounted, computed, h } from 'vue';
 import { PawPrint, Search, Loader } from 'lucide-vue-next';
 import { useRouter } from 'vue-router'; 
-import Footer from '@/components/Footer.vue';
 import TarjetaMascota from '../components/TarjetaMascota.vue';
 import { getToken } from '../utils/auth';
 import { apiUrl } from '@/config/api';
+import axios from 'axios';
+import { useAuthStore } from '@/stores/authStore';
 
 // --- ESTADOS ---
 const router = useRouter();
@@ -113,6 +113,7 @@ onMounted(async () => {
 
 async function fetchSavedRecommendations() {
   isLoading.value = true;
+  const startTime = Date.now();
   const token = authStore.token || localStorage.getItem('authToken');
 
   if (!token) {
@@ -141,7 +142,13 @@ async function fetchSavedRecommendations() {
     console.error("Error obteniendo perfil match:", error);
     matchError.value = "Hubo un problema cargando tu perfil de match.";
   } finally {
-    isLoading.value = false;
+        const elapsedTime = Date.now() - startTime;
+        const minLoadingTime = 1000; 
+        const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+        
+        setTimeout(() => {
+            isLoading.value = false;
+        }, remainingTime);
   }
 }
 
@@ -151,6 +158,7 @@ async function fetchSavedRecommendations() {
 async function onQuestionnaireSubmit(answers) {
   showQuestionnaire.value = false;
   isLoading.value = true;
+  const startTime = Date.now();
   matchError.value = null;
 
   const token = authStore.token || localStorage.getItem('authToken');
@@ -184,7 +192,13 @@ async function onQuestionnaireSubmit(answers) {
     console.error('Error enviando test:', error);
     matchError.value = error.response?.data?.message || 'Error al procesar tus respuestas.';
   } finally {
-    isLoading.value = false;
+        const elapsedTime = Date.now() - startTime;
+        const minLoadingTime = 1000; 
+        const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+        
+        setTimeout(() => {
+            isLoading.value = false;
+        }, remainingTime);
   }
 }
 
@@ -268,7 +282,7 @@ return h('div', { class: 'pet-card' }, [
   width: 48px;
   height: 48px;
   border: 5px solid;
-  border-color: #FF3D00 transparent;
+  border-color: #ff99a2 transparent;
   border-radius: 50%;
   display: inline-block;
   box-sizing: border-box;

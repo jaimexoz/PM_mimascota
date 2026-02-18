@@ -10,11 +10,11 @@ if (!process.env.DB_USER || !process.env.DB_HOST || !process.env.DB_DATABASE || 
 
 // Configuración de la Pool de conexiones a PostgreSQL
 const pool = new Pool({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_NAME || process.env.DB_DATABASE, // Soporta ambos nombres
-    password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT,
+    user: String(process.env.DB_USER || ''),
+    host: String(process.env.DB_HOST || 'localhost'),
+    database: String(process.env.DB_NAME || process.env.DB_DATABASE || ''), // Soporta ambos nombres
+    password: String(process.env.DB_PASSWORD || ''), // Asegurar que sea string
+    port: parseInt(process.env.DB_PORT || '5432', 10),
     // Configuración SSL para entornos donde la base de datos requiere conexión segura (ej. Heroku Postgres)
     // En desarrollo local (localhost), esto a menudo puede ser omitido o configurado como rejectUnauthorized: false
     // Si tu base de datos local no usa SSL, puedes quitar este objeto 'ssl' o dejarlo así para futura compatibilidad.

@@ -3,6 +3,10 @@
     <!-- Navbar -->
     <Navbar />
     
+    <div v-if="loading || changingRole" class="loading-message">
+      <div class="loader"></div>
+    </div>
+    
     <!-- Contenido Principal -->
     <main class="main-content">
       
@@ -115,6 +119,7 @@ const changingRole = ref(false);
 
 const fetchUsuarios = async () => {
   loading.value = true;
+  const startTime = Date.now();
   try {
     const token = getToken();
     if (!token) {
@@ -141,7 +146,13 @@ const fetchUsuarios = async () => {
     error.value = err.message;
     usuarios.value = [];
   } finally {
-    loading.value = false;
+    const elapsedTime = Date.now() - startTime;
+    const minLoadingTime = 1000; 
+    const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+    
+    setTimeout(() => {
+      loading.value = false;
+    }, remainingTime);
   }
 };
 
@@ -189,6 +200,7 @@ const changeUserRole = async (userId, newRole) => {
   if (changingRole.value) return;
   
   changingRole.value = true;
+  const startTime = Date.now();
   try {
     const token = getToken();
     if (!token) {
@@ -222,7 +234,13 @@ const changeUserRole = async (userId, newRole) => {
     console.error('Error al cambiar rol:', err);
     error.value = err.message;
   } finally {
-    changingRole.value = false;
+    const elapsedTime = Date.now() - startTime;
+    const minLoadingTime = 1000; 
+    const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+    
+    setTimeout(() => {
+      changingRole.value = false;
+    }, remainingTime);
   }
 };
 
@@ -472,4 +490,40 @@ h2 {
   }
 }
 
+</style>
+
+<style scoped>
+/* Loader Global */
+.loading-message {
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Centrado del contenido (spinner y texto) */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centrado vertical */
+    align-items: center;    /* Centrado horizontal */
+    background-color: white;
+    z-index: 999; 
+    color: #333;
+    font-size: 1.2em;
+}
+
+.loader {
+    width: 48px;
+    height: 48px;
+    border: 5px solid;
+    border-color: #ff99a2 transparent;
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
 </style> 

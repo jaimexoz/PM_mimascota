@@ -458,6 +458,7 @@ function handleSubmit() {
 .btn-primary {
   background-color: #ff9595;
   color: #fff;
+  width: 40%;
 }
 
 .btn-primary:hover {

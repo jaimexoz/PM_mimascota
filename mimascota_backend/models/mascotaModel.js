@@ -290,7 +290,7 @@ const insertNewMascotaDB = async (client, petData, cloudinaryUrls) => {
             nombre_mascot, especi_mascot, sexoxx_mascot, edadme_mascot, 
             razaxx_mascot, pesokg_mascot, tamano_mascot, nenerg_mascot,infoad_mascot, 
             image1_mascot, image2_mascot, image3_mascot, eliminado_logico, 
-            forane_usuari_id, approv_mascot, fechap_mascot, status_mascot, 
+            forane_usuari_id, approv_mascot, fechap_mascot, status_mascot
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
         RETURNING idxxxx_mascot;
     `;
