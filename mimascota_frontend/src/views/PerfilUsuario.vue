@@ -15,13 +15,18 @@
         <div class="perfil-foto-section">
           
           <div class="perfil-foto-wrapper">
-            <!-- La imagen de perfil -->
-            <img :src="userImageUrl" :alt="userName" class="perfil-foto" @error="handleImageError" />
+            <!-- SVG placeholder si no hay imagen -->
+            <svg v-if="!userImageUrl" class="perfil-foto perfil-foto-placeholder" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="8" r="4" fill="#ff9595"/>
+              <path d="M12 14c-4 0-7 2-7 4v2h14v-2c0-2-3-4-7-4z" fill="#ff9595"/>
+            </svg>
+            <!-- Mostrar imagen si existe -->
+            <img v-else :src="userImageUrl" :alt="userName" class="perfil-foto" @error="handleImageError" />
             
             <!-- Botón para subir/cambiar foto -->
             <label class="subir-foto-btn">
               <input type="file" accept="image/*" @change="onFileChange" hidden />
-              {{ loading ? 'Subiendo...' : (userImageUrl === defaultAvatar ? 'Subir Foto ↑' : 'Cambiar Foto ↑') }}
+              {{ loading ? 'Subiendo...' : (!userImageUrl ? 'Subir Foto ↑' : 'Cambiar Foto ↑') }}
             </label>
           </div>
         </div>
@@ -257,7 +262,7 @@ const userLastname = ref(userData.apellido || userData.lastname || '');
 const userEmail = ref(userData.email || userData.emailx_usuari || '');
 const userPhone = ref(userData.celular || userData.celula_usuari || '');
 const userAge = ref(userData.edad || userData.edadxx_usuari || '');
-const userImageUrl = ref(userData.imageUrl && userData.imageUrl.startsWith('http') ? userData.imageUrl : defaultAvatar);
+const userImageUrl = ref(userData.imageUrl && userData.imageUrl.startsWith('http') ? userData.imageUrl : null);
 
 // Variables de control
 const loading = ref(false);
@@ -287,7 +292,7 @@ const updateUserInfo = (newUserData) => {
     userEmail.value = newUserData.email || newUserData.emailx_usuari || '';
     userPhone.value = newUserData.celular || newUserData.celula_usuari || '';
     userAge.value = newUserData.edad || newUserData.edadxx_usuari  || '';
-    userImageUrl.value = newUserData.imageUrl && newUserData.imageUrl.startsWith('http') ? newUserData.imageUrl : defaultAvatar;
+    userImageUrl.value = newUserData.imageUrl && newUserData.imageUrl.startsWith('http') ? newUserData.imageUrl : null;
     
     // 2. Asegurarse de que los datos editables reflejen los datos actuales si no estamos editando
     if (!isEditing.value) {
@@ -435,7 +440,8 @@ const saveChanges = async () => {
 // Funciones de Foto de Perfil (existentes)
 // ---------------------------------------------
 function handleImageError(e) {
-  e.target.src = defaultAvatar;
+  // En vez de intentar cargar defaultAvatar (que causa loop), cambiar a null para mostrar SVG
+  userImageUrl.value = null;
 }
 
 async function onFileChange(e) {
@@ -742,6 +748,11 @@ onUnmounted(() => {
   border: 4px solid #fff;
   background: #f0f0f0;
   box-shadow: 0 2px 12px #ff6060;
+}
+
+.perfil-foto-placeholder {
+  padding: 25px;
+  display: block;
 }
 
 .subir-foto-btn {
