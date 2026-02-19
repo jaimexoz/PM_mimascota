@@ -223,13 +223,13 @@ const userImageUrl = computed(() => {
 });
 
 const isAdmin = computed(() => {
-  const role = userRole.value;
-  return role === 'admin' || role === 'Administrador';
+  const role = (userRole.value || '').toLowerCase();
+  return role === 'admin' || role === 'administrador';
 });
 
 const isAdminOrEmployee = computed(() => {
-  const role = userRole.value;
-  return isAdmin.value || role === 'empleado' || role === 'Empleado';
+  const role = (userRole.value || '').toLowerCase();
+  return isAdmin.value || role === 'empleado';
 });
 
 // ⭐️ ESTADOS CLAVE PARA NOTIFICACIONES ⭐️
