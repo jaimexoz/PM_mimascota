@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+const { createLog } = require('./LogModel');
 
 // ===============================================
 // FUNCIONES TRANSACCIONALES Y DE LÓGICA DE NEGOCIO PRINCIPAL
@@ -13,18 +14,18 @@ const pool = require('../config/db');
 async function createAdoptionSolicitud(userId, formDetails) {
     // Desestructuración de los campos necesarios
     const {
-        cedula_forado, nombre_forado, fnacim_forado, correo_forado, telefo_forado, 
-        tvivie_forado, propie_forado, patjar_forado, tampat_forado, nperca_forado, 
-        masant_forado, otrmas_forado, nmasco_forado, motivo_forado, ubimas_forado, 
-        horasl_forado, encarg_forado, veteri_forado, gastos_forado, 
-        forane_mascot_id 
+        cedula_forado, nombre_forado, fnacim_forado, correo_forado, telefo_forado,
+        tvivie_forado, propie_forado, patjar_forado, tampat_forado, nperca_forado,
+        masant_forado, otrmas_forado, nmasco_forado, motivo_forado, ubimas_forado,
+        horasl_forado, encarg_forado, veteri_forado, gastos_forado,
+        forane_mascot_id
     } = formDetails;
 
     // Se mantiene la lógica transaccional aquí (Modelo/Lógica de Negocio)
     const client = await pool.connect();
 
     try {
-        await client.query('BEGIN'); 
+        await client.query('BEGIN');
 
         // 1. OBTENER ID DEL PUBLICADOR y datos de la mascota
         const publicadorQuery = `
@@ -51,13 +52,13 @@ async function createAdoptionSolicitud(userId, formDetails) {
             ) RETURNING idxxxx_forado;
         `;
         const detailsValues = [
-            cedula_forado, nombre_forado, fnacim_forado, correo_forado, telefo_forado, 
-            tvivie_forado, propie_forado, patjar_forado, tampat_forado, nperca_forado, 
-            masant_forado, otrmas_forado, nmasco_forado, motivo_forado, ubimas_forado, 
+            cedula_forado, nombre_forado, fnacim_forado, correo_forado, telefo_forado,
+            tvivie_forado, propie_forado, patjar_forado, tampat_forado, nperca_forado,
+            masant_forado, otrmas_forado, nmasco_forado, motivo_forado, ubimas_forado,
             horasl_forado, encarg_forado, veteri_forado, gastos_forado
         ];
         const detailsResult = await client.query(insertDetailsQuery, detailsValues);
-        const forane_forado_id = detailsResult.rows[0].idxxxx_forado; 
+        const forane_forado_id = detailsResult.rows[0].idxxxx_forado;
 
         // 3. INSERTAR LA SOLICITUD DE GESTIÓN (Tabla B: solicitudes_adopcion)
         const insertSolicitudQuery = `
@@ -72,15 +73,15 @@ async function createAdoptionSolicitud(userId, formDetails) {
         const solicitud = solicitudResult.rows[0];
         const idxxxx_solici = solicitud.idxxxx_solici;
 
-        await client.query('COMMIT'); 
-        
-        return { 
+        await client.query('COMMIT');
+
+        return {
             solicitud,
-            nombre_mascot, 
-            image1_mascot, 
-            forane_public_id, 
+            nombre_mascot,
+            image1_mascot,
+            forane_public_id,
             nombre_forado,
-            idxxxx_solici 
+            idxxxx_solici
         };
 
     } catch (error) {
@@ -98,7 +99,7 @@ async function createAdoptionSolicitud(userId, formDetails) {
 async function updateSolicitudStatus(formId, userId, status) {
     // 1. Verificar dueño y obtener datos clave
     const verificationQuery = `
-        SELECT m.forane_usuari_id, s.forane_solici_id, s.forane_mascot_id
+        SELECT m.forane_usuari_id, s.forane_solici_id, s.forane_mascot_id, s.estado_solici
         FROM "solicitudes_adopcion" s
         JOIN "mascotas" m ON s.forane_mascot_id = m.idxxxx_mascot
         WHERE s.idxxxx_solici = $1;
@@ -109,7 +110,7 @@ async function updateSolicitudStatus(formId, userId, status) {
         throw new Error('Solicitud no encontrada.');
     }
 
-    const { forane_usuari_id: duenoId, forane_solici_id: solicitanteId, forane_mascot_id: mascotaId } = verificationResult.rows[0];
+    const { forane_usuari_id: duenoId, forane_solici_id: solicitanteId, forane_mascot_id: mascotaId, estado_solici: oldStatus } = verificationResult.rows[0];
 
     if (duenoId !== userId) {
         throw new Error('No está autorizado para modificar el estado de esta solicitud.');
@@ -135,7 +136,18 @@ async function updateSolicitudStatus(formId, userId, status) {
         const detailsResult = await pool.query(detailsQuery, [mascotaId]);
         details = detailsResult.rows[0];
     }
-    
+
+
+    // LOGGING: Cambio de estado de solicitud
+    await createLog({
+        table: 'solicitudes_adopcion',
+        column: 'estado_solici',
+        oldValue: oldStatus,
+        newValue: status,
+        recordId: formId,
+        userId: userId // El usuario que realizo la accion (dueno)
+    });
+
     return { updatedForm, solicitanteId, userId, details, formId, status };
 }
 
@@ -149,13 +161,13 @@ async function updateMascotStatus(mascotId, status) {
         SET status_mascot = $1
         WHERE idxxxx_mascot = $2
         RETURNING idxxxx_mascot, status_mascot, nombre_mascot, image1_mascot; 
-    `; 
+    `;
     const updateResult = await pool.query(updateQuery, [status, mascotId]);
 
     if (updateResult.rowCount === 0) {
         throw new Error('Mascota no encontrada.');
     }
-    
+
     const updatedMascot = updateResult.rows[0];
     let applicantsToNotify = [];
 
@@ -181,7 +193,7 @@ async function updateAdoptionStatusMas(idSolicitud, isAdopted, userId) {
     // 1. Verificación de dueño y obtención de datos clave
     const verificationQuery = `
         SELECT 
-            s.forane_solici_id, s.forane_mascot_id, 
+            s.forane_solici_id, s.forane_mascot_id, s.adosuc_solici,
             m.forane_usuari_id AS dueno_id, m.nombre_mascot, m.image1_mascot
         FROM "solicitudes_adopcion" s
         JOIN "mascotas" m ON s.forane_mascot_id = m.idxxxx_mascot
@@ -192,12 +204,12 @@ async function updateAdoptionStatusMas(idSolicitud, isAdopted, userId) {
     if (verificationResult.rows.length === 0) {
         throw new Error('Solicitud no encontrada.');
     }
-    const { dueno_id, forane_solici_id, forane_mascot_id, nombre_mascot, image1_mascot } = verificationResult.rows[0];
+    const { dueno_id, forane_solici_id, forane_mascot_id, nombre_mascot, image1_mascot, adosuc_solici: oldAdoptionStatus } = verificationResult.rows[0];
 
     if (dueno_id !== userId) {
         throw new Error('Acceso denegado: Solo el dueño de la mascota puede confirmar la adopción.');
     }
-    
+
     // 2. ACTUALIZACIÓN (Marcando el solicitante como ganador)
     const finalStatus = (isAdopted === true || isAdopted === 'true');
     const updateQuery = `
@@ -206,15 +218,25 @@ async function updateAdoptionStatusMas(idSolicitud, isAdopted, userId) {
         WHERE idxxxx_solici = $2
         RETURNING adosuc_solici;
     `;
-    const result = await pool.query(updateQuery, [finalStatus, idSolicitud]); 
+    const result = await pool.query(updateQuery, [finalStatus, idSolicitud]);
+
+    // LOGGING: Confirmacion de Adopcion
+    await createLog({
+        table: 'solicitudes_adopcion',
+        column: 'adosuc_solici',
+        oldValue: oldAdoptionStatus,
+        newValue: finalStatus,
+        recordId: idSolicitud,
+        userId: userId
+    });
 
     return {
         newStatus: result.rows[0].adosuc_solici,
         data: {
-            forane_solici_id, 
-            forane_mascot_id, 
-            nombre_mascot, 
-            image1_mascot, 
+            forane_solici_id,
+            forane_mascot_id,
+            nombre_mascot,
+            image1_mascot,
             dueno_id,
             finalStatus
         }
@@ -277,12 +299,12 @@ async function getAdoptionFormById(formId) {
         JOIN "solicitudes_adopcion" s ON f.idxxxx_forado = s.forane_forado_id
         WHERE f.idxxxx_forado = $1;
     `;
-    
+
     // 2. Asegúrate de pasar la conexión (client) y el ID
     const client = await pool.connect();
     try {
-        const result = await client.query(query, [formId]); 
-        
+        const result = await client.query(query, [formId]);
+
         if (result.rows.length === 0) {
             return null;
         }
@@ -332,7 +354,7 @@ async function checkUserAdoptionForPet(userId, mascotId) {
         LIMIT 1;
     `;
     const result = await pool.query(query, [userId, mascotId]);
-    
+
     if (result.rows.length > 0) {
         return result.rows[0]; // Retorna la solicitud existente
     }

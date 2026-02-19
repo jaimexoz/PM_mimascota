@@ -1,4 +1,5 @@
 const pool = require('../config/db');
+const { createLog } = require('./LogModel');
 
 // Funciones del Modelo (Interacción con la DB)
 
@@ -18,7 +19,7 @@ const findUserByEmailDB = async (email) => {
  */
 const createNewUserDB = async (userData) => {
     const { nombre_usuari, emailx_usuari, contra_usuari, celula_usuari, imagep_usuari, verificationToken, verificationExpires, apelli_usuari } = userData;
-    
+
     // Nota: Se asume que idxxx_rolesx para 'Usuario' se obtiene correctamente
     const newUser = await pool.query(
         `INSERT INTO usuarios (
@@ -120,7 +121,7 @@ const updateUserInfo = async (userId, data) => {
             edadxx_usuari = $4,
             feactu_usuari = NOW()
         WHERE idxxxx_usuari = $5
-        RETURNING *`, 
+        RETURNING *`,
         [nombre, apellido, celular, edadValue, userId]
     );
 };
@@ -223,6 +224,16 @@ const changeRoleDB = async (userId, newRole) => {
         'UPDATE usuarios SET idxxxx_rolesx = $1 WHERE idxxxx_usuari = $2',
         [newRole, userId]
     );
+
+    // LOGGING: Cambio de Rol
+    await createLog({
+        table: 'usuarios',
+        column: 'idxxxx_rolesx',
+        oldValue: 'Unknown',
+        newValue: newRole,
+        recordId: userId,
+        userId: null // TODO: Pasar el adminId como argumento a changeRoleDB
+    });
 };
 
 const softDeleteUser = async (userId) => {

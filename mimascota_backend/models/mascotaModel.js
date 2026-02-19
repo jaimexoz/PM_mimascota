@@ -1,5 +1,6 @@
-// mi_mascota_backend/models/mascotaModel.js
 const pool = require('../config/db');
+const { createLog } = require('./LogModel');
+
 
 // --- FUNCIONES DE UTILIDAD SQL (Trasladadas del router) ---
 
@@ -269,7 +270,32 @@ async function updateMascotaApproval(mascotaId, newStatus) {
     `;
 
     const result = await pool.query(query, [newStatus, mascotaId]);
-    return result.rows[0]; // Devuelve el registro actualizado
+    const updatedMascot = result.rows[0];
+
+    // LOGGING: Cambio de estado de mascota (Aprobacion)
+    // Se asume que esta acción la realiza un ADMIN. 
+    // Si tienes el ID del usuario admin disponible en esta función, pásalo.
+    // De momento, usaremos un ID genérico o null si no se pasa.
+    // TODO: Asegurarse de pasar el adminId a esta funcion desde el controlador.
+    if (updatedMascot) {
+        // Obtenemos el estado anterior si es necesario, o simplemente logueamos el cambio
+        /* 
+           Nota: Para tener el valor anterior exacto, deberiamos haber hecho un SELECT antes. 
+           Como esta funcion es directa, asumimos que cambio de 'Pendiente' a newStatus o similar.
+           Para ser mas precisos, haremos una consulta rapida del estado anterior SI es critico,
+           pero aqui optimizamos.
+        */
+        await createLog({
+            table: 'mascotas',
+            column: 'approv_mascot',
+            oldValue: 'Unknown', // O hacer SELECT antes si es vital
+            newValue: newStatus,
+            recordId: mascotaId,
+            userId: null // Necesitamos pasar el adminId aqui
+        });
+    }
+
+    return updatedMascot;
 }
 
 /**
@@ -365,6 +391,19 @@ const updateMascotaPrincipalDB = async (client, petId, petData, finalImageUrls) 
     if (result.rowCount === 0) {
         return { success: false };
     }
+
+    // LOGGING: Edición de mascota
+    // Registramos cambios clave. Para simplificar, logueamos que hubo una "edicion general"
+    // O idealmente comparamos campos.
+    await createLog({
+        table: 'mascotas',
+        column: 'multiple_fields',
+        oldValue: 'Ver versión anterior',
+        newValue: 'Actualización via Formulario',
+        recordId: petId,
+        userId: result.rows[0].forane_usuari_id // El mismo dueño
+    });
+
     return { success: true };
 };
 
