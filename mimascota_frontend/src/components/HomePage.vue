@@ -14,7 +14,8 @@
           <a href="#loq" @click.prevent="scrollToSection('#loq')" class="explore-button">Explorar</a>
           
       </div>
-      <figcaption class="adopcion-foto-inicial">Designed by <a href="https://pixabay.com/">Pixabay</a></figcaption>
+
+      <p class="adopcion-foto-inicial">Designed by <a href="https://pixabay.com/">Pixabay</a></p>
       </div>
 
       <!-- Contenido de la Página -->
@@ -119,7 +120,7 @@
 
             <div class="experience-cont">
                 <div class="experience-img">
-                    <figcaption class="adopcion-foto-opinion">Designed by <a href="https://pixabay.com/">Pixabay</a></figcaption>
+                    <p class="adopcion-foto-opinion">Designed by <a href="https://pixabay.com/">Pixabay</a></p>
                 </div>
             </div>
         </div>

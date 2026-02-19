@@ -1,6 +1,6 @@
 <template>
     <div class="auth-container">
-        <figcaption class="adopcion-foto-auth">Designed by <a href="https://pixabay.com/">Pixabay</a></figcaption>
+        <p class="adopcion-foto-auth">Designed by <a href="https://pixabay.com/">Pixabay</a></p>
         <div v-if="isLogin" class="back-to-home">
             <router-link to="/" class="back-link">
                 <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">

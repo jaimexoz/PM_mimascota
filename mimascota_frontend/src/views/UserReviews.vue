@@ -2,7 +2,7 @@
   <div class="reviews-page-container">
       <Navbar/>
     <div class="hero-section">
-      <figcaption class="adopcion-foto-experiencia">Designed by <a href="https://pixabay.com/">Pixabay</a></figcaption>
+      <small class="adopcion-foto-experiencia">Designed by <a href="https://pixabay.com/">Pixabay</a></small>
       <div class="hero-overlay">
         <h2>COMPARTE <br> TU EXPERIENCIA</h2>
       </div>

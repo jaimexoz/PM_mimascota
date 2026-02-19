@@ -129,11 +129,11 @@
         
 
         <div class="image-panel">
-            <div class="pet-image-placeholder">
+            <figure class="pet-image-placeholder">
                 <figcaption class="adopcion-foto-agregar">Designed by <a href="https://pixabay.com/">Pixabay</a></figcaption>
 
                 <img src="https://res.cloudinary.com/dxf384txl/image/upload/v1770166857/fondoAgregar_ej0ka8.png" alt="Mascotas" class="main-pet-image">
-            </div>
+            </figure>
                 
             <div 
             class="drag-drop-area"
