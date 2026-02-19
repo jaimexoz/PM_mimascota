@@ -1,5 +1,6 @@
 <template>
     <div class="auth-container">
+        <figcaption class="adopcion-foto-auth">Designed by <a href="https://pixabay.com/">Pixabay</a></figcaption>
         <div v-if="isLogin" class="back-to-home">
             <router-link to="/" class="back-link">
                 <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -153,6 +154,21 @@ const handleRegistrationSuccess = (message) => {
         
         box-shadow: 1px 10px 10px 10px rgba(32,32,32,0.3);
     }
+}
+
+.adopcion-foto-auth{
+    position: absolute;
+    bottom: 1px;
+    font-size: 6px;
+    text-decoration: none; /* Quita la línea */
+    color: rgb(0, 0, 0);  
+    text-align: end;
+    margin-left: 50px;
+}
+
+.adopcion-foto-auth a{
+    text-decoration: none; /* Quita la línea */
+    color: rgb(0, 0, 0);  
 }
 
 /* Estilos para el botón Volver */

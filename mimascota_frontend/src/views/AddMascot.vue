@@ -130,7 +130,9 @@
 
         <div class="image-panel">
             <div class="pet-image-placeholder">
-                    <img src="https://res.cloudinary.com/dxf384txl/image/upload/v1770166857/fondoAgregar_ej0ka8.png" alt="Mascotas" class="main-pet-image">
+                <figcaption class="adopcion-foto-agregar">Designed by <a href="https://pixabay.com/">Pixabay</a></figcaption>
+
+                <img src="https://res.cloudinary.com/dxf384txl/image/upload/v1770166857/fondoAgregar_ej0ka8.png" alt="Mascotas" class="main-pet-image">
             </div>
                 
             <div 
@@ -1035,6 +1037,19 @@ textarea {
 
 .upload-placeholder-item:hover {
     background-color: #ffeadc;
+}
+
+.adopcion-foto-agregar{
+    bottom: 1px;
+    font-size: 6px;
+    text-decoration: none; /* Quita la línea */
+    color: rgb(0, 0, 0);  
+    text-align: end;
+}
+
+.adopcion-foto-agregar a{
+    text-decoration: none; /* Quita la línea */
+    color: rgb(0, 0, 0);  
 }
 
 .add-icon {

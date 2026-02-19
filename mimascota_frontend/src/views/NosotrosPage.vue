@@ -44,6 +44,7 @@
               alt="Cachorro blanco acostado, emblema de la Veterinaria Mi Mascota"
               class="puppy-image"
             />
+            <figcaption class="adopcion-foto-nosotros">Designed by <a href="https://pixabay.com/">Pixabay</a></figcaption>
           </div>
         </div>
       </section>
@@ -162,6 +163,20 @@ onMounted(() => {
     height: auto;
     display: block;
     object-fit: cover;
+}
+
+.adopcion-foto-nosotros{
+    position: absolute;
+    bottom: 1px;
+    font-size: 6px;
+    text-decoration: none; /* Quita la línea */
+    color: rgb(0, 0, 0);  
+    margin-left: 30px;
+}
+
+.adopcion-foto-nosotros a{
+    text-decoration: none; /* Quita la línea */
+    color: rgb(0, 0, 0);  
 }
 
 /* --- Media Queries para Responsividad --- */

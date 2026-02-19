@@ -24,7 +24,7 @@
       </div>
   
       <div class="footer-bar">
-        MI MASCOTA &copy; 2025 Todos los derechos reservados
+        MI MASCOTA &copy; 2026 Todos los derechos reservados
       </div>
     </footer>
   </template>

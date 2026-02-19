@@ -2,6 +2,7 @@
   <div class="reviews-page-container">
       <Navbar/>
     <div class="hero-section">
+      <figcaption class="adopcion-foto-experiencia">Designed by <a href="https://pixabay.com/">Pixabay</a></figcaption>
       <div class="hero-overlay">
         <h2>COMPARTE <br> TU EXPERIENCIA</h2>
       </div>
@@ -838,6 +839,20 @@ onMounted(() => {
     width: 20px;
     height: 20px;
     vertical-align: middle;
+}
+
+.adopcion-foto-experiencia{
+    bottom: 1px;
+    font-size: 6px;
+    text-decoration: none; /* Quita la línea */
+    color: rgb(0, 0, 0);  
+    text-align: end;
+    margin-top: 10px;
+}
+
+.adopcion-foto-experiencia a{
+    text-decoration: none; /* Quita la línea */
+    color: rgb(0, 0, 0);  
 }
 /* Loader Global */
 .loading-message {

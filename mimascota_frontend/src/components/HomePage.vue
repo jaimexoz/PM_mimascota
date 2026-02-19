@@ -14,7 +14,7 @@
           <a href="#loq" @click.prevent="scrollToSection('#loq')" class="explore-button">Explorar</a>
           
       </div>
-        
+      <figcaption class="adopcion-foto-inicial">Designed by <a href="https://pixabay.com/">Pixabay</a></figcaption>
       </div>
 
       <!-- Contenido de la Página -->
@@ -119,7 +119,7 @@
 
             <div class="experience-cont">
                 <div class="experience-img">
-                    
+                    <figcaption class="adopcion-foto-opinion">Designed by <a href="https://pixabay.com/">Pixabay</a></figcaption>
                 </div>
             </div>
         </div>
@@ -154,7 +154,7 @@ const isNavigating = ref(false);
 // ==============================================
 
 /**
-* Función para obtener las 4 mascotas más recientes desde el backend.
+* Función para obtener las 4 mascotas más recientes de el backend.
 * Nota: El endpoint ahora es '/home2nd' que ya aplica el LIMIT 4.
 */
 const scrollToSection = (selector) => {
@@ -1049,6 +1049,33 @@ const PetCard = ({ mascota }) => {
     color: black;  
 }
 
+.adopcion-foto-opinion{
+    position: absolute;
+    bottom: 1px;
+    font-size: 6px;
+    text-decoration: none; /* Quita la línea */
+    color: rgb(255, 255, 255);  
+}
+
+.adopcion-foto-opinion a{
+    text-decoration: none; /* Quita la línea */
+    color: rgb(255, 255, 255);  
+}
+
+.adopcion-foto-inicial{
+    
+    position: absolute;
+    bottom: 1px;
+    font-size: 6px;
+    text-decoration: none; /* Quita la línea */
+    color: rgb(0, 0, 0);  
+    margin-bottom: 50px;
+}
+
+.adopcion-foto-inicial a{
+    text-decoration: none; /* Quita la línea */
+    color: rgb(0, 0, 0);  
+}
 
 
 /* Ajustes de padding para tablets (sm y lg) */
