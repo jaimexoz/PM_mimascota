@@ -43,7 +43,9 @@
               src="https://res.cloudinary.com/dxf384txl/image/upload/v1769999851/dog-nosotros_gd3fam.jpg" 
               alt="Cachorro blanco acostado, emblema de la Veterinaria Mi Mascota"
               class="puppy-image"
+              
             />
+            <p class="adopcion-foto-inicial">Designed by <a href="https://pixabay.com/">Pixabay</a></p>
           </div>
         </div>
       </section>
@@ -162,6 +164,20 @@ onMounted(() => {
     height: auto;
     display: block;
     object-fit: cover;
+}
+
+.adopcion-foto-inicial{
+    position: absolute;
+    bottom: 1px;
+    font-size: 6px;
+    text-decoration: none; /* Quita la línea */
+    color: rgb(255, 255, 255);
+    margin-left: 30px;  
+}
+
+.adopcion-foto-inicial a{
+    text-decoration: none; /* Quita la línea */
+    color: rgb(255, 255, 255);  
 }
 
 /* --- Media Queries para Responsividad --- */

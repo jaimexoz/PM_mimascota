@@ -12,7 +12,7 @@
           <h1 class="page-title-2nd">MEJOR AMIGO</h1>
           <p class="page-title-3rd">Adopta una mascota</p>
           <a href="#loq" @click.prevent="scrollToSection('#loq')" class="explore-button">Explorar</a>
-          
+          <p class="adopcion-foto-inicial">Designed by <a href="https://pixabay.com/">Pixabay</a></p>
       </div>
         
       </div>
@@ -107,7 +107,7 @@
         <div class="experience-primary">
             <div class="experience-tittle">
                 <h1>Tu opinión es importante</h1>
-                <p> ¿Disfrutaste tu experiencia? <br> Déjanos un comentario  y <br> mejora nuestro servicio. 
+                <p class="experience-desc"> ¿Disfrutaste tu experiencia? <br> Déjanos un comentario  y <br> mejora nuestro servicio. 
                 </p>
                 <div class="experience-button">
                     <a href="/reviews" class="adopcion-boton">
@@ -119,7 +119,7 @@
 
             <div class="experience-cont">
                 <div class="experience-img">
-                    
+                    <p class="adopcion-foto-opinion">Designed by <a href="https://pixabay.com/">Pixabay</a></p>
                 </div>
             </div>
         </div>
@@ -1102,8 +1102,21 @@ color: black;
   margin-bottom: 20px;
   text-align: center;
  }
+ .adopcion-foto-opinion{
+    position: absolute;
+    bottom: 1px;
+    font-size: 6px;
+    text-decoration: none; /* Quita la línea */
+    color: rgb(255, 255, 255);  
+    margin-left: 10px;
+}
 
- .container-4 p{
+.adopcion-foto-opinion a{
+    text-decoration: none; /* Quita la línea */
+    color: rgb(255, 255, 255);  
+}
+
+ .container-4 .experience-desc{
   color: #000000;
   font-size: 1.5rem;
   margin-bottom: 20px;
@@ -1118,6 +1131,23 @@ color: black;
     margin: 0;
     font-size: 1rem; /* text-xl */
     font-weight: 600; /* font-semibold */
+}
+
+
+
+
+.adopcion-foto-inicial{
+    position: absolute;
+    bottom: 1px;
+    font-size: 6px;
+    text-decoration: none; /* Quita la línea */
+    color: black;  
+    margin-bottom: 50px;
+}
+
+.adopcion-foto-inicial a{
+    text-decoration: none; /* Quita la línea */
+    color: black;  
 }
 
 

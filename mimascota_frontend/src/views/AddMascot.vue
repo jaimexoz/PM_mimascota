@@ -130,6 +130,7 @@
 
         <div class="image-panel">
             <div class="pet-image-placeholder">
+                 <p class="adopcion-foto-agregar">Designed by <a href="https://pixabay.com/">Pixabay</a></p>
                     <img src="https://res.cloudinary.com/dxf384txl/image/upload/v1770166857/fondoAgregar_ej0ka8.png" alt="Mascotas" class="main-pet-image">
             </div>
                 
@@ -1014,6 +1015,21 @@ textarea {
     height: 100%;
     object-fit: cover; /* Esto hace que la imagen rellene el espacio sin estirarse */
     object-position: center; /* Centra la imagen dentro del recuadro */
+}
+
+.adopcion-foto-agregar{
+    position: relative;
+    bottom: 1px;
+    font-size: 6px;
+    text-decoration: none; /* Quita la línea */
+    color: rgb(0, 0, 0);
+    margin-left: 30px;  
+    text-align: end;
+}
+
+.adopcion-foto-agregar a{
+    text-decoration: none; /* Quita la línea */
+    color: rgb(0, 0, 0);  
 }
 
 

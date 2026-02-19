@@ -2,7 +2,9 @@
   <div class="reviews-page-container">
       <Navbar/>
     <div class="hero-section">
+      <small class="adopcion-foto-experiencia">Designed by <a href="https://pixabay.com/">Pixabay</a></small>
       <div class="hero-overlay">
+        
         <h2>COMPARTE <br> TU EXPERIENCIA</h2>
       </div>
     </div>
@@ -660,6 +662,19 @@ onMounted(() => {
     transition: background-color 0.3s;
     display: block;
     width: 50%;
+  }
+
+  .adopcion-foto-experiencia {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    font-size: 6px;
+    color: #ffffff;
+    margin-right: 10px;
+  }
+
+  .adopcion-foto-experiencia a {
+    color: #ffffff;
   }
   
   .btn-primary:hover {
