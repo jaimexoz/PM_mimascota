@@ -19,68 +19,72 @@ exports.upsertInteraction = async (userId, petId, type) => {
         throw new Error(`Tipo de interacción inválido: ${type}`);
     }
 
-    let query;
-    const values = [userId, petId];
-
-    switch (type) {
-        case 'click':
-            query = `
-                INSERT INTO interacciones 
-                (forane_idxxxx_usuari, forane_idxxxx_mascot, clicks_intera, fechax_creaci, fechax_actual)
-                VALUES ($1, $2, 1, NOW(), NOW())
-                ON CONFLICT (forane_idxxxx_usuari, forane_idxxxx_mascot)
-                DO UPDATE SET 
-                    clicks_intera = interacciones.clicks_intera + 1,
-                    fechax_actual = NOW()
-                RETURNING *
-            `;
-            break;
-
-        case 'favorite':
-            query = `
-                INSERT INTO interacciones 
-                (forane_idxxxx_usuari, forane_idxxxx_mascot, favori_intera, fechax_creaci, fechax_actual)
-                VALUES ($1, $2, 1, NOW(), NOW())
-                ON CONFLICT (forane_idxxxx_usuari, forane_idxxxx_mascot)
-                DO UPDATE SET 
-                    favori_intera = 1,
-                    fechax_actual = NOW()
-                RETURNING *
-            `;
-            break;
-
-        case 'contact':
-            query = `
-                INSERT INTO interacciones 
-                (forane_idxxxx_usuari, forane_idxxxx_mascot, matchx_intera, fechax_creaci, fechax_actual)
-                VALUES ($1, $2, 1, NOW(), NOW())
-                ON CONFLICT (forane_idxxxx_usuari, forane_idxxxx_mascot)
-                DO UPDATE SET 
-                    matchx_intera = 1,
-                    fechax_actual = NOW()
-                RETURNING *
-            `;
-            break;
-
-        case 'adopt':
-            query = `
-                INSERT INTO interacciones 
-                (forane_idxxxx_usuari, forane_idxxxx_mascot, adopti_intera, fechax_creaci, fechax_actual)
-                VALUES ($1, $2, 1, NOW(), NOW())
-                ON CONFLICT (forane_idxxxx_usuari, forane_idxxxx_mascot)
-                DO UPDATE SET 
-                    adopti_intera = 1,
-                    fechax_actual = NOW()
-                RETURNING *
-            `;
-            break;
-    }
-
     try {
+        // 1. Verificar si ya existe la interacción
+        const checkQuery = `
+            SELECT idxxxx_intera 
+            FROM interacciones 
+            WHERE forane_idxxxx_usuari = $1 AND forane_idxxxx_mascot = $2
+        `;
+        const checkResult = await pool.query(checkQuery, [userId, petId]);
+
+        let query;
+        let values;
+
+        if (checkResult.rows.length > 0) {
+            // 2. Si EXISTE: Actualizar (UPDATE)
+            // No tocamos la secuencia de IDs, solo incrementamos el contador
+            const interactionId = checkResult.rows[0].idxxxx_intera;
+
+            switch (type) {
+                case 'click':
+                    query = `UPDATE interacciones SET clicks_intera = clicks_intera + 1, fechax_actual = NOW() WHERE idxxxx_intera = $1 RETURNING *`;
+                    break;
+                case 'favorite':
+                    query = `UPDATE interacciones SET favori_intera = 1, fechax_actual = NOW() WHERE idxxxx_intera = $1 RETURNING *`;
+                    break;
+                case 'contact':
+                    query = `UPDATE interacciones SET matchx_intera = 1, fechax_actual = NOW() WHERE idxxxx_intera = $1 RETURNING *`;
+                    break;
+                case 'adopt':
+                    query = `UPDATE interacciones SET adopti_intera = 1, fechax_actual = NOW() WHERE idxxxx_intera = $1 RETURNING *`;
+                    break;
+            }
+            values = [interactionId];
+
+        } else {
+            // 3. Si NO EXISTE: Insertar (INSERT)
+            // Aquí sí se usará un nuevo ID de la secuencia
+            values = [userId, petId];
+            switch (type) {
+                case 'click':
+                    query = `
+                        INSERT INTO interacciones (forane_idxxxx_usuari, forane_idxxxx_mascot, clicks_intera, fechax_creaci, fechax_actual)
+                        VALUES ($1, $2, 1, NOW(), NOW()) RETURNING *`;
+                    break;
+                case 'favorite':
+                    query = `
+                        INSERT INTO interacciones (forane_idxxxx_usuari, forane_idxxxx_mascot, favori_intera, fechax_creaci, fechax_actual)
+                        VALUES ($1, $2, 1, NOW(), NOW()) RETURNING *`;
+                    break;
+                case 'contact':
+                    query = `
+                        INSERT INTO interacciones (forane_idxxxx_usuari, forane_idxxxx_mascot, matchx_intera, fechax_creaci, fechax_actual)
+                        VALUES ($1, $2, 1, NOW(), NOW()) RETURNING *`;
+                    break;
+                case 'adopt':
+                    query = `
+                        INSERT INTO interacciones (forane_idxxxx_usuari, forane_idxxxx_mascot, adopti_intera, fechax_creaci, fechax_actual)
+                        VALUES ($1, $2, 1, NOW(), NOW()) RETURNING *`;
+                    break;
+            }
+        }
+
         const result = await pool.query(query, values);
         return result.rows[0];
+
     } catch (error) {
-        console.error('Error upsert interacción:', error);
+        console.error('Error procesando interacción (manual upsert):', error);
         throw error;
     }
 };

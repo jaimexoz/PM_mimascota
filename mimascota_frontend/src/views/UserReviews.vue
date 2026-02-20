@@ -187,7 +187,9 @@ const isDeleting = ref(false);
 // --- COMPUTED: Verifica si el usuario tiene rol de Administrador o Empleado ---
 const isAuthorizedForDeletion = computed(() => {
   // Roles permitidos: 'Administrador' o 'Empleado'
-  return currentUserRole.value === 'Administrador' || currentUserRole.value === 'Empleado';
+  // Convert role to lowercase for case-insensitive comparison
+  const role = currentUserRole.value ? currentUserRole.value.toLowerCase() : '';
+  return role === 'administrador' || role === 'admin' || role === 'empleado';
 });
 
 // --- LÓGICA DE AUTENTICACIÓN Y ROL ---

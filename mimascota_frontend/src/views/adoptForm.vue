@@ -721,6 +721,7 @@ onMounted(() => {
     max-width: 500px; /* Tamaño típico para modales de confirmación */
     padding: 2.5rem 1.5rem; /* Ajuste del padding */
     text-align: center;
+    justify-items: center;
 }
 
 .modal-header {
