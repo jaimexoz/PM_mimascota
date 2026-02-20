@@ -218,8 +218,9 @@ const getCurrentHashDB = async (userId) => {
  * Cambia el rol de un usuario.
  * @param {number} userId - ID del usuario a modificar.
  * @param {number} newRole - Nuevo ID de rol.
+ * @param {number} adminId - ID del admin que realiza el cambio.
  */
-const changeRoleDB = async (userId, newRole) => {
+const changeRoleDB = async (userId, newRole, adminId) => {
     await pool.query(
         'UPDATE usuarios SET idxxxx_rolesx = $1 WHERE idxxxx_usuari = $2',
         [newRole, userId]
@@ -232,7 +233,7 @@ const changeRoleDB = async (userId, newRole) => {
         oldValue: 'Unknown',
         newValue: newRole,
         recordId: userId,
-        userId: null // TODO: Pasar el adminId como argumento a changeRoleDB
+        userId: adminId || null
     });
 };
 

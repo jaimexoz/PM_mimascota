@@ -86,9 +86,10 @@ exports.deleteReview = async (req, res) => {
     const userId = req.user.id; 
     const userRole = req.user.role; 
 
+    const userRoleLower = (userRole || '').toLowerCase();
     // 1. Verificación de Roles para la eliminación
-    // Solo permitimos la eliminación a 'Administrador' o 'Empleado'
-    if (userRole !== 'Administrador' && userRole !== 'Empleado') {
+    // Solo permitimos la eliminación a 'Admin' o 'Empleado'
+    if (userRoleLower !== 'admin' && userRoleLower !== 'administrador' && userRoleLower !== 'empleado') {
         // Código 403 Forbidden: Acceso denegado
         return res.status(403).json({ message: 'Acceso denegado. Solo Administradores y Empleados pueden eliminar reseñas.' });
     }
