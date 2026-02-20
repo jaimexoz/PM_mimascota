@@ -25,18 +25,35 @@ class PetDatabase:
     
     def __init__(self):
         """Lee configuración desde variables de entorno (mismas que Node.js)"""
-        self.config = {
-            "host": os.getenv('DB_HOST', 'localhost'),
-            "database": os.getenv('DB_DATABASE'),
-            "user": os.getenv('DB_USER'),
-            "password": os.getenv('DB_PASSWORD'),
-            "port": int(os.getenv('DB_PORT', 5432))
-        }
+        database_url = os.getenv('DATABASE_URL')
         
-        # Validar configuración
-        missing = [k for k, v in self.config.items() if v is None and k != 'password']
-        if missing:
-            raise ValueError(f"Faltan variables de entorno: {', '.join(missing)}")
+        if database_url:
+            # Render/Supabase: usar DATABASE_URL directamente
+            print("Usando DATABASE_URL para conexión")
+            self.connection_string = database_url
+            self.config = None
+        else:
+            # Local: usar variables individuales
+            self.connection_string = None
+            self.config = {
+                "host": os.getenv('DB_HOST', 'localhost'),
+                "database": os.getenv('DB_DATABASE'),
+                "user": os.getenv('DB_USER'),
+                "password": os.getenv('DB_PASSWORD'),
+                "port": int(os.getenv('DB_PORT', 5432))
+            }
+            
+            # Validar configuración
+            missing = [k for k, v in self.config.items() if v is None and k != 'password']
+            if missing:
+                raise ValueError(f"Faltan variables de entorno: {', '.join(missing)}")
+    
+    def _get_connection(self):
+        """Crea una conexión a la base de datos"""
+        if self.connection_string:
+            return psycopg2.connect(self.connection_string, sslmode='require')
+        else:
+            return psycopg2.connect(**self.config)
     
     def get_available_pets(self):
         """
@@ -48,7 +65,7 @@ class PetDatabase:
         """
         conn = None
         try:
-            conn = psycopg2.connect(**self.config)
+            conn = self._get_connection()
             
             query = """
             SELECT 
@@ -92,7 +109,7 @@ class PetDatabase:
 
         conn = None
         try:
-            conn = psycopg2.connect(**self.config)
+            conn = self._get_connection()
 
             query = """
                 SELECT 
@@ -152,7 +169,7 @@ class PetDatabase:
             tuple: (success: bool, message: str)
         """
         try:
-            conn = psycopg2.connect(**self.config)
+            conn = self._get_connection()
             cursor = conn.cursor()
             
             # Probar query simple
@@ -183,7 +200,7 @@ class PetDatabase:
         """
         conn = None
         try:
-            conn = psycopg2.connect(**self.config)
+            conn = self._get_connection()
             
             query = """
             SELECT 
