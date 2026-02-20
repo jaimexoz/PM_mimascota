@@ -33,18 +33,22 @@ class PetDatabase:
             self.connection_string = database_url
             self.config = None
         else:
-            # Local: usar variables individuales
+            # Local/Render: usar variables individuales
             self.connection_string = None
             self.config = {
                 "host": os.getenv('DB_HOST', 'localhost'),
-                "database": os.getenv('DB_DATABASE'),
+                "database": os.getenv('DB_NAME') or os.getenv('DB_DATABASE'),
                 "user": os.getenv('DB_USER'),
                 "password": os.getenv('DB_PASSWORD'),
                 "port": int(os.getenv('DB_PORT', 5432))
             }
             
+            # Agregar SSL si no es localhost (Supabase requiere SSL)
+            if self.config["host"] != 'localhost':
+                self.config["sslmode"] = "require"
+            
             # Validar configuración
-            missing = [k for k, v in self.config.items() if v is None and k != 'password']
+            missing = [k for k, v in self.config.items() if v is None and k not in ('password', 'sslmode')]
             if missing:
                 raise ValueError(f"Faltan variables de entorno: {', '.join(missing)}")
     
