@@ -44,31 +44,34 @@ def load_models():
         success, message = db.test_connection()
         
         if not success:
-            print(f"   ERROR: {message}")
-            return False
-        
-        print(f"   {message}")
+            print(f"   WARNING: DB connection failed: {message}")
+            print("   El servidor arrancará sin conexión a BD")
+            db = None
+        else:
+            print(f"   {message}")
         
         # 2. Cargar modelo híbrido mejorado
         print("\n[2] Cargando Hybrid Enhanced (NLP + pesos balanceados)...")
-        hybrid_model = EnhancedHybridRecommender(
-            content_weight=0.7,    # 70% content-based enhanced
-            collaborative_weight=0.3  # 30% collaborative
-        )
         
         content_path = MODELS_DIR / 'content_based_enhanced.pkl'
         collab_path = MODELS_DIR / 'collaborative_model.pkl'
         
         if not content_path.exists():
-            print(f"   ERROR: {content_path} no encontrado")
+            print(f"   WARNING: {content_path} no encontrado")
             print("   Ejecuta primero: python src/models/train_enhanced.py")
-            return False
+            print("   El servidor arrancará SIN modelos ML")
+            return True  # No crashear, solo advertir
         
         if not collab_path.exists():
-            print(f"   ERROR: {collab_path} no encontrado")
+            print(f"   WARNING: {collab_path} no encontrado")
             print("   Ejecuta primero: python src/models/train_collaborative.py")
-            return False
+            print("   El servidor arrancará SIN modelos ML")
+            return True  # No crashear, solo advertir
         
+        hybrid_model = EnhancedHybridRecommender(
+            content_weight=0.7,    # 70% content-based enhanced
+            collaborative_weight=0.3  # 30% collaborative
+        )
         hybrid_model.load_models(content_path, collab_path)
         
         print("   OK - Content-Based Enhanced cargado (NLP + size=1.5x)")
@@ -78,19 +81,22 @@ def load_models():
         print("\n" + "="*70)
         print("SERVIDOR LISTO - MODELO MEJORADO ACTIVO")
         print("="*70)
-        print("\nCaracterísticas:")
-        print("  ✓ NLP con TF-IDF (ngrams 1-2)")
-        print("  ✓ Pesos balanceados: texto 2x, tamaño 1.5x")
-        print("  ✓ Híbrido: 70% content + 30% collaborative")
-        print("  ✓ Consulta PostgreSQL en tiempo real")
-        print("  ✓ Scores detallados (hybrid, content, collab)")
         
         return True
     
     except Exception as e:
-        print(f"\nERROR: {e}")
+        print(f"\nERROR al cargar modelos: {e}")
         traceback.print_exc()
-        return False
+        print("El servidor arrancará de todas formas (health endpoint disponible)")
+        return True  # No crashear el servidor
+
+
+# ============================================
+# AUTO-CARGAR AL IMPORTAR (para gunicorn)
+# ============================================
+print("\n[AUTO-LOAD] Cargando modelos al iniciar...")
+load_models()
+print("[AUTO-LOAD] Listo.\n")
 
 
 @app.route('/api/ml/health', methods=['GET'])
@@ -407,14 +413,7 @@ def internal_error(error):
 
 
 if __name__ == '__main__':
-    # Cargar modelos
-    if not load_models():
-        print("\nERROR - No se pudieron cargar los modelos. Abortando.")
-        print("\nVerifica:")
-        print("  1. python src/models/train_enhanced.py (para content_based_enhanced.pkl)")
-        print("  2. python src/models/train_collaborative.py (para collaborative_model.pkl)")
-        sys.exit(1)
-    
+    # En modo local, load_models ya se ejecutó arriba al importar
     print("\n" + "="*70)
     print("ENDPOINTS DISPONIBLES")
     print("="*70)
