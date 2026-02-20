@@ -125,7 +125,7 @@ async function fetchSavedRecommendations() {
 
   try {
     // Usamos GET para consultar si ya existen preferencias
-    const response = await axios.get('http://localhost:3000/api/recommendations/getSavedRecommendations', {
+    const response = await axios.get(apiUrl('/recommendations/getSavedRecommendations'), {
       headers: { 'Authorization': `Bearer ${token}` }
     });
 
@@ -140,7 +140,12 @@ async function fetchSavedRecommendations() {
 
   } catch (error) {
     console.error("Error obteniendo perfil match:", error);
-    matchError.value = "Hubo un problema cargando tu perfil de match.";
+    // Si es 404 o no hay datos, no mostrar error — solo mostrar botón de test
+    if (error.response && (error.response.status === 404 || error.response.status === 400)) {
+      hasSavedPreferences.value = false;
+    } else {
+      matchError.value = "Hubo un problema cargando tu perfil de match.";
+    }
   } finally {
         const elapsedTime = Date.now() - startTime;
         const minLoadingTime = 1000; 
@@ -172,7 +177,7 @@ async function onQuestionnaireSubmit(answers) {
   try {
     // Usamos POST para guardar/actualizar el vector y recibir nuevos resultados
     const response = await axios.post(
-      'http://localhost:3000/api/recommendations/submitQuestionnaire',
+      apiUrl('/recommendations/submitQuestionnaire'),
       answers,
       {
         headers: {

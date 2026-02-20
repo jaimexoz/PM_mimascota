@@ -56,7 +56,7 @@ const authorizeOwnerOrAdmin = (permission) => async (req, res, next) => {
 
     // Primero, verifica si el usuario es administrador
     // Nota: El token contiene 'role', no 'roleName'. Ajustamos la verificación.
-    if (req.user.role === 'Administrador' || req.user.role === 'admin') {
+    if (req.user.role && req.user.role.toLowerCase() === 'admin') {
         return next(); // Un administrador siempre tiene acceso completo
     }
 

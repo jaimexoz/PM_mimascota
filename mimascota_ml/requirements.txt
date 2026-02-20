@@ -11,14 +11,18 @@ seaborn
 # API
 flask
 flask-cors
+gunicorn
 
 # Utilidades
 joblib
 scipy
-jupyter
 
 # Database
 psycopg2-binary
+sqlalchemy
 
 # HTTP requests
 requests
+
+# Environment
+python-dotenv

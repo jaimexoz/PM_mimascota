@@ -647,8 +647,8 @@ const resetPassword = async (req, res) => {
 // @access  Privado (solo admin)
 const getAllUsers = async (req, res) => {
   try {
-    // Verificación de rol (ya maneja 'admin'/'Administrador' vs 'Usuario Normal')
-    if (!req.user || req.user.role === "Usuario Normal") {
+    const userRole = (req.user && req.user.role) ? req.user.role.toLowerCase() : '';
+    if (!req.user || userRole === 'usuario') {
       return res
         .status(403)
         .json({
@@ -817,9 +817,10 @@ const changeUserRole = async (req, res) => {
     const { userId, newRole } = req.body;
 
     // Verificar que el usuario que hace la petición es admin
+    const userRole = (req.user && req.user.role) ? req.user.role.toLowerCase() : '';
     if (
       !req.user ||
-      (req.user.role !== "admin" && req.user.role !== "Administrador")
+      userRole !== 'admin'
     ) {
       return res
         .status(403)
@@ -859,7 +860,7 @@ const changeUserRole = async (req, res) => {
     }
 
     // 3. Actualizar el rol (Modelo)
-    await authModel.changeRoleDB(userId, newRole);
+    await authModel.changeRoleDB(userId, newRole, req.user.id);
 
     res.status(200).json({
       message: "Rol de usuario cambiado exitosamente.",

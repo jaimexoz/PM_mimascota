@@ -12,10 +12,11 @@ __pycache__/
 # Ignore Jupyter Notebook checkpoints
 .ipynb_checkpoints/
 
-# Ignore trained models (too large for git)
+# Ignore trained models (too large for git) - EXCEPT models/ directory
 *.pkl
 *.joblib
 *.h5
+!models/*.pkl
 
 # Ignore data files
 data/raw/*.csv

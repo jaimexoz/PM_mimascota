@@ -290,7 +290,7 @@ const getTraitColor = (trait) => {
 const registerInteraction = (petId, type) => {
     if (!authStore.isAuthenticated) return;
 
-    fetch('http://localhost:3000/api/interactions', {
+    fetch(apiUrl('/interactions'), {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

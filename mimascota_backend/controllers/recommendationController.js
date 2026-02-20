@@ -168,8 +168,38 @@ exports.submitQuestionnaire = async (req, res) => {
             timestamp: new Date().toISOString()
         };
 
+        // Intentar cambiar el tipo de columna si es necesario (una sola vez)
+        try {
+            await pool.query(
+                `ALTER TABLE usuarios 
+                 ALTER COLUMN vector_preferencias TYPE jsonb 
+                 USING vector_preferencias::text::jsonb`
+            );
+            console.log('📐 Columna vector_preferencias convertida a JSONB');
+        } catch (alterErr) {
+            // Si ya es jsonb o text, ignorar el error de ALTER
+            if (!alterErr.message.includes('already')) {
+                console.log('ℹ️ Columna ya es del tipo correcto o no se pudo alterar');
+            }
+        }
+
+        // Intentar cambiar el tipo de columna si es necesario (una sola vez)
+        try {
+            await pool.query(
+                `ALTER TABLE usuarios 
+                 ALTER COLUMN vector_preferencias TYPE jsonb 
+                 USING vector_preferencias::text::jsonb`
+            );
+            console.log('📐 Columna vector_preferencias convertida a JSONB');
+        } catch (alterErr) {
+            // Si ya es jsonb o text, ignorar el error de ALTER
+            if (!alterErr.message.includes('already') && !alterErr.message.includes('same data type')) {
+                console.log('ℹ️ Nota sobre columna vector_preferencias:', alterErr.message);
+            }
+        }
+
         await pool.query(
-            'UPDATE usuarios SET vector_preferencias = $1 WHERE idxxxx_usuari = $2',
+            'UPDATE usuarios SET vector_preferencias = $1::jsonb WHERE idxxxx_usuari = $2',
             [JSON.stringify(questionnaireData), userId]
         );
 
