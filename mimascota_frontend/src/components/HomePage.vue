@@ -250,7 +250,7 @@ async function registerInteraction(petId, type) {
 
     try {
         // Fire and forget: No esperamos a que termine para navegar
-        fetch('http://localhost:3000/api/interactions', {
+        fetch(apiUrl('/interactions'), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
